@@ -1,0 +1,41 @@
+
+{
+  "name": "fundflow-smartcontract",
+  "version": "1.0.0",
+  "description": "FundFlow smart contracts for Hedera blockchain",
+  "type": "commonjs",
+  "private": true,
+  "scripts": {
+    "compile": "npx hardhat compile",
+    "test": "npx hardhat test",
+    "deploy": "node scripts/deploy.js",
+    "deploy:testnet": "npx hardhat run scripts/deploy.js --network hedera_testnet",
+    "deploy:mainnet": "npx hardhat run scripts/deploy.js --network hedera_mainnet",
+    "verify": "node scripts/verify.js",
+    "clean": "npx hardhat clean",
+    "coverage": "npx hardhat coverage",
+    "gas-report": "REPORT_GAS=true npx hardhat test"
+  },
+  "keywords": [
+    "hedera",
+    "smart-contract",
+    "solidity",
+    "blockchain",
+    "fundraising",
+    "defi"
+  ],
+  "author": "FundFlow Team",
+  "license": "MIT",
+  "devDependencies": {
+    "@nomicfoundation/hardhat-toolbox": "^4.0.0",
+    "@openzeppelin/contracts": "^5.0.0",
+    "chai": "^4.3.7",
+    "hardhat": "^2.19.0",
+    "mocha": "^10.2.0"
+  },
+  "dependencies": {
+    "@hashgraph/sdk": "^2.40.0",
+    "dotenv": "^16.3.1",
+    "ethers": "^6.8.0"
+  }
+}

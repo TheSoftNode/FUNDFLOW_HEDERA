@@ -1,0 +1,16 @@
+---
+id: 1
+name: "FundFlow Testnet Deployment"
+network: testnet
+genesis:
+  # You'll need to replace this with your actual testnet wallet address
+  # Get testnet STX from: https://explorer.stacks.co/sandbox/faucet
+plan:
+  batches:
+    - id: 0
+      transactions:
+        - contract-publish:
+            contract-name: fundflow-core
+            path: contracts/fundflow-core.clar
+            clarity-version: 1
+      epoch: "2.05"

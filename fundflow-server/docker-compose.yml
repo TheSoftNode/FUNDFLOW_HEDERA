@@ -1,0 +1,129 @@
+version: '3.8'
+
+services:
+  # Backend API
+  api:
+    build:
+      context: .
+      target: dev
+    container_name: fundflow-api
+    ports:
+      - "5000:5000"
+    environment:
+      NODE_ENV: development
+      MONGODB_URI: mongodb://mongo:27017/fundflow_dev
+      REDIS_URL: redis://redis:6379
+      JWT_SECRET: your-super-secret-jwt-key-development
+      JWT_REFRESH_SECRET: your-refresh-secret-key-development
+      STACKS_NETWORK: testnet
+      STACKS_API_URL: https://stacks-node-api.testnet.stacks.co
+      CONTRACT_ADDRESS: ST1234567890.fundflow
+      PLATFORM_FEE: 250
+      LOG_LEVEL: debug
+    volumes:
+      - .:/app
+      - /app/node_modules
+    depends_on:
+      - mongo
+      - redis
+    networks:
+      - fundflow-network
+    restart: unless-stopped
+
+  # MongoDB Database
+  mongo:
+    image: mongo:7
+    container_name: fundflow-mongo
+    ports:
+      - "27017:27017"
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: fundflow
+      MONGO_INITDB_ROOT_PASSWORD: fundflow_password
+      MONGO_INITDB_DATABASE: fundflow_dev
+    volumes:
+      - mongo_data:/data/db
+      - ./scripts/mongo-init.js:/docker-entrypoint-initdb.d/mongo-init.js:ro
+    networks:
+      - fundflow-network
+    restart: unless-stopped
+
+  # Redis Cache
+  redis:
+    image: redis:7-alpine
+    container_name: fundflow-redis
+    ports:
+      - "6379:6379"
+    command: redis-server --appendonly yes --replica-read-only no
+    volumes:
+      - redis_data:/data
+    networks:
+      - fundflow-network
+    restart: unless-stopped
+
+  # Background Workers
+  workers:
+    build:
+      context: .
+      target: dev
+    container_name: fundflow-workers
+    environment:
+      NODE_ENV: development
+      MONGODB_URI: mongodb://mongo:27017/fundflow_dev
+      REDIS_URL: redis://redis:6379
+      JWT_SECRET: your-super-secret-jwt-key-development
+      STACKS_NETWORK: testnet
+      STACKS_API_URL: https://stacks-node-api.testnet.stacks.co
+      CONTRACT_ADDRESS: ST1234567890.fundflow
+      LOG_LEVEL: debug
+    volumes:
+      - .:/app
+      - /app/node_modules
+    depends_on:
+      - mongo
+      - redis
+    networks:
+      - fundflow-network
+    command: npm run workers
+    restart: unless-stopped
+
+  # MongoDB Admin Interface (optional)
+  mongo-express:
+    image: mongo-express:1.0.0
+    container_name: fundflow-mongo-admin
+    ports:
+      - "8081:8081"
+    environment:
+      ME_CONFIG_MONGODB_ADMINUSERNAME: fundflow
+      ME_CONFIG_MONGODB_ADMINPASSWORD: fundflow_password
+      ME_CONFIG_MONGODB_URL: mongodb://fundflow:fundflow_password@mongo:27017/
+      ME_CONFIG_BASICAUTH_USERNAME: admin
+      ME_CONFIG_BASICAUTH_PASSWORD: admin123
+    depends_on:
+      - mongo
+    networks:
+      - fundflow-network
+    profiles: ["admin"]
+
+  # Redis Admin Interface (optional)
+  redis-commander:
+    image: rediscommander/redis-commander:latest
+    container_name: fundflow-redis-admin
+    ports:
+      - "8082:8081"
+    environment:
+      REDIS_HOSTS: local:redis:6379
+    depends_on:
+      - redis
+    networks:
+      - fundflow-network
+    profiles: ["admin"]
+
+volumes:
+  mongo_data:
+    driver: local
+  redis_data:
+    driver: local
+
+networks:
+  fundflow-network:
+    driver: bridge

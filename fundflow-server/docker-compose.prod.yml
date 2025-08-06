@@ -1,0 +1,100 @@
+version: '3.8'
+
+services:
+  # Production API
+  api:
+    build:
+      context: .
+      target: production
+    container_name: fundflow-api-prod
+    ports:
+      - "5000:5000"
+    environment:
+      NODE_ENV: production
+      MONGODB_URI: ${MONGODB_URI}
+      REDIS_URL: ${REDIS_URL}
+      JWT_SECRET: ${JWT_SECRET}
+      JWT_REFRESH_SECRET: ${JWT_REFRESH_SECRET}
+      STACKS_NETWORK: ${STACKS_NETWORK}
+      STACKS_API_URL: ${STACKS_API_URL}
+      CONTRACT_ADDRESS: ${CONTRACT_ADDRESS}
+      PRIVATE_KEY: ${PRIVATE_KEY}
+      PLATFORM_FEE: ${PLATFORM_FEE}
+      SENDGRID_API_KEY: ${SENDGRID_API_KEY}
+      OPENAI_API_KEY: ${OPENAI_API_KEY}
+      LOG_LEVEL: info
+    depends_on:
+      - mongo
+      - redis
+    networks:
+      - fundflow-network
+    restart: unless-stopped
+    deploy:
+      replicas: 3
+      resources:
+        limits:
+          cpus: '1'
+          memory: 1G
+        reservations:
+          cpus: '0.5'
+          memory: 512M
+
+  # Production MongoDB
+  mongo:
+    image: mongo:7
+    container_name: fundflow-mongo-prod
+    ports:
+      - "27017:27017"
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_ROOT_USERNAME}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_ROOT_PASSWORD}
+      MONGO_INITDB_DATABASE: fundflow_prod
+    volumes:
+      - mongo_data_prod:/data/db
+    networks:
+      - fundflow-network
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          cpus: '2'
+          memory: 2G
+
+  # Production Redis
+  redis:
+    image: redis:7-alpine
+    container_name: fundflow-redis-prod
+    ports:
+      - "6379:6379"
+    command: redis-server --appendonly yes --requirepass ${REDIS_PASSWORD}
+    volumes:
+      - redis_data_prod:/data
+    networks:
+      - fundflow-network
+    restart: unless-stopped
+
+  # Load Balancer
+  nginx:
+    image: nginx:alpine
+    container_name: fundflow-nginx
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./ssl:/etc/nginx/ssl:ro
+    depends_on:
+      - api
+    networks:
+      - fundflow-network
+    restart: unless-stopped
+
+volumes:
+  mongo_data_prod:
+    driver: local
+  redis_data_prod:
+    driver: local
+
+networks:
+  fundflow-network:
+    driver: bridge
