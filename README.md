@@ -1,85 +1,92 @@
-# FundFlow
+# FundFlow - Blockchain-Powered Startup Fundraising Platform
 
-**Transparent Startup Fundraising Platform on Stacks Blockchain**
+**FundFlow** is a revolutionary decentralized fundraising platform that leverages **Hedera Hashgraph** blockchain technology to create transparent, milestone-based investment opportunities for startups and investors. Built with Next.js and modern web technologies, FundFlow eliminates traditional fundraising barriers by providing a secure, automated, and transparent investment ecosystem.
 
-FundFlow revolutionizes startup fundraising by providing transparent, milestone-based funding with automated equity distribution and investor governance through smart contracts. Built on the Stacks blockchain with Bitcoin-level security.
+## 🚀 Key Features
 
-## Key Features
+### 🏢 **For Startups**
+- **Milestone-Based Fundraising**: Release funds progressively as milestones are achieved
+- **Smart Contract Automation**: Automated fund distribution based on milestone completion
+- **Investor Voting System**: Community-driven milestone approval process
+- **Transparent Campaign Management**: Real-time tracking of fundraising progress
+- **Multi-Wallet Support**: Connect with HashPack, MetaMask, and WalletConnect
 
-### For Startups
+### 💰 **For Investors**
+- **Portfolio Management**: Track investments across multiple startups
+- **Milestone Monitoring**: Real-time updates on project progress
+- **Voting Rights**: Participate in milestone approval decisions
+- **Risk Assessment**: Comprehensive due diligence tools
+- **Performance Analytics**: Detailed ROI and investment tracking
 
-- **Transparent Fundraising** - Create campaigns with clear funding goals and public timelines
-- **Milestone-Based Releases** - Access funds only after achieving verified milestones through community voting
-- **Automated Equity Distribution** - Proportional equity tokens distributed automatically to investors
-- **Global Reach** - Accept investments from anywhere using STX tokens
-- **AI-Powered Insights** - Get intelligent recommendations for campaign optimization
+### 🔒 **Blockchain Security**
+- **Hedera Hashgraph Integration**: Enterprise-grade blockchain security
+- **Smart Contract Automation**: Trustless milestone verification
+- **Transparent Transactions**: All activities recorded on-chain
+- **Multi-Signature Wallets**: Enhanced security for fund management
 
-### For Investors
+## 🏗️ Architecture Overview
 
-- **Investment Transparency** - Real-time visibility into fund usage and project progress
-- **Governance Rights** - Vote on milestone completion before fund releases using weighted voting
-- **Portfolio Analytics** - Advanced tracking with AI-powered performance insights
-- **Risk Mitigation** - Community-driven milestone approval reduces investment risk
-- **Diversification Tools** - Smart portfolio optimization recommendations
+FundFlow is built as a modern, scalable decentralized application with multiple layers:
 
-### Platform Benefits
+### **Frontend Layer**
+- **Next.js 15** with TypeScript for type-safe development
+- **Tailwind CSS** for responsive, modern design
+- **Hedera SDK** for blockchain integration
+- **Multi-wallet support** (HashPack, MetaMask, WalletConnect)
+- **Real-time updates** via WebSocket connections
 
-- **Decentralized Security** - Core operations secured by Bitcoin through Stacks consensus
-- **2.5% Platform Fee** - Sustainable and transparent revenue model
-- **Compliance Ready** - Built-in transparency aids regulatory compliance
-- **AI Integration** - Machine learning for fraud detection and recommendations
+### **Backend Layer**
+- **Node.js** with Express for API services
+- **MongoDB** for flexible data persistence and analytics
+- **Redis** for caching and session management
+- **Background job processing** for blockchain synchronization
+- **Hedera integration** for transaction processing
 
-## Architecture Overview
+### **Smart Contract Layer**
+- **Solidity smart contracts** on Hedera EVM
+- **Hedera consensus mechanism** for security
+- **Automated governance** and fund management
+- **Milestone-based funding** system
 
-FundFlow is built as a hybrid decentralized application with multiple layers:
+## 🛠️ Tech Stack
 
-**Frontend Layer**
+### **Frontend**
+- **Framework**: Next.js 15, React 19, TypeScript
+- **Styling**: Tailwind CSS 4, Framer Motion
+- **UI Components**: Shadcn/ui, Radix UI
+- **Blockchain**: Hedera SDK, Ethers.js
+- **Wallets**: HashPack, MetaMask, WalletConnect
 
-- Next.js 15 with TypeScript for type-safe development
-- Tailwind CSS for responsive design
-- Stacks.js for blockchain integration
-- Real-time updates via WebSocket connections
+### **Backend**
+- **Runtime**: Node.js, Express.js
+- **Database**: MongoDB, Redis
+- **Blockchain**: Hedera SDK
+- **Testing**: Jest, Supertest
+- **Documentation**: JSDoc, Swagger
 
-**Backend Layer**
+### **Smart Contracts**
+- **Language**: Solidity
+- **Framework**: Hardhat
+- **Testing**: Hardhat Test
+- **Deployment**: Hedera Testnet/Mainnet
+- **Security**: OpenZeppelin Contracts
 
-- Node.js with Express for API services
-- MongoDB for flexible data persistence and analytics
-- Redis for caching and session management
-- Background job processing for blockchain synchronization
+### **Development Tools**
+- **Package Manager**: npm
+- **Linting**: ESLint, Solhint
+- **Formatting**: Prettier
+- **Version Control**: Git
+- **Containerization**: Docker
 
-**Smart Contract Layer**
-
-- Clarity smart contracts on Stacks blockchain
-- Bitcoin-secured consensus mechanism
-- Formal verification capabilities
-- Automated governance and fund management
-
-**AI/ML Layer**
-
-- TensorFlow.js for client-side inference
-- Python-based models for complex analytics
-- Real-time fraud detection and risk assessment
-- Personalized investment recommendations
-
-## Tech Stack
-
-- **Frontend**: Next.js 15, TypeScript, Tailwind CSS, Stacks.js
-- **Backend**: Node.js, Express, MongoDB, Redis, Socket.io
-- **Smart Contracts**: Clarity language on Stacks blockchain
-- **AI/ML**: TensorFlow.js, Python TensorFlow/PyTorch, scikit-learn
-- **Testing**: Vitest (smart contracts), Jest (backend), Playwright (E2E)
-- **Development**: Clarinet, Docker, ESLint, Prettier
-- **Deployment**: Docker Compose, Kubernetes, Vercel
-
-## Quick Start
+## 🚀 Quick Start
 
 ### Prerequisites
 
 - Node.js 18 or higher
 - MongoDB 6 or higher
 - Redis 6 or higher
-- Clarinet for smart contract development
-- Stacks wallet for testing
+- Hedera Testnet account
+- HashPack or MetaMask wallet
 
 ### Installation
 
@@ -88,24 +95,29 @@ FundFlow is built as a hybrid decentralized application with multiple layers:
 git clone https://github.com/yourusername/fundflow.git
 cd fundflow
 
-# Install dependencies
+# Install dependencies for all packages
 npm install
+cd fundflow-frontend && npm install
+cd ../fundflow-smartcontract && npm install
+cd ../fundflow-server && npm install
 
 # Set up environment variables
-cp .env.example .env.local
+cp fundflow-frontend/.env.example fundflow-frontend/.env.local
+cp fundflow-smartcontract/.env.example fundflow-smartcontract/.env
+cp fundflow-server/.env.example fundflow-server/.env
 
-# Configure your environment variables in .env.local
-# MONGODB_URI="mongodb://localhost:27017/fundflow"
-# REDIS_URL="redis://localhost:6379"
-# STACKS_NETWORK="testnet"
-# JWT_SECRET="your-super-secret-jwt-key"
+# Configure your environment variables
+# HEDERA_NETWORK=testnet
+# HEDERA_OPERATOR_ID=your-operator-id
+# HEDERA_OPERATOR_KEY=your-operator-key
+# WALLET_CONNECT_PROJECT_ID=your-project-id
 
 # Start with Docker Compose (recommended)
 docker-compose up -d
 
 # Or start services manually
-npm run db:seed
-npm run dev
+cd fundflow-server && npm run dev
+cd ../fundflow-frontend && npm run dev
 ```
 
 Visit http://localhost:3000 to see the application.
@@ -113,375 +125,189 @@ Visit http://localhost:3000 to see the application.
 ### Smart Contract Setup
 
 ```bash
-# Navigate to contracts directory
-cd contracts
+# Navigate to smart contracts directory
+cd fundflow-smartcontract
 
-# Check contract syntax
-clarinet check
+# Compile contracts
+npm run compile
 
-# Run contract tests with Vitest
-npm run test:contracts
+# Run tests
+npm run test
 
 # Deploy to testnet
-clarinet deploy --testnet
+npm run deploy:testnet
 
 # For mainnet deployment
-clarinet deploy --mainnet
+npm run deploy:mainnet
 ```
 
-## Smart Contract Usage
+## 📁 Project Structure
+
+```
+fundflow/
+├── fundflow-frontend/          # Next.js frontend application
+│   ├── app/                   # App Router pages and layouts
+│   ├── components/            # React components
+│   │   ├── dashboard/         # Dashboard components
+│   │   ├── shared/            # Shared UI components
+│   │   ├── wallet/            # Wallet integration
+│   │   └── ui/                # Shadcn/ui components
+│   ├── lib/                   # Utilities and services
+│   ├── hooks/                 # Custom React hooks
+│   └── public/                # Static assets
+├── fundflow-smartcontract/     # Solidity smart contracts
+│   ├── contracts/             # Smart contract source code
+│   │   ├── core/              # Core contract logic
+│   │   ├── campaign/          # Campaign management
+│   │   ├── investment/        # Investment handling
+│   │   ├── milestone/         # Milestone system
+│   │   └── governance/        # Governance and voting
+│   ├── test/                  # Contract tests
+│   └── scripts/               # Deployment scripts
+├── fundflow-server/            # Backend API server
+│   ├── src/                   # Source code
+│   │   ├── routes/            # API endpoints
+│   │   ├── models/            # Database models
+│   │   ├── services/          # Business logic
+│   │   └── middleware/        # Express middleware
+│   └── tests/                 # Backend tests
+└── docs/                      # Documentation
+```
+
+## 🔧 Available Scripts
+
+### Frontend
+```bash
+cd fundflow-frontend
+npm run dev              # Start development server
+npm run build           # Build for production
+npm run start           # Start production server
+npm run lint            # Run ESLint
+```
+
+### Smart Contracts
+```bash
+cd fundflow-smartcontract
+npm run compile         # Compile contracts
+npm run test            # Run tests
+npm run deploy          # Deploy to network
+npm run coverage        # Generate coverage report
+```
+
+### Backend
+```bash
+cd fundflow-server
+npm run dev             # Start development server
+npm run build           # Build TypeScript
+npm run start           # Start production server
+npm run test            # Run tests
+npm run db:seed         # Seed database
+```
+
+## 🌐 Smart Contract Usage
 
 ### Creating a Campaign
 
-```clarity
-(contract-call? .fundflow create-campaign
-    u"Revolutionary AI Startup"
-    u"Building the next generation of AI tools for developers"
-    u10000000000  ;; 10,000 STX funding goal
-    u8640         ;; 60 days duration (in blocks)
-    u5)           ;; 5 milestones
+```solidity
+// Create a new fundraising campaign
+function createCampaign(
+    string memory title,
+    string memory description,
+    uint256 fundingGoal,
+    uint256 duration,
+    uint8 milestoneCount
+) external returns (uint256 campaignId);
 ```
 
 ### Making an Investment
 
-```clarity
-(contract-call? .fundflow invest-in-campaign
-    u1            ;; Campaign ID
-    u1000000000)  ;; 1,000 STX investment amount
+```solidity
+// Invest in a campaign
+function investInCampaign(
+    uint256 campaignId,
+    uint256 amount
+) external payable;
 ```
 
 ### Creating Milestones
 
-```clarity
-(contract-call? .fundflow create-milestone
-    u1               ;; Campaign ID
-    u1               ;; Milestone ID
-    u"MVP Development"
-    u"Complete minimum viable product with core features"
-    u25              ;; 25% of funds to release
-    u1440)           ;; 10 days voting period
+```solidity
+// Create a milestone for a campaign
+function createMilestone(
+    uint256 campaignId,
+    string memory title,
+    string memory description,
+    uint8 fundingPercentage,
+    uint256 votingPeriod
+) external;
 ```
 
 ### Voting on Milestones
 
-```clarity
-(contract-call? .fundflow vote-on-milestone
-    u1     ;; Campaign ID
-    u1     ;; Milestone ID
-    true)  ;; Vote: true = approve, false = reject
+```solidity
+// Vote on milestone completion
+function voteOnMilestone(
+    uint256 campaignId,
+    uint256 milestoneId,
+    bool approve
+) external;
 ```
 
-### Completing Milestones
+## 🔐 Security Features
 
-```clarity
-(contract-call? .fundflow complete-milestone
-    u1     ;; Campaign ID
-    u1)    ;; Milestone ID
-```
+### Smart Contract Security
+- **Access Control**: Role-based permissions and ownership controls
+- **Reentrancy Protection**: Built-in protection against reentrancy attacks
+- **Input Validation**: Comprehensive parameter validation
+- **Emergency Pause**: Ability to pause operations in emergencies
+- **OpenZeppelin**: Battle-tested security libraries
 
-## Development
+### Backend Security
+- **JWT Authentication**: Secure token-based authentication
+- **Rate Limiting**: API abuse prevention
+- **Input Sanitization**: Protection against injection attacks
+- **CORS Configuration**: Secure cross-origin requests
+- **Helmet.js**: Security headers and middleware
 
-### Project Structure
+## 🧪 Testing
 
-```
-fundflow/
-├── contracts/           # Clarity smart contracts
-│   ├── fundflow.clar   # Main contract
-│   └── tests/          # Vitest contract tests
-├── src/
-│   ├── components/     # React components
-│   ├── pages/          # Next.js pages and API routes
-│   ├── lib/            # Utilities and blockchain integration
-│   ├── styles/         # CSS and styling
-│   ├── hooks/          # Custom React hooks
-│   │   └── useWallet.tsx # Wallet management hook
-├── server/             # Backend API services
-│   ├── routes/         # API endpoints
-│   ├── models/         # MongoDB models
-│   └── services/       # Business logic
-├── ai/                 # AI/ML models and services
-├── tests/              # Playwright E2E tests
-└── __tests__/          # Jest unit tests
-```
-
-### Available Scripts
-
+### Smart Contract Tests
 ```bash
-npm run dev              # Start development server
-npm run build           # Build for production
-npm run start           # Start production server
+cd fundflow-smartcontract
 npm run test            # Run all tests
-npm run test:contracts  # Run Vitest smart contract tests
-npm run test:e2e        # Run Playwright end-to-end tests
-npm run test:unit       # Run Jest unit tests
-npm run test:api        # Run backend API tests
-npm run lint            # Run ESLint
-npm run db:seed         # Seed MongoDB with test data
+npm run test:coverage   # Generate coverage report
+npm run gas-report      # Gas usage analysis
 ```
 
-## Database Schema (MongoDB)
-
-### Campaign Document Structure
-
-```javascript
-{
-  _id: ObjectId,
-  campaignId: 1,
-  founder: "ST1234567890ABCDEF",
-  title: "Revolutionary AI Startup",
-  description: "Building next-gen AI tools",
-  fundingGoal: 10000000000,
-  totalRaised: 5000000000,
-  deadline: ISODate("2025-03-15"),
-  active: true,
-  completed: false,
-  milestoneCount: 5,
-  createdAt: ISODate,
-  updatedAt: ISODate,
-  investments: [
-    {
-      investor: "ST0987654321ABCDEF",
-      amount: 1000000000,
-      timestamp: ISODate,
-      equityTokens: 1000,
-      transactionHash: "0x123..."
-    }
-  ],
-  milestones: [
-    {
-      milestoneId: 1,
-      title: "MVP Development",
-      description: "Complete minimum viable product",
-      fundingPercentage: 25,
-      completed: false,
-      votesFor: 750,
-      votesAgainst: 250,
-      votingDeadline: ISODate,
-      fundsReleased: false,
-      votes: [
-        {
-          voter: "ST0987654321",
-          vote: true,
-          timestamp: ISODate,
-          votingPower: 500
-        }
-      ]
-    }
-  ],
-  stats: {
-    totalInvestors: 15,
-    averageInvestment: 666666667,
-    lastUpdate: ISODate
-  }
-}
-```
-
-### User Portfolio Document
-
-```javascript
-{
-  _id: ObjectId,
-  userAddress: "ST0987654321ABCDEF",
-  totalInvested: 5000000000,
-  activeCampaigns: 3,
-  totalReturns: 1500000000,
-  investments: [
-    {
-      campaignId: 1,
-      amount: 1000000000,
-      equityTokens: 1000,
-      timestamp: ISODate,
-      currentValue: 1200000000
-    }
-  ],
-  aiProfile: {
-    riskTolerance: "moderate",
-    preferredSectors: ["AI", "Blockchain", "FinTech"],
-    investmentPattern: "conservative",
-    lastRecommendationUpdate: ISODate
-  }
-}
-```
-
-## Security Features
-
-**Smart Contract Security**
-
-- Formal verification with Clarity language
-- Access control with role-based permissions
-- Reentrancy protection built into Clarity
-- Input validation for all parameters
-- Emergency pause functionality
-
-**Backend Security**
-
-- JWT authentication with wallet signature verification
-- Rate limiting to prevent API abuse
-- MongoDB injection protection with parameterized queries
-- CORS configuration for secure cross-origin requests
-- Encryption for sensitive data
-
-**AI Security**
-
-- Model protection against adversarial attacks
-- Privacy-preserving analytics with differential privacy
-- Bias detection and mitigation in recommendation systems
-- Secure model serving with input validation
-
-## AI & Machine Learning Features
-
-**Investment Recommendations**
-
-- Collaborative filtering based on user investment behavior
-- Content-based filtering using campaign characteristics
-- Hybrid recommendation system combining multiple approaches
-- Real-time adaptation to market conditions and user preferences
-
-**Risk Assessment**
-
-- Founder credibility scoring using on-chain transaction history
-- Campaign risk evaluation based on multiple technical and market factors
-- Market risk analysis incorporating macroeconomic indicators
-- Technical risk assessment for smart contract implementations
-
-**Fraud Detection**
-
-- Real-time anomaly detection using isolation forests and autoencoders
-- Behavioral pattern analysis for identifying suspicious investment activity
-- Network analysis for detecting Sybil attacks and coordinated manipulation
-- Cross-platform behavior correlation for comprehensive fraud prevention
-
-**Portfolio Optimization**
-
-- Modern Portfolio Theory implementation for risk-return optimization
-- Dynamic rebalancing recommendations based on market conditions
-- Risk-adjusted performance analytics and benchmarking
-- Diversification scoring and investment allocation suggestions
-
-## Testing
-
-### Smart Contract Tests (Vitest)
-
+### Frontend Tests
 ```bash
-# Run all contract tests
-npm run test:contracts
-
-# Run specific test suite
-npm run test:contracts -- --run campaigns
-
-# Watch mode for development
-npm run test:contracts -- --watch
-
-# Generate coverage report
-npm run test:contracts -- --coverage
+cd fundflow-frontend
+npm run test            # Run component tests
+npm run test:e2e        # End-to-end testing
 ```
 
-Example test structure:
-
-```javascript
-import { describe, expect, it, beforeEach } from "vitest";
-import { Cl } from "@stacks/transactions";
-
-describe("FundFlow Campaign Tests", () => {
-  beforeEach(() => {
-    simnet.mineEmptyBlocks(1);
-  });
-
-  it("should create campaign successfully", () => {
-    const result = simnet.callPublicFn(
-      "fundflow",
-      "create-campaign",
-      [
-        Cl.stringUtf8("Test Campaign"),
-        Cl.stringUtf8("Test Description"),
-        Cl.uint(10000000000),
-        Cl.uint(8640),
-        Cl.uint(5),
-      ],
-      founder1
-    );
-    expect(result.result).toBeOk(Cl.uint(1));
-  });
-});
-```
-
-### End-to-End Tests (Playwright)
-
+### Backend Tests
 ```bash
-# Install Playwright browsers
-npx playwright install
-
-# Run E2E tests
-npm run test:e2e
-
-# Run tests in headed mode
-npm run test:e2e -- --headed
-
-# Run specific test file
-npm run test:e2e tests/campaign-flow.spec.ts
-
-# Generate test report
-npm run test:e2e -- --reporter=html
+cd fundflow-server
+npm run test            # Run unit tests
+npm run test:integration # Integration tests
+npm run test:coverage   # Coverage report
 ```
 
-Example E2E test:
-
-```javascript
-import { test, expect } from "@playwright/test";
-
-test("complete campaign creation and investment flow", async ({ page }) => {
-  await page.goto("http://localhost:3000");
-
-  // Connect wallet
-  await page.click('[data-testid="connect-wallet"]');
-
-  // Create campaign
-  await page.click('[data-testid="create-campaign"]');
-  await page.fill('[data-testid="campaign-title"]', "Test Campaign");
-  await page.fill('[data-testid="funding-goal"]', "10000");
-  await page.click('[data-testid="submit-campaign"]');
-
-  // Verify campaign creation
-  await expect(page.locator('[data-testid="campaign-success"]')).toBeVisible();
-});
-```
-
-### Unit Tests (Jest)
-
-```bash
-# Run unit tests
-npm run test:unit
-
-# Run with coverage
-npm run test:unit -- --coverage
-
-# Watch mode
-npm run test:unit -- --watch
-```
-
-### API Tests
-
-```bash
-# Run API integration tests
-npm run test:api
-
-# Test specific endpoint
-npm run test:api -- --grep "campaign creation"
-```
-
-## Deployment
+## 🚀 Deployment
 
 ### Environment Configuration
 
 ```bash
 # Production environment variables
 NODE_ENV=production
+HEDERA_NETWORK=mainnet
+HEDERA_OPERATOR_ID=your-mainnet-operator-id
+HEDERA_OPERATOR_KEY=your-mainnet-operator-key
 MONGODB_URI=mongodb+srv://user:password@cluster.mongodb.net/fundflow_prod
 REDIS_URL=redis://redis:6379
-STACKS_NETWORK=mainnet
-STACKS_API_URL=https://stacks-node-api.mainnet.stacks.co
 JWT_SECRET=your-production-jwt-secret
-PLATFORM_FEE=250  # 2.5%
+WALLET_CONNECT_PROJECT_ID=your-project-id
 ```
 
 ### Docker Deployment
@@ -503,85 +329,26 @@ docker-compose logs -f
 ### Manual Deployment
 
 ```bash
-# Build the application
-npm run build
+# Build applications
+cd fundflow-frontend && npm run build
+cd ../fundflow-server && npm run build
 
-# Seed MongoDB
-npm run db:seed
+# Deploy smart contracts
+cd ../fundflow-smartcontract && npm run deploy:mainnet
 
-# Start production server
-npm start
-
-# Start background workers
-npm run workers
+# Start services
+cd ../fundflow-server && npm start
+cd ../fundflow-frontend && npm start
 ```
 
-## Key Smart Contract Functions
+## 📚 Documentation
 
-### Read-Only Functions
+- **[Hedera Setup Guide](fundflow-frontend/HEDERA_SETUP.md)** - Complete Hedera integration guide
+- **[Implementation Summary](fundflow-frontend/IMPLEMENTATION_SUMMARY.md)** - Technical implementation details
+- **[Wallet Setup Guide](fundflow-frontend/WALLET_SETUP_GUIDE.md)** - Wallet integration instructions
+- **[Smart Contract Docs](fundflow-smartcontract/README.md)** - Contract architecture and usage
 
-- `get-campaign-details(campaign-id)` - Retrieve complete campaign information
-- `get-investment-details(campaign-id, investor)` - Get specific investment data
-- `get-investor-portfolio(investor)` - View investor's complete portfolio
-- `get-milestone-details(campaign-id, milestone-id)` - Milestone information and voting status
-- `calculate-milestone-approval-rate(campaign-id, milestone-id)` - Real-time voting results
-
-### Public Functions
-
-- `create-campaign()` - Initialize new fundraising campaign
-- `invest-in-campaign()` - Process STX investments with automatic fee calculation
-- `create-milestone()` - Define project milestones with funding allocation
-- `vote-on-milestone()` - Participate in milestone governance
-- `complete-milestone()` - Release funds upon milestone approval
-
-### Administrative Functions
-
-- `set-platform-fee()` - Adjust platform fee percentage (owner only)
-- `toggle-pause()` - Emergency pause functionality
-- `withdraw-platform-fees()` - Collect platform revenue
-- `emergency-close-campaign()` - Administrative campaign intervention
-
-## Configuration
-
-### Platform Settings
-
-```javascript
-const PLATFORM_CONFIG = {
-  FEE_PERCENTAGE: 250, // 2.5% platform fee
-  MIN_CAMPAIGN_GOAL: 1000, // Minimum 1,000 STX
-  MAX_CAMPAIGN_GOAL: 1000000, // Maximum 1M STX
-  MIN_CAMPAIGN_DURATION: 1440, // 10 days minimum
-  MAX_CAMPAIGN_DURATION: 8640, // 60 days maximum
-  MAX_MILESTONES: 10, // Maximum milestones per campaign
-  VOTING_PERIOD: 1440, // 10 days voting period
-  APPROVAL_THRESHOLD: 51, // 51% approval required
-};
-```
-
-### MongoDB Configuration
-
-```javascript
-// MongoDB connection with options
-const mongoConfig = {
-  uri: process.env.MONGODB_URI,
-  options: {
-    maxPoolSize: 10,
-    serverSelectionTimeoutMS: 5000,
-    socketTimeoutMS: 45000,
-    bufferMaxEntries: 0,
-    useNewUrlParser: true,
-    useUnifiedTopology: true,
-  },
-};
-
-// Indexes for performance
-db.campaigns.createIndex({ campaignId: 1 }, { unique: true });
-db.campaigns.createIndex({ founder: 1 });
-db.campaigns.createIndex({ active: 1, deadline: 1 });
-db.portfolios.createIndex({ userAddress: 1 }, { unique: true });
-```
-
-## Contributing
+## 🤝 Contributing
 
 We welcome contributions from the community! Here's how you can contribute:
 
@@ -605,37 +372,54 @@ npm run lint
 npm run lint:fix
 ```
 
-## License
+## 📄 License
 
 This project is licensed under the MIT License. See the LICENSE file for details.
 
-## Roadmap
+## 🗺️ Roadmap
 
-### Phase 1 - Foundation (Q1 2025)
+### Phase 1 - Foundation (Q1 2025) ✅
+- [x] Core smart contract functionality
+- [x] Basic web interface for campaigns and investments
+- [x] Wallet integration and authentication
+- [x] Milestone creation and voting system
 
-- Core smart contract functionality
-- Basic web interface for campaigns and investments
-- Wallet integration and authentication
-- Milestone creation and voting system
+### Phase 2 - Enhanced Features (Q2 2025)
+- [ ] Advanced analytics dashboard
+- [ ] Mobile-responsive design
+- [ ] Enhanced governance features
+- [ ] Performance optimizations
 
-### Phase 2 - AI Integration (Q2 2025)
+### Phase 3 - Scale & Compliance (Q3 2025)
+- [ ] Mainnet launch with security audits
+- [ ] Regulatory compliance framework
+- [ ] Enterprise-grade features
+- [ ] Global market expansion
 
-- Investment recommendation engine
-- Fraud detection and risk assessment
-- Portfolio optimization algorithms
-- Advanced analytics dashboard
+### Phase 4 - Innovation (Q4 2025)
+- [ ] AI-powered investment recommendations
+- [ ] Cross-chain bridge integration
+- [ ] Advanced DeFi features
+- [ ] Institutional investor tools
 
-### Phase 3 - Enhanced Features (Q3 2025)
+## 🌟 Why Hedera?
 
-- Mobile applications for iOS and Android
-- Advanced governance features
-- Cross-chain bridge integration
-- Institutional investor tools
+**Hedera Hashgraph** provides the ideal foundation for FundFlow:
 
-### Phase 4 - Scale & Compliance (Q4 2025)
+- **Enterprise-Grade Security**: Byzantine fault tolerance with 1/3 malicious node tolerance
+- **High Performance**: 10,000+ transactions per second
+- **Low Cost**: Predictable, low transaction fees
+- **Environmental**: Carbon-negative blockchain
+- **Regulatory Ready**: Built with compliance in mind
+- **EVM Compatible**: Seamless integration with existing Ethereum tools
 
-- Mainnet launch with full security audits
-- Regulatory compliance framework
-- Enterprise-grade features
-- Global market expansion
-# FUNDFLOW_HEDERA
+## 📞 Support
+
+- **Documentation**: [docs.fundflow.io](https://docs.fundflow.io)
+- **Discord**: [discord.gg/fundflow](https://discord.gg/fundflow)
+- **Twitter**: [@fundflow_io](https://twitter.com/fundflow_io)
+- **Email**: support@fundflow.io
+
+---
+
+**FundFlow** - Revolutionizing startup fundraising with blockchain technology. 🚀
