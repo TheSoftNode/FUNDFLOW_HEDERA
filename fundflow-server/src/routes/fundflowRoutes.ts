@@ -1,7 +1,7 @@
 import { Router } from 'express';
 import { body, param, query } from 'express-validator';
 import { validateRequest } from '../middleware/validation';
-import { authenticateToken } from '../middleware/auth';
+import { authenticateToken } from '../middleware/authMiddleware';
 import { FundFlowController } from '../controllers/FundFlowController';
 
 const router = Router();

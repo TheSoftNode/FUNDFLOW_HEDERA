@@ -15,7 +15,7 @@ const handleValidationErrors = (req: express.Request, res: express.Response, nex
       details: errors.array()
     });
   }
-  next();
+  return next();
 };
 
 // POST /api/auth/wallet-connect - Authenticate with wallet signature

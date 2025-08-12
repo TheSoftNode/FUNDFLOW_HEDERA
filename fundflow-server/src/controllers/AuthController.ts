@@ -1,7 +1,9 @@
 import { Request, Response, NextFunction } from 'express';
-import jwt from 'jsonwebtoken';
+import jwt, { Secret, SignOptions } from 'jsonwebtoken';
 import { UserService } from '../services/UserService';
 import { logger } from '../utils/logger';
+
+
 
 export class AuthController {
   // Generate JWT token
@@ -10,7 +12,7 @@ export class AuthController {
     return jwt.sign(
       { userId, walletAddress },
       secret,
-      { expiresIn: process.env.JWT_EXPIRES_IN || '7d' }
+      { expiresIn: process.env.JWT_EXPIRES_IN || '7d' } as SignOptions
     );
   }
 
@@ -18,11 +20,11 @@ export class AuthController {
   static async walletConnect(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
       const { walletAddress, signature, message } = req.body;
-      
+
       // TODO: Verify Stacks wallet signature
       // This would involve verifying the signature against the message using Stacks libraries
       // For now, we'll do basic validation
-      
+
       if (!signature || !message) {
         res.status(400).json({
           success: false,
@@ -33,7 +35,7 @@ export class AuthController {
 
       // Find or create user
       let user = await UserService.getUserByWallet(walletAddress);
-      
+
       if (!user) {
         // Create basic user record - they'll complete profile in onboarding
         user = await UserService.createOrUpdateUser({
@@ -57,7 +59,7 @@ export class AuthController {
             }
           }
         });
-        
+
         logger.info(`New user created via wallet connect: ${walletAddress}`);
       } else {
         // Update last active
@@ -66,7 +68,7 @@ export class AuthController {
       }
 
       // Generate JWT token
-      const token = AuthController.generateToken(user._id.toString(), user.walletAddress);
+      const token = AuthController.generateToken((user._id as any).toString(), user.walletAddress);
 
       res.json({
         success: true,
@@ -88,11 +90,11 @@ export class AuthController {
     try {
       const { token } = req.body;
       const secret = process.env.JWT_SECRET || 'fallback-secret-change-in-production';
-      
+
       const decoded = jwt.verify(token, secret) as { userId: string; walletAddress: string };
-      
+
       const user = await UserService.getUserByWallet(decoded.walletAddress);
-      
+
       if (!user) {
         res.status(404).json({
           success: false,
@@ -120,7 +122,7 @@ export class AuthController {
         });
         return;
       }
-      
+
       logger.error('Error in verifyToken:', error);
       next(error);
     }
@@ -131,15 +133,15 @@ export class AuthController {
     try {
       const { token } = req.body;
       const secret = process.env.JWT_SECRET || 'fallback-secret-change-in-production';
-      
+
       // Verify the current token (even if expired)
-      const decoded = jwt.verify(token, secret, { ignoreExpiration: true }) as { 
-        userId: string; 
-        walletAddress: string 
+      const decoded = jwt.verify(token, secret, { ignoreExpiration: true }) as {
+        userId: string;
+        walletAddress: string
       };
-      
+
       const user = await UserService.getUserByWallet(decoded.walletAddress);
-      
+
       if (!user) {
         res.status(404).json({
           success: false,
@@ -149,8 +151,8 @@ export class AuthController {
       }
 
       // Generate new token
-      const newToken = AuthController.generateToken(user._id.toString(), user.walletAddress);
-      
+      const newToken = AuthController.generateToken((user._id as any).toString(), user.walletAddress);
+
       // Update last active
       await UserService.updateLastActive(decoded.walletAddress);
 
@@ -173,7 +175,7 @@ export class AuthController {
   static async logout(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
       const { walletAddress } = req.body;
-      
+
       if (walletAddress) {
         await UserService.updateLastActive(walletAddress);
         logger.info(`User logged out: ${walletAddress}`);
@@ -193,7 +195,7 @@ export class AuthController {
   static async getCurrentUser(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
       const authHeader = req.headers.authorization;
-      
+
       if (!authHeader || !authHeader.startsWith('Bearer ')) {
         res.status(401).json({
           success: false,
@@ -204,11 +206,11 @@ export class AuthController {
 
       const token = authHeader.substring(7);
       const secret = process.env.JWT_SECRET || 'fallback-secret-change-in-production';
-      
+
       const decoded = jwt.verify(token, secret) as { userId: string; walletAddress: string };
-      
+
       const user = await UserService.getUserByWallet(decoded.walletAddress);
-      
+
       if (!user) {
         res.status(404).json({
           success: false,
@@ -232,7 +234,7 @@ export class AuthController {
         });
         return;
       }
-      
+
       logger.error('Error in getCurrentUser:', error);
       next(error);
     }

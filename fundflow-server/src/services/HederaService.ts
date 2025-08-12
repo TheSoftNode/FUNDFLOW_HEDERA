@@ -7,11 +7,13 @@ import {
   ContractCallQuery,
   ContractFunctionParameters,
   Hbar,
+  HbarUnit,
   TransactionReceiptQuery,
   TransactionResponse,
   Status,
   ReceiptStatusError,
-  TransactionId
+  TransactionId,
+  AccountBalanceQuery
 } from '@hashgraph/sdk';
 import { logger } from '../utils/logger';
 import { config } from '../config/environment';
@@ -86,7 +88,7 @@ export class HederaService {
       const receipt = await txResponse.getReceipt(this.client);
 
       if (receipt.status !== Status.Success) {
-        throw new ReceiptStatusError(`Transaction failed with status: ${receipt.status}`);
+        throw new Error(`Transaction failed with status: ${receipt.status}`);
       }
 
       logger.info(`Contract function ${functionName} executed successfully. Transaction ID: ${txResponse.transactionId}`);
@@ -170,9 +172,10 @@ export class HederaService {
   async getAccountBalance(accountId: string): Promise<Hbar> {
     try {
       const account = AccountId.fromString(accountId);
-      const balance = await this.client.getAccountBalance(account);
-      return balance;
-      return balance;
+      const balance = await new AccountBalanceQuery()
+        .setAccountId(account)
+        .execute(this.client);
+      return balance.hbars;
     } catch (error) {
       logger.error(`Failed to get account balance for ${accountId}:`, error);
       throw error;
@@ -197,7 +200,7 @@ export class HederaService {
       } else if (typeof param === 'number') {
         contractParams.addUint256(param);
       } else if (typeof param === 'bigint') {
-        contractParams.addUint256(param);
+        contractParams.addUint256(Number(param));
       } else if (typeof param === 'boolean') {
         contractParams.addBool(param);
       } else if (Array.isArray(param)) {
@@ -240,14 +243,19 @@ export class HederaService {
    * Convert Hedera account ID to Solidity address
    */
   accountIdToSolidityAddress(accountId: string): string {
-    return AccountId.fromString(accountId).toSolidityAddress();
+    return AccountId.fromString(accountId).toEvmAddress();
   }
+
 
   /**
    * Convert Solidity address to Hedera account ID
    */
   solidityAddressToAccountId(address: string): string {
-    return AccountId.fromSolidityAddress(address).toString();
+    // AccountId.fromEvmAddress requires shard, realm, and evmAddress
+    // Assume mainnet/testnet default: shard=0, realm=0
+    // Remove '0x' prefix if present
+    const evmAddress = address.startsWith('0x') ? address.slice(2) : address;
+    return AccountId.fromEvmAddress(0, 0, evmAddress).toString();
   }
 }
 
@@ -257,5 +265,5 @@ export const hederaService = new HederaService({
   accountId: config.HEDERA_OPERATOR_ID,
   privateKey: config.HEDERA_OPERATOR_KEY,
   gasLimit: config.GAS_LIMIT,
-  maxTransactionFee: Hbar.from(config.MAX_TRANSACTION_FEE)
+  maxTransactionFee: Hbar.from(config.MAX_TRANSACTION_FEE, HbarUnit.Hbar)
 });

@@ -5,21 +5,26 @@ export interface IInvestment extends Document {
   campaignId: mongoose.Types.ObjectId;
   investorAddress: string;
   creatorAddress: string;
-  
+
+  // Instance methods
+  addVote(milestoneId: number, vote: 'for' | 'against', transactionId?: string): Promise<IInvestment>;
+  addPayout(amount: number, transactionId: string, type: 'milestone' | 'dividend' | 'exit', milestoneId?: number): Promise<IInvestment>;
+  updateStatus(status: 'pending' | 'confirmed' | 'failed' | 'refunded', confirmations?: number): Promise<IInvestment>;
+
   // Investment amounts
   amount: number; // Total investment amount in microSTX
   netAmount: number; // Amount after platform fee
   platformFee: number; // Platform fee paid
-  
+
   // Transaction details
   transactionId: string;
   blockHeight: number;
   timestamp: Date;
-  
+
   // Investment status
   status: 'pending' | 'confirmed' | 'failed' | 'refunded';
   confirmations: number;
-  
+
   // Voting power and governance
   votingPower: number; // Based on investment amount
   votes: Array<{
@@ -28,7 +33,7 @@ export interface IInvestment extends Document {
     timestamp: Date;
     transactionId?: string;
   }>;
-  
+
   // Returns and payouts
   expectedReturns: number;
   actualReturns: number;
@@ -39,12 +44,12 @@ export interface IInvestment extends Document {
     milestoneId?: number;
     type: 'milestone' | 'dividend' | 'exit';
   }>;
-  
+
   // Metadata
   source: 'web' | 'mobile' | 'api';
   userAgent?: string;
   ipAddress?: string;
-  
+
   createdAt: Date;
   updatedAt: Date;
 }
@@ -67,7 +72,7 @@ const InvestmentSchema = new Schema<IInvestment>({
     required: true,
     index: true
   },
-  
+
   // Investment amounts
   amount: {
     type: Number,
@@ -84,7 +89,7 @@ const InvestmentSchema = new Schema<IInvestment>({
     required: true,
     min: 0
   },
-  
+
   // Transaction details
   transactionId: {
     type: String,
@@ -102,7 +107,7 @@ const InvestmentSchema = new Schema<IInvestment>({
     required: true,
     index: true
   },
-  
+
   // Investment status
   status: {
     type: String,
@@ -115,7 +120,7 @@ const InvestmentSchema = new Schema<IInvestment>({
     default: 0,
     min: 0
   },
-  
+
   // Voting power and governance
   votingPower: {
     type: Number,
@@ -138,7 +143,7 @@ const InvestmentSchema = new Schema<IInvestment>({
     },
     transactionId: String
   }],
-  
+
   // Returns and payouts
   expectedReturns: {
     type: Number,
@@ -170,7 +175,7 @@ const InvestmentSchema = new Schema<IInvestment>({
       required: true
     }
   }],
-  
+
   // Metadata
   source: {
     type: String,
@@ -182,7 +187,7 @@ const InvestmentSchema = new Schema<IInvestment>({
 }, {
   timestamps: true,
   toJSON: {
-    transform: function(doc, ret) {
+    transform: function (doc, ret) {
       delete (ret as any).__v;
       delete ret.userAgent;
       delete ret.ipAddress;
@@ -199,29 +204,29 @@ InvestmentSchema.index({ transactionId: 1 }, { unique: true });
 InvestmentSchema.index({ blockHeight: -1 });
 
 // Virtual for ROI percentage
-InvestmentSchema.virtual('roiPercentage').get(function() {
+InvestmentSchema.virtual('roiPercentage').get(function () {
   return this.netAmount > 0 ? ((this.actualReturns - this.netAmount) / this.netAmount) * 100 : 0;
 });
 
 // Instance methods
-InvestmentSchema.methods.addVote = function(milestoneId: number, vote: 'for' | 'against', transactionId?: string) {
+InvestmentSchema.methods.addVote = function (milestoneId: number, vote: 'for' | 'against', transactionId?: string) {
   // Check if already voted on this milestone
-  const existingVote = this.votes.find(v => v.milestoneId === milestoneId);
+  const existingVote = this.votes.find((v: any) => v.milestoneId === milestoneId);
   if (existingVote) {
     throw new Error('Already voted on this milestone');
   }
-  
+
   this.votes.push({
     milestoneId,
     vote,
     timestamp: new Date(),
     transactionId
   });
-  
+
   return this.save();
 };
 
-InvestmentSchema.methods.addPayout = function(amount: number, transactionId: string, type: 'milestone' | 'dividend' | 'exit', milestoneId?: number) {
+InvestmentSchema.methods.addPayout = function (amount: number, transactionId: string, type: 'milestone' | 'dividend' | 'exit', milestoneId?: number) {
   this.payouts.push({
     amount,
     timestamp: new Date(),
@@ -229,12 +234,12 @@ InvestmentSchema.methods.addPayout = function(amount: number, transactionId: str
     milestoneId,
     type
   });
-  
+
   this.actualReturns += amount;
   return this.save();
 };
 
-InvestmentSchema.methods.updateStatus = function(status: 'pending' | 'confirmed' | 'failed' | 'refunded', confirmations?: number) {
+InvestmentSchema.methods.updateStatus = function (status: 'pending' | 'confirmed' | 'failed' | 'refunded', confirmations?: number) {
   this.status = status;
   if (confirmations !== undefined) {
     this.confirmations = confirmations;
@@ -243,22 +248,22 @@ InvestmentSchema.methods.updateStatus = function(status: 'pending' | 'confirmed'
 };
 
 // Static methods
-InvestmentSchema.statics.findByInvestor = function(investorAddress: string) {
+InvestmentSchema.statics.findByInvestor = function (investorAddress: string) {
   return this.find({ investorAddress }).populate('campaignId').sort({ createdAt: -1 });
 };
 
-InvestmentSchema.statics.findByCampaign = function(campaignId: string) {
+InvestmentSchema.statics.findByCampaign = function (campaignId: string) {
   return this.find({ campaignId }).sort({ timestamp: -1 });
 };
 
-InvestmentSchema.statics.getTotalInvestmentByInvestor = function(investorAddress: string) {
+InvestmentSchema.statics.getTotalInvestmentByInvestor = function (investorAddress: string) {
   return this.aggregate([
     { $match: { investorAddress, status: 'confirmed' } },
     { $group: { _id: null, total: { $sum: '$netAmount' } } }
   ]);
 };
 
-InvestmentSchema.statics.getPortfolioStats = function(investorAddress: string) {
+InvestmentSchema.statics.getPortfolioStats = function (investorAddress: string) {
   return this.aggregate([
     { $match: { investorAddress, status: 'confirmed' } },
     {
@@ -274,4 +279,12 @@ InvestmentSchema.statics.getPortfolioStats = function(investorAddress: string) {
   ]);
 };
 
-export default mongoose.model<IInvestment>('Investment', InvestmentSchema);
+// Static methods interface
+export interface IInvestmentModel extends mongoose.Model<IInvestment> {
+  findByInvestor(investorAddress: string): Promise<IInvestment[]>;
+  findByCampaign(campaignId: string): Promise<IInvestment[]>;
+  getTotalInvestmentByInvestor(investorAddress: string): Promise<any[]>;
+  getPortfolioStats(investorAddress: string): Promise<any[]>;
+}
+
+export default mongoose.model<IInvestment, IInvestmentModel>('Investment', InvestmentSchema);

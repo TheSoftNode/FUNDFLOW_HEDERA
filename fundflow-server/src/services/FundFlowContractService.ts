@@ -3,22 +3,25 @@ import { logger } from '../utils/logger';
 import { config } from '../config/environment';
 
 export interface CampaignData {
-    id: number;
-    creator: string;
     title: string;
     description: string;
+    ipfsHash: string;
     targetAmount: string;
-    raisedAmount: string;
-    deadline: number;
-    status: number;
-    category: string;
-    imageUrl: string;
-    videoUrl: string;
-    documents: string[];
-    socialLinks: string[];
+    durationDays: number;
+    category: number; // CampaignCategory enum value
+    milestoneFundingPercentages: number[];
+    milestoneTitles: string[];
+    milestoneDescriptions: string[];
+}
+
+export interface CampaignDraft {
+    title: string;
+    description: string;
+    category: number; // CampaignCategory enum value
+    fundingGoal: string;
+    duration: number;
     tags: string[];
-    createdAt: number;
-    updatedAt: number;
+    ipfsHash: string;
 }
 
 export interface InvestmentData {
@@ -91,20 +94,18 @@ export class FundFlowContractService {
     /**
      * Create a new campaign
      */
-    async createCampaign(campaignData: Omit<CampaignData, 'id' | 'createdAt' | 'updatedAt'>): Promise<ContractCallResult> {
+    async createCampaign(campaignData: CampaignData): Promise<ContractCallResult> {
         try {
             const parameters = [
-                campaignData.creator,
                 campaignData.title,
                 campaignData.description,
+                campaignData.ipfsHash,
                 campaignData.targetAmount,
-                campaignData.deadline,
+                campaignData.durationDays,
                 campaignData.category,
-                campaignData.imageUrl || '',
-                campaignData.videoUrl || '',
-                campaignData.documents || [],
-                campaignData.socialLinks || [],
-                campaignData.tags || []
+                campaignData.milestoneFundingPercentages,
+                campaignData.milestoneTitles,
+                campaignData.milestoneDescriptions
             ];
 
             return await hederaService.executeContractFunction(
@@ -181,26 +182,28 @@ export class FundFlowContractService {
     /**
      * Update campaign
      */
-    async updateCampaign(campaignId: number, updates: Partial<CampaignData>): Promise<ContractCallResult> {
+    async updateCampaignDraft(campaignId: number, draft: CampaignDraft): Promise<ContractCallResult> {
         try {
             const parameters = [
                 campaignId,
-                updates.title || '',
-                updates.description || '',
-                updates.imageUrl || '',
-                updates.videoUrl || '',
-                updates.documents || [],
-                updates.socialLinks || [],
-                updates.tags || []
+                [
+                    draft.title,
+                    draft.description,
+                    draft.category,
+                    draft.fundingGoal,
+                    draft.duration,
+                    draft.tags,
+                    draft.ipfsHash
+                ]
             ];
 
             return await hederaService.executeContractFunction(
                 this.campaignManagerId,
-                'updateCampaign',
+                'updateCampaignDraft',
                 parameters
             );
         } catch (error) {
-            logger.error(`Failed to update campaign ${campaignId}:`, error);
+            logger.error(`Failed to update campaign draft ${campaignId}:`, error);
             return {
                 success: false,
                 error: error instanceof Error ? error.message : 'Unknown error occurred'

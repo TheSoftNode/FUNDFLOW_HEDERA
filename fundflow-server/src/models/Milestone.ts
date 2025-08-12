@@ -269,7 +269,7 @@ MilestoneSchema.virtual('votingTimeRemaining').get(function() {
 // Instance methods
 MilestoneSchema.methods.addVote = function(investorAddress: string, investmentAmount: number, vote: 'for' | 'against', transactionId?: string) {
   // Check if investor already voted
-  const existingVoteIndex = this.votes.findIndex(v => v.investorAddress === investorAddress);
+  const existingVoteIndex = this.votes.findIndex((v: any) => v.investorAddress === investorAddress);
   if (existingVoteIndex !== -1) {
     // Update existing vote
     const oldVote = this.votes[existingVoteIndex];

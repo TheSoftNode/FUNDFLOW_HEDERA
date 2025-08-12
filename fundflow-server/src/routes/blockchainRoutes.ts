@@ -1,7 +1,7 @@
 import { Router } from 'express';
 import { body, param, query } from 'express-validator';
 import { validateRequest } from '../middleware/validation';
-import { authenticateToken } from '../middleware/auth';
+import { authenticateToken } from '../middleware/authMiddleware';
 import { BlockchainController } from '../controllers/BlockchainController';
 
 const router = Router();
@@ -105,7 +105,7 @@ router.get('/contracts', blockchainController.getContractInfo);
  *                     balanceInHbar:
  *                       type: number
  */
-router.get('/balance/:accountId', 
+router.get('/balance/:accountId',
   param('accountId').isString().notEmpty(),
   validateRequest,
   blockchainController.getAccountBalance

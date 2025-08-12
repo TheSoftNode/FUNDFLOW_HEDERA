@@ -12,17 +12,15 @@ export class FundFlowController {
   async createCampaign(req: Request, res: Response) {
     try {
       const campaignData = {
-        creator: (req as any).user.walletAddress,
         title: req.body.title,
         description: req.body.description,
+        ipfsHash: req.body.ipfsHash || '',
         targetAmount: req.body.targetAmount,
-        deadline: req.body.deadline,
+        durationDays: req.body.durationDays,
         category: req.body.category,
-        imageUrl: req.body.imageUrl || '',
-        videoUrl: req.body.videoUrl || '',
-        documents: req.body.documents || [],
-        socialLinks: req.body.socialLinks || [],
-        tags: req.body.tags || []
+        milestoneFundingPercentages: req.body.milestoneFundingPercentages || [],
+        milestoneTitles: req.body.milestoneTitles || [],
+        milestoneDescriptions: req.body.milestoneDescriptions || []
       };
 
       const result = await fundFlowContractService.createCampaign(campaignData);
@@ -47,7 +45,7 @@ export class FundFlowController {
   async getCampaign(req: Request, res: Response) {
     try {
       const { campaignId } = req.params;
-      
+
       if (!campaignId) {
         return ApiResponse.error(res, 'Campaign ID is required', 400);
       }
@@ -81,15 +79,15 @@ export class FundFlowController {
 
       // Apply filters (in a real implementation, this would be done at the database level)
       let campaigns = result.data || [];
-      
+
       if (status) {
         campaigns = campaigns.filter((c: any) => c.status === parseInt(status as string));
       }
-      
+
       if (category) {
         campaigns = campaigns.filter((c: any) => c.category === category);
       }
-      
+
       if (creator) {
         campaigns = campaigns.filter((c: any) => c.creator === creator);
       }
@@ -129,7 +127,7 @@ export class FundFlowController {
 
       // Get campaign to verify ownership
       const campaignResult = await fundFlowContractService.getCampaign(parseInt(campaignId));
-      
+
       if (!campaignResult.success) {
         return ApiResponse.error(res, 'Campaign not found', 404);
       }
@@ -139,7 +137,17 @@ export class FundFlowController {
         return ApiResponse.forbidden(res, 'Only campaign creator can update campaign');
       }
 
-      const result = await fundFlowContractService.updateCampaign(parseInt(campaignId), updates);
+      // Convert updates to CampaignDraft format
+      const draftData = {
+        title: updates.title || '',
+        description: updates.description || '',
+        category: updates.category || 0,
+        fundingGoal: updates.targetAmount || '0',
+        duration: updates.deadline || 0,
+        tags: updates.tags || [],
+        ipfsHash: updates.ipfsHash || ''
+      };
+      const result = await fundFlowContractService.updateCampaignDraft(parseInt(campaignId), draftData);
 
       if (!result.success) {
         return ApiResponse.error(res, result.error || 'Failed to update campaign', 500);
@@ -248,7 +256,11 @@ export class FundFlowController {
         description: req.body.description,
         targetAmount: req.body.targetAmount,
         deadline: req.body.deadline,
-        votingDeadline: req.body.votingDeadline
+        votingDeadline: req.body.votingDeadline,
+        status: 0, // Pending
+        votesFor: 0,
+        votesAgainst: 0,
+        totalVotingPower: 0
       };
 
       const result = await fundFlowContractService.addMilestone(milestoneData);
@@ -275,6 +287,10 @@ export class FundFlowController {
       const { milestoneId } = req.params;
       const { vote, votingPower } = req.body;
       const voter = (req as any).user.walletAddress;
+
+      if (!milestoneId) {
+        return ApiResponse.error(res, 'Milestone ID is required', 400);
+      }
 
       const result = await fundFlowContractService.voteOnMilestone(
         parseInt(milestoneId),
@@ -305,6 +321,10 @@ export class FundFlowController {
   async executeMilestone(req: Request, res: Response) {
     try {
       const { milestoneId } = req.params;
+
+      if (!milestoneId) {
+        return ApiResponse.error(res, 'Milestone ID is required', 400);
+      }
 
       const result = await fundFlowContractService.executeMilestone(parseInt(milestoneId));
 
@@ -454,6 +474,10 @@ export class FundFlowController {
       const { vote, votingPower } = req.body;
       const voter = (req as any).user.walletAddress;
 
+      if (!proposalId) {
+        return ApiResponse.error(res, 'Proposal ID is required', 400);
+      }
+
       const result = await fundFlowContractService.voteOnProposal(
         parseInt(proposalId),
         voter,
@@ -483,6 +507,10 @@ export class FundFlowController {
   async executeProposal(req: Request, res: Response) {
     try {
       const { proposalId } = req.params;
+
+      if (!proposalId) {
+        return ApiResponse.error(res, 'Proposal ID is required', 400);
+      }
 
       const result = await fundFlowContractService.executeProposal(parseInt(proposalId));
 

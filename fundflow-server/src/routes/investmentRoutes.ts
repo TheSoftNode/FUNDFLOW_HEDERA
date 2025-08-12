@@ -16,7 +16,7 @@ const handleValidationErrors = (req: express.Request, res: express.Response, nex
       details: errors.array()
     });
   }
-  next();
+  return next();
 };
 
 // GET /api/investments/portfolio/:walletAddress - Get investor's portfolio
@@ -33,19 +33,19 @@ router.get('/portfolio/:walletAddress',
     try {
       const { walletAddress } = req.params;
       const { page = 1, limit = 20 } = req.query;
-      
+
       const skip = (Number(page) - 1) * Number(limit);
-      
-      const investments = await Investment.find({ 
-        investorAddress: walletAddress.toLowerCase() 
+
+      const investments = await Investment.find({
+        investorAddress: walletAddress?.toLowerCase() || ''
       })
         .populate('campaignId', 'title description status targetAmount raisedAmount deadline')
         .sort({ timestamp: -1 })
         .skip(skip)
         .limit(Number(limit));
 
-      const totalInvestments = await Investment.countDocuments({ 
-        investorAddress: walletAddress.toLowerCase() 
+      const totalInvestments = await Investment.countDocuments({
+        investorAddress: walletAddress?.toLowerCase() || ''
       });
 
       res.json({
@@ -74,9 +74,16 @@ router.get('/stats/:walletAddress',
   async (req: express.Request, res: express.Response, next: express.NextFunction) => {
     try {
       const { walletAddress } = req.params;
-      
+
+      if (!walletAddress) {
+        res.status(400).json({
+          success: false,
+          error: 'Wallet address is required'
+        });
+        return;
+      }
       const stats = await Investment.getPortfolioStats(walletAddress);
-      
+
       res.json({
         success: true,
         data: stats.length > 0 ? stats[0] : {
@@ -102,10 +109,10 @@ router.get('/:id',
   async (req: express.Request, res: express.Response, next: express.NextFunction) => {
     try {
       const { id } = req.params;
-      
+
       const investment = await Investment.findById(id)
         .populate('campaignId', 'title description status targetAmount raisedAmount deadline creatorAddress');
-      
+
       if (!investment) {
         res.status(404).json({
           success: false,
@@ -115,15 +122,15 @@ router.get('/:id',
       }
 
       // Check if user owns this investment or is the campaign creator
-      if (req.user?.walletAddress.toLowerCase() !== investment.investorAddress.toLowerCase() && 
-          req.user?.walletAddress.toLowerCase() !== investment.creatorAddress.toLowerCase()) {
+      if (req.user?.walletAddress.toLowerCase() !== investment.investorAddress.toLowerCase() &&
+        req.user?.walletAddress.toLowerCase() !== investment.creatorAddress.toLowerCase()) {
         res.status(403).json({
           success: false,
           error: 'Access denied'
         });
         return;
       }
-      
+
       res.json({
         success: true,
         data: investment
@@ -148,13 +155,13 @@ router.put('/:id/status',
     try {
       const { id } = req.params;
       const { status } = req.body;
-      
+
       const investment = await Investment.findByIdAndUpdate(
         id,
         { status, updatedAt: new Date() },
         { new: true }
       );
-      
+
       if (!investment) {
         res.status(404).json({
           success: false,
@@ -162,7 +169,7 @@ router.put('/:id/status',
         });
         return;
       }
-      
+
       res.json({
         success: true,
         data: investment,

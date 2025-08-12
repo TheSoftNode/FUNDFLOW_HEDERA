@@ -28,7 +28,12 @@ export interface ICampaign extends Document {
   chainId: number;
   creatorAddress: string;
   contractAddress: string;
-  
+
+  // Instance methods
+  addInvestment(investment: Partial<IInvestment>): Promise<ICampaign>;
+  addMilestone(milestone: Partial<IMilestone>): Promise<ICampaign>;
+  updateStatus(): Promise<ICampaign>;
+
   // Campaign details
   title: string;
   description: string;
@@ -37,21 +42,21 @@ export interface ICampaign extends Document {
   raisedAmount: number;
   deadline: Date;
   status: 'active' | 'completed' | 'cancelled' | 'failed';
-  
+
   // Milestones
   milestones: IMilestone[];
   currentMilestone: number;
-  
+
   // Investments
   investments: IInvestment[];
   investorCount: number;
-  
+
   // Metadata
   category: string;
   tags: string[];
   industry: string;
   stage: 'idea' | 'mvp' | 'early-revenue' | 'growth' | 'scale';
-  
+
   // Team information
   team: Array<{
     name: string;
@@ -60,7 +65,7 @@ export interface ICampaign extends Document {
     linkedin?: string;
     avatar?: string;
   }>;
-  
+
   // Media
   media: {
     logo?: string;
@@ -73,7 +78,7 @@ export interface ICampaign extends Document {
       type: 'pitch-deck' | 'business-plan' | 'financial-projections' | 'other';
     }>;
   };
-  
+
   // Metrics
   metrics: {
     traction?: string;
@@ -83,7 +88,7 @@ export interface ICampaign extends Document {
     mrr?: number;
     runway?: number;
   };
-  
+
   // Funding details
   fundingDetails: {
     useOfFunds: Array<{
@@ -96,14 +101,14 @@ export interface ICampaign extends Document {
     expectedROI?: string;
     exitStrategy?: string;
   };
-  
+
   // Platform data
   views: number;
   likes: number;
   shares: number;
   featured: boolean;
   verified: boolean;
-  
+
   // Timestamps
   createdAt: Date;
   updatedAt: Date;
@@ -137,7 +142,7 @@ const CampaignSchema = new Schema<ICampaign>({
   chainId: { type: Number, required: true, index: true },
   creatorAddress: { type: String, required: true, index: true },
   contractAddress: { type: String, required: true },
-  
+
   // Campaign details
   title: { type: String, required: true, maxlength: 200, index: true },
   description: { type: String, required: true, maxlength: 500 },
@@ -151,15 +156,15 @@ const CampaignSchema = new Schema<ICampaign>({
     default: 'active',
     index: true
   },
-  
+
   // Milestones
   milestones: [MilestoneSchema],
   currentMilestone: { type: Number, default: 0, min: 0 },
-  
+
   // Investments
   investments: [InvestmentSchema],
   investorCount: { type: Number, default: 0, min: 0 },
-  
+
   // Metadata
   category: { type: String, required: true, index: true },
   tags: [{ type: String, trim: true }],
@@ -170,7 +175,7 @@ const CampaignSchema = new Schema<ICampaign>({
     required: true,
     index: true
   },
-  
+
   // Team information
   team: [{
     name: { type: String, required: true, maxlength: 100 },
@@ -179,7 +184,7 @@ const CampaignSchema = new Schema<ICampaign>({
     linkedin: String,
     avatar: String
   }],
-  
+
   // Media
   media: {
     logo: String,
@@ -196,7 +201,7 @@ const CampaignSchema = new Schema<ICampaign>({
       }
     }]
   },
-  
+
   // Metrics
   metrics: {
     traction: String,
@@ -206,7 +211,7 @@ const CampaignSchema = new Schema<ICampaign>({
     mrr: { type: Number, min: 0 },
     runway: { type: Number, min: 0 }
   },
-  
+
   // Funding details
   fundingDetails: {
     useOfFunds: [{
@@ -219,21 +224,21 @@ const CampaignSchema = new Schema<ICampaign>({
     expectedROI: String,
     exitStrategy: String
   },
-  
+
   // Platform data
   views: { type: Number, default: 0, min: 0 },
   likes: { type: Number, default: 0, min: 0 },
   shares: { type: Number, default: 0, min: 0 },
   featured: { type: Boolean, default: false, index: true },
   verified: { type: Boolean, default: false, index: true },
-  
+
   // Timestamps
   launchedAt: Date,
   completedAt: Date
 }, {
   timestamps: true,
   toJSON: {
-    transform: function(doc, ret) {
+    transform: function (doc, ret) {
       delete (ret as any).__v;
       return ret;
     }
@@ -249,30 +254,30 @@ CampaignSchema.index({ raisedAmount: -1 });
 CampaignSchema.index({ 'investments.investorAddress': 1 });
 
 // Virtual for funding progress percentage
-CampaignSchema.virtual('fundingProgress').get(function() {
+CampaignSchema.virtual('fundingProgress').get(function () {
   return this.targetAmount > 0 ? (this.raisedAmount / this.targetAmount) * 100 : 0;
 });
 
 // Virtual for days remaining
-CampaignSchema.virtual('daysRemaining').get(function() {
+CampaignSchema.virtual('daysRemaining').get(function () {
   const now = new Date();
   const diffTime = this.deadline.getTime() - now.getTime();
   return Math.ceil(diffTime / (1000 * 60 * 60 * 24));
 });
 
 // Instance methods
-CampaignSchema.methods.addInvestment = function(investment: Partial<IInvestment>) {
+CampaignSchema.methods.addInvestment = function (investment: Partial<IInvestment>) {
   this.investments.push(investment);
   this.raisedAmount += investment.netAmount || 0;
-  
+
   // Update investor count (unique investors)
-  const uniqueInvestors = new Set(this.investments.map(inv => inv.investorAddress));
+  const uniqueInvestors = new Set(this.investments.map((inv: any) => inv.investorAddress));
   this.investorCount = uniqueInvestors.size;
-  
+
   return this.save();
 };
 
-CampaignSchema.methods.addMilestone = function(milestone: Partial<IMilestone>) {
+CampaignSchema.methods.addMilestone = function (milestone: Partial<IMilestone>) {
   const newMilestone = {
     ...milestone,
     id: this.milestones.length,
@@ -284,9 +289,9 @@ CampaignSchema.methods.addMilestone = function(milestone: Partial<IMilestone>) {
   return this.save();
 };
 
-CampaignSchema.methods.updateStatus = function() {
+CampaignSchema.methods.updateStatus = function () {
   const now = new Date();
-  
+
   if (now > this.deadline && this.status === 'active') {
     if (this.raisedAmount >= this.targetAmount) {
       this.status = 'completed';
@@ -295,20 +300,20 @@ CampaignSchema.methods.updateStatus = function() {
       this.status = 'failed';
     }
   }
-  
+
   return this.save();
 };
 
 // Static methods
-CampaignSchema.statics.findByCreator = function(creatorAddress: string) {
+CampaignSchema.statics.findByCreator = function (creatorAddress: string) {
   return this.find({ creatorAddress }).sort({ createdAt: -1 });
 };
 
-CampaignSchema.statics.findByInvestor = function(investorAddress: string) {
+CampaignSchema.statics.findByInvestor = function (investorAddress: string) {
   return this.find({ 'investments.investorAddress': investorAddress }).sort({ createdAt: -1 });
 };
 
-CampaignSchema.statics.findActive = function() {
+CampaignSchema.statics.findActive = function () {
   return this.find({ status: 'active', deadline: { $gt: new Date() } }).sort({ createdAt: -1 });
 };
 

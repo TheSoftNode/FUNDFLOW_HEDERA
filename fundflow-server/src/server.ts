@@ -4,7 +4,7 @@ import helmet from 'helmet';
 import compression from 'compression';
 import morgan from 'morgan';
 import rateLimit from 'express-rate-limit';
-import { connectDatabase } from './config/database';
+import { connectDatabase, checkDatabaseHealth } from './config/database';
 import { connectRedis } from './config/redis';
 import { errorHandler } from './middleware/errorHandler';
 import { logger } from './utils/logger';
@@ -49,11 +49,33 @@ app.use(limiter);
 
 // Health check endpoint
 app.get('/health', (req, res) => {
-  res.status(200).json({ 
-    status: 'OK', 
+  res.status(200).json({
+    status: 'OK',
     timestamp: new Date().toISOString(),
     environment: process.env.NODE_ENV || 'development'
   });
+});
+
+// Database health check endpoint
+app.get('/health/db', async (req, res) => {
+  try {
+    const isHealthy = await checkDatabaseHealth();
+
+    res.status(isHealthy ? 200 : 503).json({
+      status: isHealthy ? 'OK' : 'ERROR',
+      timestamp: new Date().toISOString(),
+      database: {
+        healthy: isHealthy,
+        message: isHealthy ? 'Database connection is healthy' : 'Database connection failed'
+      }
+    });
+  } catch (error) {
+    res.status(503).json({
+      status: 'ERROR',
+      timestamp: new Date().toISOString(),
+      error: error instanceof Error ? error.message : 'Unknown error'
+    });
+  }
 });
 
 // Swagger Documentation
