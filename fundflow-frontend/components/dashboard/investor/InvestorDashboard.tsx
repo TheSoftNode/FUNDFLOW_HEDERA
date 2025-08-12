@@ -17,11 +17,13 @@ interface InvestorDashboardProps {
 }
 
 const InvestorDashboard: React.FC<InvestorDashboardProps> = ({
-  sidebarCollapsed = true,
-  activeNavItem = 'dashboard',
+  sidebarCollapsed: initialSidebarCollapsed = true,
+  activeNavItem: initialActiveNavItem = 'dashboard',
   onNavItemClick
 }) => {
   const [selectedInvestment, setSelectedInvestment] = useState<any>(null);
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(initialSidebarCollapsed);
+  const [activeNavItem, setActiveNavItem] = useState(initialActiveNavItem);
 
   // Mock data - replace with actual data from your API
   const portfolioStats = {

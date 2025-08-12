@@ -1,11 +1,12 @@
 import type { NextConfig } from "next";
+import webpack from 'webpack';
 
 const nextConfig: NextConfig = {
   reactStrictMode: true,
   eslint: {
     ignoreDuringBuilds: true,
   },
-  
+
   env: {
     CUSTOM_KEY: process.env.CUSTOM_KEY,
   },
@@ -72,7 +73,7 @@ const nextConfig: NextConfig = {
       };
 
       config.plugins.push(
-        new config.webpack.ProvidePlugin({
+        new webpack.ProvidePlugin({
           Buffer: ['buffer', 'Buffer'],
           process: 'process/browser',
         })

@@ -77,18 +77,17 @@ export default function WalletTestPage() {
 
     const testHashPackDetection = () => {
         addLog('Testing HashPack detection...');
+        addLog('HashPack works through WalletConnect according to their documentation');
+        addLog('https://docs.hashpack.app/dapp-developers/walletconnect');
 
-        if (typeof window !== 'undefined') {
-            addLog(`window.hashpack exists: ${!!window.hashpack}`);
-            addLog(`window.hashpack type: ${typeof window.hashpack}`);
+        // Check if HashPack is available through WalletConnect
+        const hashpackInstalled = WalletConnector.isHashPackInstalled();
+        addLog(`HashPack available: ${hashpackInstalled}`);
 
-            if (window.hashpack) {
-                addLog('HashPack is available');
-            } else {
-                addLog('HashPack is not available');
-            }
+        if (hashpackInstalled) {
+            addLog('HashPack is available through WalletConnect integration');
         } else {
-            addLog('Window is not available (SSR)');
+            addLog('HashPack WalletConnect integration not available');
         }
     };
 
@@ -136,10 +135,39 @@ export default function WalletTestPage() {
 
                                 <button
                                     onClick={testHashPackDetection}
-                                    className="w-full px-4 py-2 bg-purple-500 text-white rounded-lg hover:bg-purple-600 transition-colors"
+                                    className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
                                 >
                                     Test HashPack Detection
                                 </button>
+
+                                <button
+                                    onClick={() => {
+                                        addLog('Testing HashPack WalletConnect integration...');
+                                        addLog('HashPack works through WalletConnect according to their documentation');
+                                        addLog('https://docs.hashpack.app/dapp-developers/walletconnect');
+
+                                        // Check if we have the Hedera WalletConnect package
+                                        try {
+                                            const available = WalletConnector.getAvailableWallets();
+                                            addLog(`Available wallets: ${available.join(', ')}`);
+
+                                            if (available.includes(WalletType.HASHPACK)) {
+                                                addLog('HashPack is available through WalletConnect integration');
+                                            } else {
+                                                addLog('HashPack WalletConnect integration not available');
+                                            }
+                                        } catch (error) {
+                                            addLog(`Error checking HashPack: ${error}`);
+                                        }
+                                    }}
+                                    className="px-4 py-2 bg-purple-600 text-white rounded hover:bg-purple-700"
+                                >
+                                    Test HashPack WalletConnect
+                                </button>
+
+
+
+
 
                                 <button
                                     onClick={checkAvailableWallets}

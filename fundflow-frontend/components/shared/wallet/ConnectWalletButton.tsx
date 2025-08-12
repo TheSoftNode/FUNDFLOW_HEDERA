@@ -1,7 +1,7 @@
 "use client";
 
 import React from 'react';
-import { Wallet, ChevronDown, Loader2, User, LogOut, ExternalLink } from 'lucide-react';
+import { Wallet, ChevronDown, Loader2, User, LogOut, ExternalLink, Sparkles } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
@@ -11,7 +11,7 @@ import {
   DropdownMenuSeparator,
 } from '@/components/ui/dropdown-menu';
 import { useAuth } from '@/hooks/useAuth';
-import { WalletType } from '@/lib/hedera-wallet-service';
+import { WalletType } from '@/lib/wallet-connector';
 
 interface ConnectWalletButtonProps {
   variant?: 'default' | 'compact';
@@ -37,21 +37,27 @@ const ConnectWalletButton: React.FC<ConnectWalletButtonProps> = ({
       id: WalletType.HASHPACK,
       description: 'Native Hedera wallet',
       recommended: true,
-      icon: '🔗'
+      icon: '🔗',
+      color: 'from-purple-500 to-purple-600',
+      installUrl: 'https://hashpack.app'
     },
     {
       name: 'MetaMask',
       id: WalletType.METAMASK,
       description: 'EVM compatible wallet',
       recommended: false,
-      icon: '🦊'
+      icon: '🦊',
+      color: 'from-orange-500 to-orange-600',
+      installUrl: 'https://metamask.io'
     },
     {
       name: 'WalletConnect',
       id: WalletType.WALLETCONNECT,
       description: 'Multi-wallet support',
       recommended: false,
-      icon: '🔌'
+      icon: '🔌',
+      color: 'from-blue-500 to-blue-600',
+      installUrl: 'https://walletconnect.com'
     }
   ];
 
@@ -110,7 +116,6 @@ const ConnectWalletButton: React.FC<ConnectWalletButtonProps> = ({
 
   // Connected state - show user menu
   if (isConnected && user) {
-
     return (
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
@@ -217,7 +222,7 @@ const ConnectWalletButton: React.FC<ConnectWalletButtonProps> = ({
         </Button>
       </DropdownMenuTrigger>
 
-      <DropdownMenuContent align="end" className="w-72 bg-white dark:bg-gray-800 border border-gray-200/50 dark:border-gray-700/50 shadow-xl rounded-xl p-1.5">
+      <DropdownMenuContent align="end" className="w-80 bg-white dark:bg-gray-800 border border-gray-200/50 dark:border-gray-700/50 shadow-xl rounded-xl p-1.5">
 
         <div className="px-3 py-1.5 border-b border-gray-100 dark:border-gray-700/50 mb-1">
           <p className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
@@ -230,27 +235,30 @@ const ConnectWalletButton: React.FC<ConnectWalletButtonProps> = ({
             <DropdownMenuItem
               key={wallet.id}
               onClick={() => handleConnect(wallet.id)}
-              className="flex items-center justify-between p-2.5 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700/50 rounded-lg mx-1 transition-all duration-200 group"
+              className="flex items-center justify-between p-3 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700/50 rounded-lg mx-1 transition-all duration-200 group"
               disabled={isLoading}
             >
               <div className="flex items-center space-x-3">
-                <div className="w-7 h-7 bg-gradient-to-br from-[#7F56D9] to-[#9F7AEA] rounded-lg flex items-center justify-center shadow-sm">
+                <div className={`w-8 h-8 bg-gradient-to-br ${wallet.color} rounded-lg flex items-center justify-center shadow-sm`}>
                   <span className="text-sm">{wallet.icon}</span>
                 </div>
                 <div className="flex-1">
-                  <span className="font-medium text-gray-900 dark:text-white group-hover:text-[#7F56D9] transition-colors block">
-                    {wallet.name}
-                  </span>
-                  <p className="text-xs text-gray-500 dark:text-gray-400 leading-tight">
+                  <div className="flex items-center space-x-2">
+                    <span className="font-medium text-gray-900 dark:text-white group-hover:text-[#7F56D9] transition-colors">
+                      {wallet.name}
+                    </span>
+                    {wallet.recommended && (
+                      <span className="inline-flex items-center space-x-1 text-xs bg-gradient-to-r from-[#00C9A7] to-[#00E6A7] text-white px-2 py-0.5 rounded-full font-medium">
+                        <Sparkles className="w-2.5 h-2.5" />
+                        <span>Recommended</span>
+                      </span>
+                    )}
+                  </div>
+                  <p className="text-xs text-gray-500 dark:text-gray-400 leading-tight mt-0.5">
                     {wallet.description}
                   </p>
                 </div>
               </div>
-              {wallet.recommended && (
-                <span className="text-xs bg-[#00C9A7]/10 text-[#00C9A7] px-2.5 py-1 rounded-full font-medium border border-[#00C9A7]/20 whitespace-nowrap">
-                  Recommended
-                </span>
-              )}
             </DropdownMenuItem>
           ))
         ) : (

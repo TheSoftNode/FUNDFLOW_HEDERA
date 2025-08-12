@@ -1,7 +1,8 @@
 import { ethers } from 'ethers';
-import { Client, AccountId, AccountBalanceQuery, Hbar, LedgerId } from '@hashgraph/sdk';
 import { EthereumProvider } from '@walletconnect/ethereum-provider';
 import { DAppConnector } from '@hashgraph/hedera-wallet-connect';
+import { Client, AccountId, AccountBalanceQuery, Hbar, LedgerId } from '@hashgraph/sdk';
+import { EventEmitter } from 'events';
 import { MetaMaskInpageProvider } from '@metamask/providers';
 
 // Types
@@ -66,6 +67,7 @@ export class WalletConnector {
   private hederaClient: Client | null = null;
   private walletConnectProvider: any = null;
   private hashPackConnector: DAppConnector | null = null;
+  private hederaWalletConnectProvider: DAppConnector | null = null;
 
   constructor() {
     if (typeof window !== 'undefined') {
@@ -112,16 +114,27 @@ export class WalletConnector {
   // HashPack Integration
   async connectHashPack(): Promise<WalletConnection> {
     try {
-      if (!window.hashpack) {
-        throw new Error('HashPack wallet is not installed. Please install HashPack extension.');
-      }
+      console.log('🔗 Connecting to HashPack wallet via WalletConnect...');
 
-      console.log('🔗 Connecting to HashPack wallet...');
+      // HashPack works through WalletConnect according to their documentation
+      // https://docs.hashpack.app/dapp-developers/walletconnect
+      console.log('Using HashPack WalletConnect integration...');
+      return await this.connectHashPackWalletConnect();
+    } catch (error) {
+      console.error('HashPack connection error:', error);
+      throw error;
+    }
+  }
 
+
+
+  // HashPack WalletConnect Integration
+  private async connectHashPackWalletConnect(): Promise<WalletConnection> {
+    try {
       // Initialize HashPack connector
       if (!this.hashPackConnector) {
         const network = process.env.NEXT_PUBLIC_HEDERA_NETWORK === 'mainnet' ? LedgerId.MAINNET : LedgerId.TESTNET;
-        
+
         this.hashPackConnector = new DAppConnector({
           name: process.env.NEXT_PUBLIC_HASHPACK_APP_NAME || 'FundFlow',
           description: process.env.NEXT_PUBLIC_HASHPACK_APP_DESCRIPTION || 'Blockchain-Powered Startup Fundraising Platform',
@@ -135,7 +148,7 @@ export class WalletConnector {
 
       // Connect to HashPack using extension
       const session = await this.hashPackConnector.connectExtension('hashpack');
-      
+
       // Get the first available signer
       const signers = this.hashPackConnector.signers;
       if (signers.length === 0) {
@@ -144,7 +157,10 @@ export class WalletConnector {
 
       const signer = signers[0];
       const accountId = signer.getAccountId().toString();
-      
+
+      // Set the provider for use in signing and transactions
+      this.hederaWalletConnectProvider = this.hashPackConnector;
+
       // Get account balance
       let balance = '0';
       try {
@@ -173,10 +189,12 @@ export class WalletConnector {
 
       return connection;
     } catch (error) {
-      console.error('HashPack connection error:', error);
+      console.error('HashPack WalletConnect connection error:', error);
       throw error;
     }
   }
+
+
 
   // MetaMask Integration
   async connectMetaMask(): Promise<WalletConnection> {
@@ -265,9 +283,21 @@ export class WalletConnector {
     try {
       console.log('🔗 Connecting via WalletConnect...');
 
+      // Debug: Check environment variables
+      const projectId = process.env.NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID;
+      console.log('WalletConnect Project ID:', projectId);
+      console.log('Project ID length:', projectId?.length);
+      console.log('Project ID valid format:', /^[a-f0-9]{32}$/.test(projectId || ''));
+
+      if (!projectId) {
+        throw new Error('WalletConnect Project ID is missing. Please check your environment variables.');
+      }
+
       if (!this.walletConnectProvider) {
+        console.log('Creating WalletConnect provider...');
+        // Initialize WalletConnect v2 provider
         this.walletConnectProvider = await EthereumProvider.init({
-          projectId: process.env.NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID!,
+          projectId: projectId,
           chains: [parseInt(process.env.NEXT_PUBLIC_METAMASK_CHAIN_ID || '296')],
           showQrModal: true,
           metadata: {
@@ -277,10 +307,13 @@ export class WalletConnector {
             icons: ['https://fundflow.com/icon.png']
           }
         });
+        console.log('WalletConnect provider created successfully');
       }
 
+      console.log('Attempting to connect...');
       // Connect
       await this.walletConnectProvider.connect();
+      console.log('WalletConnect connection successful');
 
       // Get accounts
       const accounts = await this.walletConnectProvider.request({ method: 'eth_accounts' }) as string[];
@@ -425,9 +458,12 @@ export class WalletConnector {
   async disconnect() {
     if (this.connection) {
       const connection = this.connection;
-      
+
       // Disconnect from specific wallet
-      if (this.connection.type === WalletType.WALLETCONNECT && this.walletConnectProvider) {
+      if (this.connection.type === WalletType.HASHPACK) {
+        // HashPack disconnection is handled by WalletConnect
+        console.log('Disconnecting HashPack via WalletConnect...');
+      } else if (this.connection.type === WalletType.WALLETCONNECT && this.walletConnectProvider) {
         await this.walletConnectProvider.disconnect();
       }
 
@@ -477,20 +513,29 @@ export class WalletConnector {
 
     try {
       if (this.connection.type === WalletType.HASHPACK) {
-        if (this.hashPackConnector && this.connection.accountId) {
-          const signer = this.hashPackConnector.getSigner(AccountId.fromString(this.connection.accountId));
-          const signature = await signer.sign([new TextEncoder().encode(message)]);
-          return Buffer.from(signature[0].signature).toString('hex');
+        // HashPack signing through WalletConnect
+        if (this.hederaWalletConnectProvider) {
+          try {
+            // Use the correct DAppConnector API for signing
+            const signer = this.hederaWalletConnectProvider.getSigner(AccountId.fromString(this.connection.accountId));
+            const signature = await signer.sign([new TextEncoder().encode(message)]);
+            return Buffer.from(signature[0].signature).toString('hex');
+          } catch (error) {
+            console.error('HashPack WalletConnect signing failed:', error);
+            throw new Error('Failed to sign message with HashPack');
+          }
+        } else {
+          throw new Error('HashPack WalletConnect provider not available');
         }
-        throw new Error('HashPack connector not available');
       } else if (this.connection.signer) {
+        // For MetaMask and other EVM wallets
         const signature = await this.connection.signer.signMessage(message);
         return signature;
+      } else {
+        throw new Error('No signer available for message signing');
       }
-
-      throw new Error('Message signing not supported for this wallet type');
     } catch (error) {
-      console.error('Message signing error:', error);
+      console.error('Error signing message:', error);
       throw error;
     }
   }
@@ -502,21 +547,39 @@ export class WalletConnector {
 
     try {
       if (this.connection.type === WalletType.HASHPACK) {
-        if (this.hashPackConnector && this.connection.accountId) {
-          const signer = this.hashPackConnector.getSigner(AccountId.fromString(this.connection.accountId));
-          const signedTransaction = await signer.signTransaction(transaction);
-          const result = await signedTransaction.execute(this.hederaClient!);
-          return result.transactionId.toString();
+        // HashPack transaction signing through WalletConnect
+        if (this.hederaWalletConnectProvider) {
+          try {
+            // Use the correct DAppConnector API for transaction signing
+            const signer = this.hederaWalletConnectProvider.getSigner(AccountId.fromString(this.connection.accountId));
+            const signedTransaction = await signer.signTransaction(transaction);
+            if (this.hederaClient) {
+              const result = await signedTransaction.execute(this.hederaClient);
+              return result.transactionId.toString();
+            } else {
+              throw new Error('Hedera client not available');
+            }
+          } catch (error) {
+            console.error('HashPack WalletConnect transaction failed:', error);
+            throw new Error('Failed to send transaction with HashPack');
+          }
+        } else {
+          throw new Error('HashPack WalletConnect provider not available');
         }
-        throw new Error('HashPack connector not available');
       } else if (this.connection.signer) {
+        // For MetaMask and other EVM wallets
         const tx = await this.connection.signer.sendTransaction(transaction);
-        return tx.hash;
+        const receipt = await tx.wait();
+        if (receipt) {
+          return receipt.hash;
+        } else {
+          throw new Error('Transaction receipt is null');
+        }
+      } else {
+        throw new Error('No signer available for transaction signing');
       }
-
-      throw new Error('Transaction sending not supported for this wallet type');
     } catch (error) {
-      console.error('Transaction error:', error);
+      console.error('Error sending transaction:', error);
       throw error;
     }
   }
@@ -528,8 +591,18 @@ export class WalletConnector {
 
   // Utility methods
   static isHashPackInstalled(): boolean {
-    return typeof window !== 'undefined' && !!window.hashpack;
+    if (typeof window === 'undefined') return false;
+
+    // HashPack works through WalletConnect, not as a direct extension
+    // According to HashPack docs: https://docs.hashpack.app/dapp-developers/walletconnect
+    // "HashPack is fully compatible with WalletConnect - either using the native WalletConnect/ReOwn sdk's, or the Hedera WalletConnect wrapper"
+
+    // HashPack is always available through WalletConnect integration
+    console.log('HashPack available through WalletConnect integration');
+    return true;
   }
+
+
 
   static isMetaMaskInstalled(): boolean {
     if (typeof window === 'undefined') return false;
@@ -537,20 +610,31 @@ export class WalletConnector {
   }
 
   static getAvailableWallets(): WalletType[] {
-    const available: WalletType[] = [];
+    const wallets: WalletType[] = [];
 
-    if (this.isHashPackInstalled()) {
-      available.push(WalletType.HASHPACK);
+    console.log('Checking HashPack installation...');
+    const hashpackInstalled = WalletConnector.isHashPackInstalled();
+    console.log('HashPack installed:', hashpackInstalled);
+
+    console.log('Checking MetaMask installation...');
+    const metamaskInstalled = WalletConnector.isMetaMaskInstalled();
+    console.log('MetaMask installed:', metamaskInstalled);
+
+    // Check HashPack extension
+    if (hashpackInstalled) {
+      wallets.push(WalletType.HASHPACK);
     }
 
-    if (this.isMetaMaskInstalled()) {
-      available.push(WalletType.METAMASK);
+    // Check MetaMask
+    if (metamaskInstalled) {
+      wallets.push(WalletType.METAMASK);
     }
 
-    // WalletConnect is always available
-    available.push(WalletType.WALLETCONNECT);
+    // WalletConnect is always available as a fallback
+    wallets.push(WalletType.WALLETCONNECT);
 
-    return available;
+    console.log('Available wallets:', wallets);
+    return wallets;
   }
 
   static formatAddress(address: string): string {
@@ -584,6 +668,7 @@ export class WalletConnector {
       localStorage.removeItem('fundflow_wallet_connection');
     }
   }
+
 }
 
 // Export singleton instance

@@ -155,8 +155,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
         // Check for demo role from localStorage
         const demoRole = localStorage.getItem('user_role');
-        if (demoRole && (demoRole === 'startup' || demoRole === 'investor')) {
-          const updatedUser = { ...user, role: demoRole as UserRole };
+        if (demoRole && (demoRole === 'startup' || demoRole === 'investor') && user) {
+          const updatedUser: User = {
+            ...user,
+            role: demoRole as UserRole
+          };
           setUser(updatedUser);
           localStorage.setItem(`user_${walletConnection.accountId}`, JSON.stringify(updatedUser));
         }
@@ -259,7 +262,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setUser(updatedUser);
       localStorage.setItem(`user_${user.accountId}`, JSON.stringify(updatedUser));
       // Also save role globally for demo purposes
-      localStorage.setItem('user_role', role);
+      if (role) {
+        localStorage.setItem('user_role', role);
+      } else {
+        localStorage.removeItem('user_role');
+      }
     } catch (error) {
       console.error('Failed to set user role:', error);
     }
