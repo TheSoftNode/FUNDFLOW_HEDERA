@@ -1,4 +1,3 @@
-
 {
   "name": "fundflow-smartcontract",
   "version": "1.0.0",
@@ -7,10 +6,10 @@
   "scripts": {
     "compile": "hardhat compile",
     "test": "hardhat test",
-    "deploy": "node scripts/deploy.js",
-    "deploy:testnet": "HEDERA_NETWORK=testnet node scripts/deploy.js",
-    "deploy:mainnet": "HEDERA_NETWORK=mainnet node scripts/deploy.js",
-    "deploy:previewnet": "HEDERA_NETWORK=previewnet node scripts/deploy.js",
+    "deploy": "node scripts/deploy-fundflow.js",
+    "deploy:testnet": "HEDERA_NETWORK=testnet node scripts/deploy-fundflow.js",
+    "deploy:mainnet": "HEDERA_NETWORK=mainnet node scripts/deploy-fundflow.js",
+    "deploy:previewnet": "HEDERA_NETWORK=previewnet node scripts/deploy-fundflow.js",
     "verify": "node scripts/verify.js",
     "setup": "node scripts/setup.js",
     "clean": "hardhat clean && rm -rf deployments",

@@ -4,30 +4,30 @@ require("hardhat-contract-sizer");
 require("solidity-coverage");
 require("dotenv").config();
 
-// Hedera network configuration
-const HEDERA_NETWORKS = {
-  testnet: {
-    url: "https://testnet.hashio.io/api",
-    accounts: process.env.HEDERA_PRIVATE_KEY ? [process.env.HEDERA_PRIVATE_KEY] : [],
-    chainId: 296,
-    gasPrice: "auto",
-    gasMultiplier: 1.2,
-  },
-  mainnet: {
-    url: "https://mainnet.hashio.io/api",
-    accounts: process.env.HEDERA_PRIVATE_KEY ? [process.env.HEDERA_PRIVATE_KEY] : [],
-    chainId: 295,
-    gasPrice: "auto",
-    gasMultiplier: 1.1,
-  },
-  previewnet: {
-    url: "https://previewnet.hashio.io/api",
-    accounts: process.env.HEDERA_PRIVATE_KEY ? [process.env.HEDERA_PRIVATE_KEY] : [],
-    chainId: 297,
-    gasPrice: "auto",
-    gasMultiplier: 1.3,
-  }
-};
+// Hedera network configuration - using custom deployment script instead
+// const HEDERA_NETWORKS = {
+//   testnet: {
+//     url: "https://testnet.hashio.io/api",
+//     accounts: process.env.HEDERA_PRIVATE_KEY ? [process.env.HEDERA_PRIVATE_KEY] : [],
+//     chainId: 296,
+//     gasPrice: "auto",
+//     gasMultiplier: 1.2,
+//   },
+//   mainnet: {
+//     url: "https://mainnet.hashio.io/api",
+//     accounts: process.env.HEDERA_PRIVATE_KEY ? [process.env.HEDERA_PRIVATE_KEY] : [],
+//     chainId: 295,
+//     gasPrice: "auto",
+//     gasMultiplier: 1.1,
+//   },
+//   previewnet: {
+//     url: "https://previewnet.hashio.io/api",
+//     accounts: process.env.HEDERA_PRIVATE_KEY ? [process.env.HEDERA_PRIVATE_KEY] : [],
+//     chainId: 297,
+//     gasPrice: "auto",
+//     gasMultiplier: 1.3,
+//   }
+// };
 
 /** @type import('hardhat/config').HardhatUserConfig */
 module.exports = {
@@ -46,7 +46,7 @@ module.exports = {
       }
     },
   },
-  
+
   networks: {
     hardhat: {
       chainId: 31337,
@@ -61,18 +61,38 @@ module.exports = {
     localhost: {
       url: "http://127.0.0.1:8545",
       chainId: 31337,
-    },
-    // Hedera networks
-    ...HEDERA_NETWORKS
+    }
+    // Hedera networks commented out - using custom deployment script instead
+    // testnet: {
+    //   url: "https://testnet.hashio.io/api",
+    //   accounts: process.env.HEDERA_PRIVATE_KEY ? [process.env.HEDERA_PRIVATE_KEY] : [],
+    //   chainId: 296,
+    //   gasPrice: "auto",
+    //   gasMultiplier: 1.2,
+    // },
+    // mainnet: {
+    //   url: "https://mainnet.hashio.io/api",
+    //   accounts: process.env.HEDERA_PRIVATE_KEY ? [process.env.HEDERA_PRIVATE_KEY] : [],
+    //   chainId: 295,
+    //   gasPrice: "auto",
+    //   gasMultiplier: 1.1,
+    // },
+    // previewnet: {
+    //   url: "https://previewnet.hashio.io/api",
+    //   accounts: process.env.HEDERA_PRIVATE_KEY ? [process.env.HEDERA_PRIVATE_KEY] : [],
+    //   chainId: 297,
+    //   gasPrice: "auto",
+    //   gasMultiplier: 1.3,
+    // }
   },
-  
+
   paths: {
     sources: "./contracts",
     tests: "./test",
-    cache: "./cache", 
+    cache: "./cache",
     artifacts: "./artifacts"
   },
-  
+
   gasReporter: {
     enabled: process.env.REPORT_GAS === "true",
     currency: "USD",
@@ -81,19 +101,19 @@ module.exports = {
     showMethodSig: true,
     maxMethodDiff: 10,
   },
-  
+
   contractSizer: {
     alphaSort: true,
     disambiguatePaths: false,
     runOnCompile: true,
     strict: true,
   },
-  
+
   mocha: {
     timeout: 60000,
     bail: false,
   },
-  
+
   etherscan: {
     apiKey: {
       // Note: Hedera doesn't use Etherscan but we keep this for compatibility
@@ -110,7 +130,7 @@ module.exports = {
         }
       },
       {
-        network: "hedera-mainnet", 
+        network: "hedera-mainnet",
         chainId: 295,
         urls: {
           apiURL: "https://mainnet-public.mirrornode.hedera.com",
@@ -119,14 +139,14 @@ module.exports = {
       }
     ]
   },
-  
+
   typechain: {
     outDir: "typechain",
     target: "ethers-v5",
     alwaysGenerateOverloads: false,
     externalArtifacts: [],
   },
-  
+
   // Custom settings for Hedera optimization
   hedera: {
     network: process.env.HEDERA_NETWORK || "testnet",

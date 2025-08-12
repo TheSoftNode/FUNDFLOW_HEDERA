@@ -1,0 +1,45 @@
+{
+  "network": "testnet",
+  "operatorId": "0.0.6514439",
+  "deployedAt": "2025-08-12T14:34:47.429Z",
+  "contracts": {
+    "fundFlowCore": {
+      "contractId": "0.0.6558178",
+      "contractAddress": "00000000000000000000000000000000006411e2",
+      "success": true
+    },
+    "campaignManager": {
+      "contractId": "0.0.6558181",
+      "contractAddress": "00000000000000000000000000000000006411e5",
+      "success": true
+    },
+    "investmentManager": {
+      "contractId": "0.0.6558243",
+      "transactionId": "0.0.6514439@1755009211.903686083",
+      "contractAddress": "0000000000000000000000000000000000641223",
+      "explorerUrl": "https://hashscan.io/testnet/contract/0.0.6558243",
+      "success": true
+    },
+    "milestoneManager": {
+      "contractId": "0.0.6558245",
+      "transactionId": "0.0.6514439@1755009228.758537141",
+      "contractAddress": "0000000000000000000000000000000000641225",
+      "explorerUrl": "https://hashscan.io/testnet/contract/0.0.6558245",
+      "success": true
+    },
+    "analyticsManager": {
+      "contractId": "0.0.6558248",
+      "transactionId": "0.0.6514439@1755009246.962015403",
+      "contractAddress": "0000000000000000000000000000000000641228",
+      "explorerUrl": "https://hashscan.io/testnet/contract/0.0.6558248",
+      "success": true
+    },
+    "governanceManager": {
+      "contractId": "0.0.6558251",
+      "transactionId": "0.0.6514439@1755009265.754757568",
+      "contractAddress": "000000000000000000000000000000000064122b",
+      "explorerUrl": "https://hashscan.io/testnet/contract/0.0.6558251",
+      "success": true
+    }
+  }
+}
