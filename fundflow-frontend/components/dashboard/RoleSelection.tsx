@@ -2,10 +2,10 @@
 
 import React, { useState } from 'react';
 import { useAuth, UserRole } from '@/hooks/useAuth';
-import { 
-  TrendingUp, 
-  Rocket, 
-  Users, 
+import {
+  TrendingUp,
+  Rocket,
+  Users,
   Target,
   DollarSign,
   BarChart3,
@@ -54,23 +54,30 @@ const RoleSelection: React.FC = () => {
 
   const handleRoleSelect = (role: UserRole) => {
     setSelectedRole(role);
+    // For demo: immediately navigate to dashboard
+    setUserRole(role);
+    if (role === 'startup') {
+      window.location.href = '/dashboard/startup';
+    } else if (role === 'investor') {
+      window.location.href = '/dashboard/investor';
+    }
   };
 
   const handleContinue = async () => {
     if (!selectedRole) return;
-    
+
     setIsSubmitting(true);
     try {
       // Set the user role
       setUserRole(selectedRole);
-      
+
       // Initialize default profile based on role
-      const defaultProfile = selectedRole === 'investor' 
+      const defaultProfile = selectedRole === 'investor'
         ? { isAccredited: false }
         : { companyName: '', industry: '' };
-      
+
       updateProfile(defaultProfile);
-      
+
       // Role is set, DashboardRouter will automatically redirect
     } catch (error) {
       console.error('Error setting user role:', error);
@@ -100,11 +107,10 @@ const RoleSelection: React.FC = () => {
             <div
               key={role.id}
               onClick={() => handleRoleSelect(role.id)}
-              className={`relative bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-lg border-2 cursor-pointer transition-all duration-300 transform hover:scale-105 hover:shadow-xl ${
-                selectedRole === role.id
+              className={`relative bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-lg border-2 cursor-pointer transition-all duration-300 transform hover:scale-105 hover:shadow-xl ${selectedRole === role.id
                   ? 'border-blue-500 ring-4 ring-blue-500/20'
                   : 'border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600'
-              }`}
+                }`}
             >
               {/* Selection Indicator */}
               {selectedRole === role.id && (
@@ -158,11 +164,10 @@ const RoleSelection: React.FC = () => {
           <Button
             onClick={handleContinue}
             disabled={!selectedRole || isSubmitting}
-            className={`px-8 py-4 text-lg font-semibold transition-all duration-200 transform hover:scale-105 ${
-              selectedRole
+            className={`px-8 py-4 text-lg font-semibold transition-all duration-200 transform hover:scale-105 ${selectedRole
                 ? 'bg-gradient-to-r from-blue-500 to-teal-400 hover:from-blue-600 hover:to-teal-500 text-white'
                 : 'bg-gray-200 dark:bg-gray-700 text-gray-400 cursor-not-allowed'
-            }`}
+              }`}
           >
             {isSubmitting ? (
               <>
@@ -176,7 +181,7 @@ const RoleSelection: React.FC = () => {
               </>
             )}
           </Button>
-          
+
           {selectedRole && (
             <p className="text-xs text-gray-500 dark:text-gray-400 mt-4">
               You can change your role later in settings
@@ -195,7 +200,7 @@ const RoleSelection: React.FC = () => {
               Bitcoin-level security with milestone-based releases
             </p>
           </div>
-          
+
           <div className="text-center">
             <div className="w-12 h-12 bg-purple-100 dark:bg-purple-900/30 rounded-xl flex items-center justify-center mx-auto mb-4">
               <Users className="w-6 h-6 text-purple-600 dark:text-purple-400" />
@@ -205,7 +210,7 @@ const RoleSelection: React.FC = () => {
               Transparent governance with investor participation
             </p>
           </div>
-          
+
           <div className="text-center">
             <div className="w-12 h-12 bg-teal-100 dark:bg-teal-900/30 rounded-xl flex items-center justify-center mx-auto mb-4">
               <BarChart3 className="w-6 h-6 text-teal-600 dark:text-teal-400" />

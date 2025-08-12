@@ -1,338 +1,660 @@
+import {
+  Client,
+  ContractExecuteTransaction,
+  ContractCallQuery,
+  ContractFunctionParameters,
+  AccountId,
+  Hbar,
+  TransactionId,
+  LedgerId,
+  TransferTransaction,
+  AccountCreateTransaction,
+  PrivateKey,
+  PublicKey,
+  AccountBalanceQuery
+} from '@hashgraph/sdk';
 import { ethers } from 'ethers';
+import { hederaWalletService, WalletType } from './hedera-wallet-service';
 
-// Contract configuration
-const CONTRACT_ADDRESS = process.env.NEXT_PUBLIC_CONTRACT_ADDRESS || '';
-const HEDERA_NETWORK = process.env.NEXT_PUBLIC_HEDERA_NETWORK || 'testnet';
+export interface TransactionResult {
+  success: boolean;
+  transactionId?: string;
+  error?: string;
+  data?: any;
+}
 
-// Contract ABI (simplified for the main functions we need)
-const FUNDFLOW_ABI = [
-  // Campaign Management
-  "function createCampaign(string memory _title, string memory _description, uint256 _targetAmount, uint256 _durationDays) external returns (uint256)",
-  "function investInCampaign(uint256 _campaignId) external payable",
-  
-  // Milestone Management
-  "function addMilestone(uint256 _campaignId, string memory _title, string memory _description, uint256 _targetAmount, uint256 _votingDurationDays) external returns (uint256)",
-  "function voteOnMilestone(uint256 _campaignId, uint256 _milestoneId, bool _voteFor) external",
-  "function releaseMilestoneFunds(uint256 _campaignId, uint256 _milestoneId) external",
-  
-  // View Functions
-  "function getCampaign(uint256 _campaignId) external view returns (address creator, string memory title, string memory description, uint256 targetAmount, uint256 raisedAmount, uint256 deadline, bool isActive, uint256 milestoneCount, uint256 totalInvestors)",
-  "function getMilestone(uint256 _campaignId, uint256 _milestoneId) external view returns (string memory title, string memory description, uint256 targetAmount, bool isCompleted, uint256 votesFor, uint256 votesAgainst, uint256 votingDeadline)",
-  "function getInvestment(uint256 _campaignId, address _investor) external view returns (uint256)",
-  "function calculatePlatformFee(uint256 _amount) external view returns (uint256)",
-  "function platformFeePercent() external view returns (uint256)",
-  "function getNextCampaignId() external view returns (uint256)",
-  "function getCampaignInvestors(uint256 _campaignId) external view returns (address[])",
-  
-  // Admin Functions
-  "function setPlatformFeePercent(uint256 _newFeePercent) external",
-  "function withdrawPlatformFees(address payable _recipient) external",
-  
-  // Events
-  "event CampaignCreated(uint256 indexed campaignId, address indexed creator, string title, uint256 targetAmount, uint256 deadline)",
-  "event InvestmentMade(uint256 indexed campaignId, address indexed investor, uint256 amount, uint256 netAmount)",
-  "event MilestoneAdded(uint256 indexed campaignId, uint256 indexed milestoneId, string title, uint256 targetAmount, uint256 votingDeadline)",
-  "event MilestoneVoted(uint256 indexed campaignId, uint256 indexed milestoneId, address indexed voter, bool vote, uint256 votingPower)",
-  "event MilestoneFundsReleased(uint256 indexed campaignId, uint256 indexed milestoneId, address indexed recipient, uint256 amount)"
-];
-
-// Types
 export interface CampaignData {
+  id: number;
   title: string;
   description: string;
   targetAmount: number;
+  currentAmount: number;
   durationDays: number;
+  startDate: number;
+  endDate: number;
+  creator: string;
+  status: 'active' | 'funded' | 'expired' | 'cancelled';
+  milestones: MilestoneData[];
 }
 
 export interface MilestoneData {
-  campaignId: number;
+  id: number;
   title: string;
   description: string;
   targetAmount: number;
   votingDurationDays: number;
+  votesFor: number;
+  votesAgainst: number;
+  status: 'pending' | 'approved' | 'rejected' | 'funded';
 }
 
-export interface InvestmentData {
-  campaignId: number;
-  amount: number;
-}
+export class HederaTransactionService {
+  private client: Client | null = null;
+  private contractAddress: string;
 
-export interface CampaignInfo {
-  creator: string;
-  title: string;
-  description: string;
-  targetAmount: string;
-  raisedAmount: string;
-  deadline: string;
-  isActive: boolean;
-  milestoneCount: string;
-  totalInvestors: string;
-}
-
-export interface MilestoneInfo {
-  title: string;
-  description: string;
-  targetAmount: string;
-  isCompleted: boolean;
-  votesFor: string;
-  votesAgainst: string;
-  votingDeadline: string;
-}
-
-// Provider setup
-const getProvider = () => {
-  const rpcUrl = HEDERA_NETWORK === 'mainnet' 
-    ? 'https://mainnet.hashio.io/api'
-    : 'https://testnet.hashio.io/api';
-  
-  return new ethers.JsonRpcProvider(rpcUrl);
-};
-
-export class FundFlowTransactions {
-  private provider: ethers.JsonRpcProvider;
-  private contract: ethers.Contract;
-  private signer: ethers.Signer | null;
-
-  constructor(signer?: ethers.Signer) {
-    this.provider = getProvider();
-    this.contract = new ethers.Contract(CONTRACT_ADDRESS, FUNDFLOW_ABI, this.provider);
-    this.signer = signer || null;
-    
-    if (this.signer) {
-      this.contract = this.contract.connect(this.signer);
-    }
+  constructor() {
+    this.contractAddress = process.env.NEXT_PUBLIC_CONTRACT_ADDRESS || '';
+    this.setupClient();
   }
 
-  // Set signer (for wallet connection)
-  setSigner(signer: ethers.Signer) {
-    this.signer = signer;
-    this.contract = this.contract.connect(signer);
+  private setupClient() {
+    const network = process.env.NEXT_PUBLIC_HEDERA_NETWORK || 'testnet';
+    this.client = new Client({
+      network: network as any
+    });
   }
 
   // Campaign Management
-  async createCampaign(campaignData: CampaignData): Promise<string> {
-    if (!this.signer) {
-      throw new Error('Wallet not connected');
+  async createCampaign(
+    title: string,
+    description: string,
+    targetAmount: number,
+    durationDays: number
+  ): Promise<TransactionResult> {
+    try {
+      const connection = hederaWalletService.getConnection();
+      if (!connection) {
+        throw new Error('No wallet connected');
+      }
+
+      if (connection.type === WalletType.HASHPACK) {
+        return await this.createCampaignHashPack(title, description, targetAmount, durationDays);
+      } else if (connection.type === WalletType.METAMASK) {
+        return await this.createCampaignMetaMask(title, description, targetAmount, durationDays);
+      } else {
+        throw new Error('Unsupported wallet type for campaign creation');
+      }
+    } catch (error) {
+      console.error('Error creating campaign:', error);
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : 'Unknown error'
+      };
     }
-
-    // Convert HBAR to wei (1 HBAR = 10^18 wei, like ETH)
-    const targetAmountWei = ethers.parseEther(campaignData.targetAmount.toString());
-
-    const tx = await this.contract.createCampaign(
-      campaignData.title,
-      campaignData.description,
-      targetAmountWei,
-      campaignData.durationDays
-    );
-
-    const receipt = await tx.wait();
-    return receipt.hash;
   }
 
-  async investInCampaign(investmentData: InvestmentData): Promise<string> {
-    if (!this.signer) {
-      throw new Error('Wallet not connected');
+  private async createCampaignHashPack(
+    title: string,
+    description: string,
+    targetAmount: number,
+    durationDays: number
+  ): Promise<TransactionResult> {
+    try {
+      if (!this.client) {
+        throw new Error('Hedera client not initialized');
+      }
+
+      const parameters = new ContractFunctionParameters()
+        .addString(title)
+        .addString(description)
+        .addUint256(targetAmount)
+        .addUint256(durationDays);
+
+      const transaction = new ContractExecuteTransaction()
+        .setContractId(this.contractAddress)
+        .setGas(300000)
+        .setFunction("createCampaign", parameters);
+
+      const response = await transaction.execute(this.client);
+      const receipt = await response.getReceipt(this.client);
+
+      return {
+        success: true,
+        transactionId: response.transactionId.toString(),
+        data: { receipt }
+      };
+    } catch (error) {
+      console.error('HashPack campaign creation error:', error);
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : 'Unknown error'
+      };
     }
+  }
 
-    // Convert HBAR to wei
-    const amountWei = ethers.parseEther(investmentData.amount.toString());
+  private async createCampaignMetaMask(
+    title: string,
+    description: string,
+    targetAmount: number,
+    durationDays: number
+  ): Promise<TransactionResult> {
+    try {
+      const connection = hederaWalletService.getConnection();
+      if (!connection || !connection.signer) {
+        throw new Error('MetaMask signer not available');
+      }
 
-    const tx = await this.contract.investInCampaign(investmentData.campaignId, {
-      value: amountWei
-    });
+      // For MetaMask, we'd need to interact with the EVM contract
+      // This is a simplified implementation
+      const contractInterface = new ethers.Interface([
+        "function createCampaign(string title, string description, uint256 targetAmount, uint256 durationDays) external"
+      ]);
 
-    const receipt = await tx.wait();
-    return receipt.hash;
+      const data = contractInterface.encodeFunctionData("createCampaign", [
+        title,
+        description,
+        targetAmount,
+        durationDays
+      ]);
+
+      const transaction = {
+        to: this.contractAddress,
+        data: data,
+        gasLimit: ethers.parseUnits("300000", "wei")
+      };
+
+      const tx = await connection.signer.sendTransaction(transaction);
+      const receipt = await tx.wait();
+
+      return {
+        success: true,
+        transactionId: tx.hash,
+        data: { receipt }
+      };
+    } catch (error) {
+      console.error('MetaMask campaign creation error:', error);
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : 'Unknown error'
+      };
+    }
+  }
+
+  // Investment
+  async investInCampaign(campaignId: number, amount: number): Promise<TransactionResult> {
+    try {
+      const connection = hederaWalletService.getConnection();
+      if (!connection) {
+        throw new Error('No wallet connected');
+      }
+
+      if (connection.type === WalletType.HASHPACK) {
+        return await this.investInCampaignHashPack(campaignId, amount);
+      } else if (connection.type === WalletType.METAMASK) {
+        return await this.investInCampaignMetaMask(campaignId, amount);
+      } else {
+        throw new Error('Unsupported wallet type for investment');
+      }
+    } catch (error) {
+      console.error('Error investing in campaign:', error);
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : 'Unknown error'
+      };
+    }
+  }
+
+  private async investInCampaignHashPack(
+    campaignId: number,
+    amount: number
+  ): Promise<TransactionResult> {
+    try {
+      if (!this.client) {
+        throw new Error('Hedera client not initialized');
+      }
+
+      const parameters = new ContractFunctionParameters()
+        .addUint256(campaignId);
+
+      const transaction = new ContractExecuteTransaction()
+        .setContractId(this.contractAddress)
+        .setGas(300000)
+        .setPayableAmount(new Hbar(amount))
+        .setFunction("investInCampaign", parameters);
+
+      const response = await transaction.execute(this.client);
+      const receipt = await response.getReceipt(this.client);
+
+      return {
+        success: true,
+        transactionId: response.transactionId.toString(),
+        data: { receipt }
+      };
+    } catch (error) {
+      console.error('HashPack investment error:', error);
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : 'Unknown error'
+      };
+    }
+  }
+
+  private async investInCampaignMetaMask(
+    campaignId: number,
+    amount: number
+  ): Promise<TransactionResult> {
+    try {
+      const connection = hederaWalletService.getConnection();
+      if (!connection || !connection.signer) {
+        throw new Error('MetaMask signer not available');
+      }
+
+      const contractInterface = new ethers.Interface([
+        "function investInCampaign(uint256 campaignId) external payable"
+      ]);
+
+      const data = contractInterface.encodeFunctionData("investInCampaign", [campaignId]);
+
+      const transaction = {
+        to: this.contractAddress,
+        data: data,
+        value: ethers.parseEther(amount.toString()),
+        gasLimit: ethers.parseUnits("300000", "wei")
+      };
+
+      const tx = await connection.signer.sendTransaction(transaction);
+      const receipt = await tx.wait();
+
+      return {
+        success: true,
+        transactionId: tx.hash,
+        data: { receipt }
+      };
+    } catch (error) {
+      console.error('MetaMask investment error:', error);
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : 'Unknown error'
+      };
+    }
   }
 
   // Milestone Management
-  async addMilestone(milestoneData: MilestoneData): Promise<string> {
-    if (!this.signer) {
-      throw new Error('Wallet not connected');
-    }
-
-    // Convert HBAR to wei
-    const targetAmountWei = ethers.parseEther(milestoneData.targetAmount.toString());
-
-    const tx = await this.contract.addMilestone(
-      milestoneData.campaignId,
-      milestoneData.title,
-      milestoneData.description,
-      targetAmountWei,
-      milestoneData.votingDurationDays
-    );
-
-    const receipt = await tx.wait();
-    return receipt.hash;
-  }
-
-  async voteOnMilestone(campaignId: number, milestoneId: number, voteFor: boolean): Promise<string> {
-    if (!this.signer) {
-      throw new Error('Wallet not connected');
-    }
-
-    const tx = await this.contract.voteOnMilestone(campaignId, milestoneId, voteFor);
-    const receipt = await tx.wait();
-    return receipt.hash;
-  }
-
-  async releaseMilestoneFunds(campaignId: number, milestoneId: number): Promise<string> {
-    if (!this.signer) {
-      throw new Error('Wallet not connected');
-    }
-
-    const tx = await this.contract.releaseMilestoneFunds(campaignId, milestoneId);
-    const receipt = await tx.wait();
-    return receipt.hash;
-  }
-
-  // Read-only functions
-  async getCampaign(campaignId: number): Promise<CampaignInfo> {
+  async addMilestone(
+    campaignId: number,
+    title: string,
+    description: string,
+    targetAmount: number,
+    votingDurationDays: number
+  ): Promise<TransactionResult> {
     try {
-      const result = await this.contract.getCampaign(campaignId);
+      const connection = hederaWalletService.getConnection();
+      if (!connection) {
+        throw new Error('No wallet connected');
+      }
+
+      if (connection.type === WalletType.HASHPACK) {
+        return await this.addMilestoneHashPack(campaignId, title, description, targetAmount, votingDurationDays);
+      } else if (connection.type === WalletType.METAMASK) {
+        return await this.addMilestoneMetaMask(campaignId, title, description, targetAmount, votingDurationDays);
+      } else {
+        throw new Error('Unsupported wallet type for milestone creation');
+      }
+    } catch (error) {
+      console.error('Error adding milestone:', error);
       return {
-        creator: result[0],
-        title: result[1],
-        description: result[2],
-        targetAmount: ethers.formatEther(result[3]),
-        raisedAmount: ethers.formatEther(result[4]),
-        deadline: result[5].toString(),
-        isActive: result[6],
-        milestoneCount: result[7].toString(),
-        totalInvestors: result[8].toString()
+        success: false,
+        error: error instanceof Error ? error.message : 'Unknown error'
+      };
+    }
+  }
+
+  private async addMilestoneHashPack(
+    campaignId: number,
+    title: string,
+    description: string,
+    targetAmount: number,
+    votingDurationDays: number
+  ): Promise<TransactionResult> {
+    try {
+      if (!this.client) {
+        throw new Error('Hedera client not initialized');
+      }
+
+      const parameters = new ContractFunctionParameters()
+        .addUint256(campaignId)
+        .addString(title)
+        .addString(description)
+        .addUint256(targetAmount)
+        .addUint256(votingDurationDays);
+
+      const transaction = new ContractExecuteTransaction()
+        .setContractId(this.contractAddress)
+        .setGas(300000)
+        .setFunction("addMilestone", parameters);
+
+      const response = await transaction.execute(this.client);
+      const receipt = await response.getReceipt(this.client);
+
+      return {
+        success: true,
+        transactionId: response.transactionId.toString(),
+        data: { receipt }
       };
     } catch (error) {
-      console.error('Error fetching campaign:', error);
-      throw error;
+      console.error('HashPack milestone creation error:', error);
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : 'Unknown error'
+      };
     }
   }
 
-  async getMilestone(campaignId: number, milestoneId: number): Promise<MilestoneInfo> {
+  private async addMilestoneMetaMask(
+    campaignId: number,
+    title: string,
+    description: string,
+    targetAmount: number,
+    votingDurationDays: number
+  ): Promise<TransactionResult> {
     try {
-      const result = await this.contract.getMilestone(campaignId, milestoneId);
+      const connection = hederaWalletService.getConnection();
+      if (!connection || !connection.signer) {
+        throw new Error('MetaMask signer not available');
+      }
+
+      const contractInterface = new ethers.Interface([
+        "function addMilestone(uint256 campaignId, string title, string description, uint256 targetAmount, uint256 votingDurationDays) external"
+      ]);
+
+      const data = contractInterface.encodeFunctionData("addMilestone", [
+        campaignId,
+        title,
+        description,
+        targetAmount,
+        votingDurationDays
+      ]);
+
+      const transaction = {
+        to: this.contractAddress,
+        data: data,
+        gasLimit: ethers.parseUnits("300000", "wei")
+      };
+
+      const tx = await connection.signer.sendTransaction(transaction);
+      const receipt = await tx.wait();
+
       return {
-        title: result[0],
-        description: result[1],
-        targetAmount: ethers.formatEther(result[2]),
-        isCompleted: result[3],
-        votesFor: ethers.formatEther(result[4]),
-        votesAgainst: ethers.formatEther(result[5]),
-        votingDeadline: result[6].toString()
+        success: true,
+        transactionId: tx.hash,
+        data: { receipt }
       };
     } catch (error) {
-      console.error('Error fetching milestone:', error);
-      throw error;
+      console.error('MetaMask milestone creation error:', error);
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : 'Unknown error'
+      };
     }
   }
 
-  async getInvestment(campaignId: number, investorAddress: string): Promise<string> {
+  // Voting
+  async voteOnMilestone(
+    campaignId: number,
+    milestoneId: number,
+    voteFor: boolean
+  ): Promise<TransactionResult> {
     try {
-      const result = await this.contract.getInvestment(campaignId, investorAddress);
-      return ethers.formatEther(result);
+      const connection = hederaWalletService.getConnection();
+      if (!connection) {
+        throw new Error('No wallet connected');
+      }
+
+      if (connection.type === WalletType.HASHPACK) {
+        return await this.voteOnMilestoneHashPack(campaignId, milestoneId, voteFor);
+      } else if (connection.type === WalletType.METAMASK) {
+        return await this.voteOnMilestoneMetaMask(campaignId, milestoneId, voteFor);
+      } else {
+        throw new Error('Unsupported wallet type for voting');
+      }
     } catch (error) {
-      console.error('Error fetching investment:', error);
-      throw error;
+      console.error('Error voting on milestone:', error);
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : 'Unknown error'
+      };
     }
   }
 
-  async getPlatformFeePercent(): Promise<number> {
+  private async voteOnMilestoneHashPack(
+    campaignId: number,
+    milestoneId: number,
+    voteFor: boolean
+  ): Promise<TransactionResult> {
     try {
-      const result = await this.contract.platformFeePercent();
-      return parseInt(result.toString());
+      if (!this.client) {
+        throw new Error('Hedera client not initialized');
+      }
+
+      const parameters = new ContractFunctionParameters()
+        .addUint256(campaignId)
+        .addUint256(milestoneId)
+        .addBool(voteFor);
+
+      const transaction = new ContractExecuteTransaction()
+        .setContractId(this.contractAddress)
+        .setGas(300000)
+        .setFunction("voteOnMilestone", parameters);
+
+      const response = await transaction.execute(this.client);
+      const receipt = await response.getReceipt(this.client);
+
+      return {
+        success: true,
+        transactionId: response.transactionId.toString(),
+        data: { receipt }
+      };
     } catch (error) {
-      console.error('Error fetching platform fee:', error);
-      throw error;
+      console.error('HashPack voting error:', error);
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : 'Unknown error'
+      };
     }
   }
 
-  async calculatePlatformFee(amount: number): Promise<string> {
+  private async voteOnMilestoneMetaMask(
+    campaignId: number,
+    milestoneId: number,
+    voteFor: boolean
+  ): Promise<TransactionResult> {
     try {
-      const amountWei = ethers.parseEther(amount.toString());
-      const result = await this.contract.calculatePlatformFee(amountWei);
-      return ethers.formatEther(result);
+      const connection = hederaWalletService.getConnection();
+      if (!connection || !connection.signer) {
+        throw new Error('MetaMask signer not available');
+      }
+
+      const contractInterface = new ethers.Interface([
+        "function voteOnMilestone(uint256 campaignId, uint256 milestoneId, bool voteFor) external"
+      ]);
+
+      const data = contractInterface.encodeFunctionData("voteOnMilestone", [
+        campaignId,
+        milestoneId,
+        voteFor
+      ]);
+
+      const transaction = {
+        to: this.contractAddress,
+        data: data,
+        gasLimit: ethers.parseUnits("300000", "wei")
+      };
+
+      const tx = await connection.signer.sendTransaction(transaction);
+      const receipt = await tx.wait();
+
+      return {
+        success: true,
+        transactionId: tx.hash,
+        data: { receipt }
+      };
     } catch (error) {
-      console.error('Error calculating platform fee:', error);
-      throw error;
+      console.error('MetaMask voting error:', error);
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : 'Unknown error'
+      };
     }
   }
 
-  async getNextCampaignId(): Promise<number> {
+  // Query Functions
+  async getCampaign(campaignId: number): Promise<CampaignData | null> {
     try {
-      const result = await this.contract.getNextCampaignId();
-      return parseInt(result.toString());
+      if (!this.client) {
+        throw new Error('Hedera client not initialized');
+      }
+
+      const parameters = new ContractFunctionParameters()
+        .addUint256(campaignId);
+
+      const query = new ContractCallQuery()
+        .setContractId(this.contractAddress)
+        .setGas(100000)
+        .setFunction("getCampaign", parameters);
+
+      const response = await query.execute(this.client);
+
+      if (response.getUint256(0).toString() === '0') {
+        return null; // Campaign doesn't exist
+      }
+
+      // Parse campaign data from response
+      // This would need to match your smart contract structure
+      const campaign: CampaignData = {
+        id: campaignId,
+        title: response.getString(0),
+        description: response.getString(1),
+        targetAmount: Number(response.getUint256(2)),
+        currentAmount: Number(response.getUint256(3)),
+        durationDays: Number(response.getUint256(4)),
+        startDate: Number(response.getUint256(5)),
+        endDate: Number(response.getUint256(6)),
+        creator: response.getString(7),
+        status: response.getString(8) as any,
+        milestones: [] // Would need to query milestones separately
+      };
+
+      return campaign;
     } catch (error) {
-      console.error('Error fetching next campaign ID:', error);
-      throw error;
+      console.error('Error getting campaign:', error);
+      return null;
     }
   }
 
-  async getCampaignInvestors(campaignId: number): Promise<string[]> {
+  // Utility Functions
+  async getBalance(accountId: string): Promise<string> {
     try {
-      const result = await this.contract.getCampaignInvestors(campaignId);
-      return result;
+      if (!this.client) {
+        throw new Error('Hedera client not initialized');
+      }
+
+      const query = new AccountBalanceQuery()
+        .setAccountId(AccountId.fromString(accountId));
+
+      const accountBalance = await query.execute(this.client);
+      return accountBalance.hbars.toString();
     } catch (error) {
-      console.error('Error fetching campaign investors:', error);
-      throw error;
+      console.error('Error getting balance:', error);
+      return '0';
     }
   }
 
-  // Event listening
-  async listenForCampaignCreated(callback: (event: any) => void) {
-    this.contract.on('CampaignCreated', callback);
-  }
-
-  async listenForInvestment(callback: (event: any) => void) {
-    this.contract.on('InvestmentMade', callback);
-  }
-
-  async listenForMilestoneVoted(callback: (event: any) => void) {
-    this.contract.on('MilestoneVoted', callback);
-  }
-
-  // Stop listening to events
-  removeAllListeners() {
-    this.contract.removeAllListeners();
-  }
-
-  // Utility functions
-  async estimateGas(method: string, params: any[]): Promise<bigint> {
+  async transferHBAR(toAccountId: string, amount: number): Promise<TransactionResult> {
     try {
-      const gasEstimate = await this.contract[method].estimateGas(...params);
-      return gasEstimate;
+      const connection = hederaWalletService.getConnection();
+      if (!connection) {
+        throw new Error('No wallet connected');
+      }
+
+      if (connection.type === WalletType.HASHPACK) {
+        return await this.transferHBARHashPack(toAccountId, amount);
+      } else if (connection.type === WalletType.METAMASK) {
+        return await this.transferHBARMetaMask(toAccountId, amount);
+      } else {
+        throw new Error('Unsupported wallet type for transfer');
+      }
     } catch (error) {
-      console.error('Error estimating gas:', error);
-      return BigInt(300000); // Default gas limit
+      console.error('Error transferring HBAR:', error);
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : 'Unknown error'
+      };
     }
   }
 
-  async getTransactionFee(): Promise<number> {
+  private async transferHBARHashPack(
+    toAccountId: string,
+    amount: number
+  ): Promise<TransactionResult> {
     try {
-      const gasPrice = await this.provider.getFeeData();
-      const gasLimit = BigInt(300000); // Estimated gas limit
-      const totalFee = gasLimit * (gasPrice.gasPrice || BigInt(0));
-      return parseFloat(ethers.formatEther(totalFee));
+      if (!this.client) {
+        throw new Error('Hedera client not initialized');
+      }
+
+      const transaction = new TransferTransaction()
+        .addHbarTransfer(AccountId.fromString(toAccountId), new Hbar(amount))
+        .addHbarTransfer(AccountId.fromString("0.0.0"), new Hbar(-amount));
+
+      const response = await transaction.execute(this.client);
+      const receipt = await response.getReceipt(this.client);
+
+      return {
+        success: true,
+        transactionId: response.transactionId.toString(),
+        data: { receipt }
+      };
     } catch (error) {
-      console.error('Error calculating transaction fee:', error);
-      return 0.001; // Default fee in HBAR
+      console.error('HashPack transfer error:', error);
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : 'Unknown error'
+      };
     }
   }
 
-  // Contract address and network info
-  getContractAddress(): string {
-    return CONTRACT_ADDRESS;
-  }
+  private async transferHBARMetaMask(
+    toAccountId: string,
+    amount: number
+  ): Promise<TransactionResult> {
+    try {
+      const connection = hederaWalletService.getConnection();
+      if (!connection || !connection.signer) {
+        throw new Error('MetaMask signer not available');
+      }
 
-  getNetworkName(): string {
-    return HEDERA_NETWORK;
-  }
+      const transaction = {
+        to: toAccountId,
+        value: ethers.parseEther(amount.toString()),
+        gasLimit: ethers.parseUnits("21000", "wei")
+      };
 
-  // Get provider for external use
-  getProvider(): ethers.JsonRpcProvider {
-    return this.provider;
+      const tx = await connection.signer.sendTransaction(transaction);
+      const receipt = await tx.wait();
+
+      return {
+        success: true,
+        transactionId: tx.hash,
+        data: { receipt }
+      };
+    } catch (error) {
+      console.error('MetaMask transfer error:', error);
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : 'Unknown error'
+      };
+    }
   }
 }
 
-// Utility function to create transaction instance
-export const createFundFlowTransactions = (signer?: ethers.Signer): FundFlowTransactions => {
-  return new FundFlowTransactions(signer);
-};
+// Export singleton instance
+export const hederaTransactionService = new HederaTransactionService();

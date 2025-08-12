@@ -2,40 +2,67 @@
 {
   "name": "fundflow-smartcontract",
   "version": "1.0.0",
-  "description": "FundFlow smart contracts for Hedera blockchain",
-  "type": "commonjs",
-  "private": true,
+  "description": "Smart contracts for FundFlow - Advanced Hedera-based fundraising ecosystem",
+  "main": "index.js",
   "scripts": {
-    "compile": "npx hardhat compile",
-    "test": "npx hardhat test",
+    "compile": "hardhat compile",
+    "test": "hardhat test",
     "deploy": "node scripts/deploy.js",
-    "deploy:testnet": "npx hardhat run scripts/deploy.js --network hedera_testnet",
-    "deploy:mainnet": "npx hardhat run scripts/deploy.js --network hedera_mainnet",
+    "deploy:testnet": "HEDERA_NETWORK=testnet node scripts/deploy.js",
+    "deploy:mainnet": "HEDERA_NETWORK=mainnet node scripts/deploy.js",
+    "deploy:previewnet": "HEDERA_NETWORK=previewnet node scripts/deploy.js",
     "verify": "node scripts/verify.js",
-    "clean": "npx hardhat clean",
-    "coverage": "npx hardhat coverage",
-    "gas-report": "REPORT_GAS=true npx hardhat test"
+    "setup": "node scripts/setup.js",
+    "clean": "hardhat clean && rm -rf deployments",
+    "size": "hardhat size-contracts",
+    "coverage": "hardhat coverage",
+    "lint": "solhint 'contracts/**/*.sol'",
+    "lint:fix": "solhint 'contracts/**/*.sol' --fix",
+    "flatten": "hardhat flatten",
+    "gas-report": "REPORT_GAS=true hardhat test"
   },
   "keywords": [
     "hedera",
-    "smart-contract",
+    "hashgraph",
     "solidity",
-    "blockchain",
+    "smart-contracts",
     "fundraising",
-    "defi"
+    "blockchain",
+    "defi",
+    "crowdfunding"
   ],
   "author": "FundFlow Team",
   "license": "MIT",
-  "devDependencies": {
-    "@nomicfoundation/hardhat-toolbox": "^4.0.0",
-    "@openzeppelin/contracts": "^5.0.0",
-    "chai": "^4.3.7",
-    "hardhat": "^2.19.0",
-    "mocha": "^10.2.0"
-  },
   "dependencies": {
-    "@hashgraph/sdk": "^2.40.0",
+    "@hashgraph/sdk": "^2.45.0",
+    "@openzeppelin/contracts": "^4.9.3",
     "dotenv": "^16.3.1",
-    "ethers": "^6.8.0"
-  }
+    "ethers": "^5.7.2"
+  },
+  "devDependencies": {
+    "@nomicfoundation/hardhat-toolbox": "^2.0.2",
+    "@nomiclabs/hardhat-ethers": "^2.2.3",
+    "@nomiclabs/hardhat-waffle": "^2.0.6",
+    "@typechain/ethers-v5": "^10.2.1",
+    "@typechain/hardhat": "^6.1.6",
+    "@types/chai": "^4.3.5",
+    "@types/mocha": "^10.0.1",
+    "chai": "^4.3.8",
+    "ethereum-waffle": "^3.4.4",
+    "hardhat": "^2.17.1",
+    "hardhat-contract-sizer": "^2.10.0",
+    "hardhat-gas-reporter": "^1.0.9",
+    "solhint": "^3.6.2",
+    "solidity-coverage": "^0.8.4",
+    "typechain": "^8.3.1",
+    "typescript": "^5.1.6"
+  },
+  "engines": {
+    "node": ">=16.0.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/TheSoftNode/FUNDFLOW_HEDERA.git"
+  },
+  "homepage": "https://fundflow.io"
 }

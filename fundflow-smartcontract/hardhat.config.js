@@ -1,5 +1,33 @@
 require("@nomicfoundation/hardhat-toolbox");
+require("hardhat-gas-reporter");
+require("hardhat-contract-sizer");
+require("solidity-coverage");
 require("dotenv").config();
+
+// Hedera network configuration
+const HEDERA_NETWORKS = {
+  testnet: {
+    url: "https://testnet.hashio.io/api",
+    accounts: process.env.HEDERA_PRIVATE_KEY ? [process.env.HEDERA_PRIVATE_KEY] : [],
+    chainId: 296,
+    gasPrice: "auto",
+    gasMultiplier: 1.2,
+  },
+  mainnet: {
+    url: "https://mainnet.hashio.io/api",
+    accounts: process.env.HEDERA_PRIVATE_KEY ? [process.env.HEDERA_PRIVATE_KEY] : [],
+    chainId: 295,
+    gasPrice: "auto",
+    gasMultiplier: 1.1,
+  },
+  previewnet: {
+    url: "https://previewnet.hashio.io/api",
+    accounts: process.env.HEDERA_PRIVATE_KEY ? [process.env.HEDERA_PRIVATE_KEY] : [],
+    chainId: 297,
+    gasPrice: "auto",
+    gasMultiplier: 1.3,
+  }
+};
 
 /** @type import('hardhat/config').HardhatUserConfig */
 module.exports = {
@@ -8,66 +36,103 @@ module.exports = {
     settings: {
       optimizer: {
         enabled: true,
-        runs: 200,
+        runs: 1,
       },
+      viaIR: true,
+      outputSelection: {
+        "*": {
+          "*": ["abi", "evm.bytecode", "evm.deployedBytecode", "evm.methodIdentifiers"]
+        }
+      }
     },
   },
+  
   networks: {
-    hedera_testnet: {
-      url: "https://testnet.hashio.io/api",
-      accounts: process.env.PRIVATE_KEY ? [process.env.PRIVATE_KEY] : [],
-      chainId: 296,
-      gas: 3000000,
-      gasPrice: 10000000000, // 10 Gwei
-    },
-    hedera_mainnet: {
-      url: "https://mainnet.hashio.io/api",
-      accounts: process.env.PRIVATE_KEY ? [process.env.PRIVATE_KEY] : [],
-      chainId: 295,
-      gas: 3000000,
-      gasPrice: 10000000000, // 10 Gwei
+    hardhat: {
+      chainId: 31337,
+      gas: 12000000,
+      blockGasLimit: 12000000,
+      allowUnlimitedContractSize: true,
+      mining: {
+        auto: true,
+        interval: 1000
+      }
     },
     localhost: {
       url: "http://127.0.0.1:8545",
       chainId: 31337,
     },
+    // Hedera networks
+    ...HEDERA_NETWORKS
   },
+  
+  paths: {
+    sources: "./contracts",
+    tests: "./test",
+    cache: "./cache", 
+    artifacts: "./artifacts"
+  },
+  
   gasReporter: {
-    enabled: process.env.REPORT_GAS !== undefined,
+    enabled: process.env.REPORT_GAS === "true",
     currency: "USD",
+    gasPrice: 20,
+    showTimeSpent: true,
+    showMethodSig: true,
+    maxMethodDiff: 10,
   },
+  
+  contractSizer: {
+    alphaSort: true,
+    disambiguatePaths: false,
+    runOnCompile: true,
+    strict: true,
+  },
+  
+  mocha: {
+    timeout: 60000,
+    bail: false,
+  },
+  
   etherscan: {
-    // Hedera doesn't have Etherscan verification, but we can use HashScan
     apiKey: {
-      hedera_testnet: "not-needed",
-      hedera_mainnet: "not-needed",
+      // Note: Hedera doesn't use Etherscan but we keep this for compatibility
+      testnet: process.env.ETHERSCAN_API_KEY || "",
+      mainnet: process.env.ETHERSCAN_API_KEY || "",
     },
     customChains: [
       {
-        network: "hedera_testnet",
+        network: "hedera-testnet",
         chainId: 296,
         urls: {
-          apiURL: "https://testnet.hashscan.io/api",
-          browserURL: "https://testnet.hashscan.io"
+          apiURL: "https://testnet.mirrornode.hedera.com",
+          browserURL: "https://hashscan.io/testnet"
         }
       },
       {
-        network: "hedera_mainnet",
+        network: "hedera-mainnet", 
         chainId: 295,
         urls: {
-          apiURL: "https://hashscan.io/api",
-          browserURL: "https://hashscan.io"
+          apiURL: "https://mainnet-public.mirrornode.hedera.com",
+          browserURL: "https://hashscan.io/mainnet"
         }
       }
     ]
   },
-  paths: {
-    sources: "./contracts",
-    tests: "./test",
-    cache: "./cache",
-    artifacts: "./artifacts"
+  
+  typechain: {
+    outDir: "typechain",
+    target: "ethers-v5",
+    alwaysGenerateOverloads: false,
+    externalArtifacts: [],
   },
-  mocha: {
-    timeout: 60000
+  
+  // Custom settings for Hedera optimization
+  hedera: {
+    network: process.env.HEDERA_NETWORK || "testnet",
+    accountId: process.env.HEDERA_ACCOUNT_ID,
+    privateKey: process.env.HEDERA_PRIVATE_KEY,
+    maxTransactionFee: "20", // HBAR
+    maxQueryPayment: "1",   // HBAR
   }
 };

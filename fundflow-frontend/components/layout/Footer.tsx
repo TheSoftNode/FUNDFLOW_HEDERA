@@ -1,11 +1,11 @@
 "use client";
 
 import React, { useState, useEffect } from 'react';
-import { 
-  Twitter, 
-  Github, 
-  Linkedin, 
-  Mail, 
+import {
+  Twitter,
+  Github,
+  Linkedin,
+  Mail,
   ExternalLink,
   Shield,
   Globe,
@@ -15,6 +15,7 @@ import {
   CheckCircle,
   Sparkles
 } from 'lucide-react';
+import Logo from '@/components/shared/logo/Logo';
 
 const Footer = () => {
   const [email, setEmail] = useState('');
@@ -29,43 +30,43 @@ const Footer = () => {
       icon?: React.ComponentType<{ className?: string }>;
     }>;
   }> = [
-    {
-      title: "Platform",
-      links: [
-        { name: "How it Works", href: "#how-it-works" },
-        { name: "Features", href: "#features" },
-        { name: "Security", href: "#security" },
-        { name: "Pricing", href: "#pricing" }
-      ]
-    },
-    {
-      title: "For Startups",
-      links: [
-        { name: "Create Campaign", href: "/create" },
-        { name: "Success Stories", href: "/stories" },
-        { name: "Resources", href: "/resources" },
-        { name: "Support", href: "/support" }
-      ]
-    },
-    {
-      title: "For Investors", 
-      links: [
-        { name: "Browse Campaigns", href: "/browse" },
-        { name: "Portfolio", href: "/portfolio" },
-        { name: "Analytics", href: "/analytics" },
-        { name: "Risk Assessment", href: "/risk" }
-      ]
-    },
-    {
-      title: "Developers",
-      links: [
-        { name: "API Documentation", href: "/docs", icon: Book },
-        { name: "Smart Contracts", href: "/contracts", icon: Shield },
-        { name: "GitHub", href: "https://github.com/fundflow", icon: Github },
-        { name: "Community", href: "/community", icon: MessageCircle }
-      ]
-    }
-  ];
+      {
+        title: "Platform",
+        links: [
+          { name: "How it Works", href: "#how-it-works" },
+          { name: "Features", href: "#features" },
+          { name: "Security", href: "#security" },
+          { name: "Pricing", href: "#pricing" }
+        ]
+      },
+      {
+        title: "For Startups",
+        links: [
+          { name: "Create Campaign", href: "/create" },
+          { name: "Success Stories", href: "/stories" },
+          { name: "Resources", href: "/resources" },
+          { name: "Support", href: "/support" }
+        ]
+      },
+      {
+        title: "For Investors",
+        links: [
+          { name: "Browse Campaigns", href: "/browse" },
+          { name: "Portfolio", href: "/portfolio" },
+          { name: "Analytics", href: "/analytics" },
+          { name: "Risk Assessment", href: "/risk" }
+        ]
+      },
+      {
+        title: "Developers",
+        links: [
+          { name: "API Documentation", href: "/docs", icon: Book },
+          { name: "Smart Contracts", href: "/contracts", icon: Shield },
+          { name: "GitHub", href: "https://github.com/fundflow", icon: Github },
+          { name: "Community", href: "/community", icon: MessageCircle }
+        ]
+      }
+    ];
 
   const socialLinks = [
     { icon: Twitter, href: "https://twitter.com/fundflow", label: "Twitter", color: "hover:from-blue-400 hover:to-blue-500" },
@@ -154,17 +155,10 @@ const Footer = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-6 lg:gap-8">
           {/* Enhanced Brand Section */}
           <div className="lg:col-span-2 space-y-4">
-            <div className="flex items-center space-x-3">
-              <div className="w-10 h-10 bg-gradient-to-br from-blue-500 via-purple-500 to-teal-400 rounded-xl flex items-center justify-center shadow-lg">
-                <Sparkles className="w-5 h-5 text-white" />
-              </div>
-              <span className="text-2xl font-bold">
-                Fund<span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-teal-400">Flow</span>
-              </span>
-            </div>
-            
+            <Logo size="md" />
+
             <p className="text-gray-400 text-sm leading-relaxed max-w-sm">
-              Revolutionizing startup fundraising with transparent, milestone-based funding 
+              Revolutionizing startup fundraising with transparent, milestone-based funding
               secured by Bitcoin-level security on the Stacks blockchain.
             </p>
 
@@ -220,7 +214,7 @@ const Footer = () => {
                 Get the latest updates on new features, campaigns, and platform developments.
               </p>
             </div>
-            
+
             <div className="flex space-x-3">
               <div className="flex-1 relative">
                 <input
@@ -231,13 +225,12 @@ const Footer = () => {
                   className="w-full bg-gray-800/80 dark:bg-gray-900/80 backdrop-blur-sm border border-gray-700/50 dark:border-gray-600/50 rounded-xl px-4 py-3 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-300"
                 />
               </div>
-              <button 
+              <button
                 onClick={handleSubscribe}
-                className={`px-6 py-3 rounded-xl font-semibold transition-all duration-300 transform hover:scale-105 flex items-center space-x-2 ${
-                  isSubscribed 
-                    ? 'bg-emerald-600 hover:bg-emerald-700' 
+                className={`px-6 py-3 rounded-xl font-semibold transition-all duration-300 transform hover:scale-105 flex items-center space-x-2 ${isSubscribed
+                    ? 'bg-emerald-600 hover:bg-emerald-700'
                     : 'bg-gradient-to-r from-blue-600 to-teal-500 hover:from-blue-700 hover:to-teal-600'
-                }`}
+                  }`}
               >
                 {isSubscribed ? (
                   <>

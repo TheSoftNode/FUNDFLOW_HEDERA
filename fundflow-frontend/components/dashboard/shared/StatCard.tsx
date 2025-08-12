@@ -52,15 +52,15 @@ const StatCard: React.FC<StatCardProps> = ({
         <p className="text-2xl font-bold text-gray-900 dark:text-white">
           {value}
         </p>
-        
+
         <div className="flex items-center justify-between">
           {subtitle && (
             <span className="text-sm text-gray-600 dark:text-gray-400">
               {subtitle}
             </span>
           )}
-          
-          {trend && (
+
+          {trend && trend.value !== undefined && (
             <div className={`flex items-center space-x-1 ${trend.color}`}>
               <trend.icon className="w-4 h-4" />
               <span className="text-sm font-medium">

@@ -33,7 +33,7 @@ const HeroSection = () => {
 
       <div className="relative z-10 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12 lg:py-16">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 sm:gap-8 lg:gap-12 items-center">
-          
+
           {/* Left Content - Clean & Professional */}
           <div className={`order-1 lg:order-1 text-center lg:text-left space-y-5 sm:space-y-6 transition-all duration-1000 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}>
             {/* Stylish Headline */}
@@ -47,7 +47,7 @@ const HeroSection = () => {
                 </span>
               </h1>
             </div>
-            
+
             {/* Professional Description */}
             <p className="text-base sm:text-lg lg:text-xl text-slate-600 dark:text-slate-300 leading-relaxed max-w-xl mx-auto lg:mx-0">
               Advanced blockchain infrastructure enabling transparent, milestone-driven fundraising with institutional-grade security and automated governance protocols.
@@ -61,11 +61,15 @@ const HeroSection = () => {
                   <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
                 </span>
               </button>
-              
-              <button className="w-full sm:w-auto group flex items-center justify-center gap-2 text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white px-5 py-3 rounded-xl border border-slate-200 dark:border-slate-700 hover:border-slate-300 dark:hover:border-slate-600 transition-all duration-300 bg-white/50 dark:bg-gray-800/50 backdrop-blur-sm hover:bg-white/80 dark:hover:bg-gray-800/80">
+
+              {/* <a href="/wallet-demo" className="w-full sm:w-auto group flex items-center justify-center gap-2 text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white px-5 py-3 rounded-xl border border-slate-200 dark:border-slate-700 hover:border-slate-300 dark:hover:border-slate-600 transition-all duration-300 bg-white/50 dark:bg-gray-800/50 backdrop-blur-sm hover:bg-white/80 dark:hover:bg-gray-800/80">
                 <Play className="w-4 h-4" />
-                Platform Demo
-              </button>
+                Wallet Demo
+              </a>
+              <a href="/wallet-test" className="w-full sm:w-auto group flex items-center justify-center gap-2 text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white px-5 py-3 rounded-xl border border-slate-200 dark:border-slate-700 hover:border-slate-300 dark:hover:border-slate-600 transition-all duration-300 bg-white/50 dark:bg-gray-800/50 backdrop-blur-sm hover:bg-white/80 dark:hover:bg-gray-800/80">
+                <Play className="w-4 h-4" />
+                Wallet Test
+              </a> */}
             </div>
 
             {/* Clean Stats */}
@@ -88,16 +92,16 @@ const HeroSection = () => {
           {/* Right Content - Refined Circular Dashboard */}
           <div className={`order-2 lg:order-2 flex justify-center transition-all duration-1000 delay-300 ${isVisible ? 'opacity-100 translate-x-0' : 'opacity-0 translate-x-8'}`}>
             <div className="relative">
-              
+
               {/* Clean Circular Interface */}
               <div className="relative w-80 h-80 sm:w-96 sm:h-96 md:w-[420px] md:h-[420px] lg:w-96 lg:h-96 xl:w-[440px] xl:h-[440px] bg-white/90 dark:bg-slate-800/90 backdrop-blur-2xl rounded-full shadow-2xl border border-slate-200/60 dark:border-slate-700/60">
-                
+
                 {/* Subtle Outer Ring */}
                 <div className="absolute inset-2 sm:inset-3 rounded-full border border-slate-200/30 dark:border-slate-700/30 animate-spin [animation-duration:30s]"></div>
-                
+
                 {/* Inner Dashboard */}
                 <div className="absolute inset-4 sm:inset-6 rounded-full bg-white/60 dark:bg-slate-800/60 backdrop-blur-xl border border-slate-200/40 dark:border-slate-700/40 flex flex-col items-center justify-center">
-                  
+
                   {/* Top Section - Company */}
                   <div className="absolute top-8 sm:top-10 text-center">
                     <div className="flex items-center justify-center gap-1.5 mb-1.5">
@@ -122,12 +126,12 @@ const HeroSection = () => {
                         {/* Background */}
                         <circle cx="100" cy="100" r="80" stroke="#e2e8f0" strokeWidth="2" fill="none" className="dark:stroke-slate-700" />
                         {/* Progress */}
-                        <circle 
-                          cx="100" 
-                          cy="100" 
-                          r="80" 
-                          stroke="url(#progressGrad)" 
-                          strokeWidth="3" 
+                        <circle
+                          cx="100"
+                          cy="100"
+                          r="80"
+                          stroke="url(#progressGrad)"
+                          strokeWidth="3"
                           fill="none"
                           strokeDasharray={`${2 * Math.PI * 80}`}
                           strokeDashoffset={`${2 * Math.PI * 80 * (1 - 0.8)}`}
@@ -135,7 +139,7 @@ const HeroSection = () => {
                           strokeLinecap="round"
                         />
                       </svg>
-                      
+
                       {/* Center Content - Dynamic */}
                       <div className="absolute inset-0 flex flex-col items-center justify-center">
                         <div className="text-2xl sm:text-3xl md:text-4xl font-bold text-slate-900 dark:text-white mb-1">
@@ -154,7 +158,7 @@ const HeroSection = () => {
                       <div className="text-lg sm:text-xl font-bold text-slate-900 dark:text-white">$1.2M / $1.5M</div>
                       <div className="text-xs text-slate-500 dark:text-slate-400">Target: March 2025</div>
                     </div>
-                    
+
                     <button className="px-5 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold rounded-full transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-[1.02]">
                       View Details
                     </button>

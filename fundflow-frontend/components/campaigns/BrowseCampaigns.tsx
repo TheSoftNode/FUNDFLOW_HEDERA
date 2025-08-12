@@ -1,40 +1,21 @@
 "use client"
 
 import React, { useState } from 'react';
-import { 
-  Search, 
-  Users, 
-  Clock, 
+import {
+  Search,
+  Users,
+  Clock,
   Target,
   Star,
   ArrowRight,
   MapPin,
-  
+
 } from 'lucide-react';
 
 const BrowseCampaigns = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [sortBy, setSortBy] = useState('trending');
-
-  // Filter campaigns based on search and category
-  const filteredCampaigns = campaigns.filter(campaign => {
-    const matchesSearch = campaign.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         campaign.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         campaign.founder.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesCategory = selectedCategory === 'all' || 
-                           campaign.category.toLowerCase().includes(selectedCategory.toLowerCase());
-    return matchesSearch && matchesCategory;
-  });
-
-  const categories = [
-    { id: 'all', name: 'All Categories', count: 147 },
-    { id: 'ai', name: 'AI & Machine Learning', count: 42 },
-    { id: 'blockchain', name: 'Blockchain', count: 38 },
-    { id: 'fintech', name: 'FinTech', count: 28 },
-    { id: 'healthtech', name: 'HealthTech', count: 22 },
-    { id: 'edtech', name: 'EdTech', count: 17 }
-  ];
 
   const campaigns = [
     {
@@ -88,6 +69,25 @@ const BrowseCampaigns = () => {
       image: "/api/placeholder/400/240",
       tags: ["Blockchain", "Social", "Web3"]
     }
+  ];
+
+  // Filter campaigns based on search and category
+  const filteredCampaigns = campaigns.filter(campaign => {
+    const matchesSearch = campaign.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      campaign.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      campaign.founder.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesCategory = selectedCategory === 'all' ||
+      campaign.category.toLowerCase().includes(selectedCategory.toLowerCase());
+    return matchesSearch && matchesCategory;
+  });
+
+  const categories = [
+    { id: 'all', name: 'All Categories', count: 147 },
+    { id: 'ai', name: 'AI & Machine Learning', count: 42 },
+    { id: 'blockchain', name: 'Blockchain', count: 38 },
+    { id: 'fintech', name: 'FinTech', count: 28 },
+    { id: 'healthtech', name: 'HealthTech', count: 22 },
+    { id: 'edtech', name: 'EdTech', count: 17 }
   ];
 
   const formatCurrency = (amount: number) => {
@@ -218,7 +218,7 @@ const BrowseCampaigns = () => {
                     </span>
                   </div>
                   <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
-                    <div 
+                    <div
                       className="bg-gradient-to-r from-blue-500 to-teal-400 h-2 rounded-full transition-all duration-500"
                       style={{ width: `${campaign.progressPercentage}%` }}
                     ></div>
@@ -277,7 +277,7 @@ const BrowseCampaigns = () => {
                 </div>
 
                 {/* CTA Button */}
-                <button 
+                <button
                   onClick={() => window.location.href = `/campaign/detail?id=${campaign.id}`}
                   className="w-full bg-gradient-to-r from-blue-500 to-teal-400 hover:from-blue-600 hover:to-teal-500 text-white py-3 rounded-xl font-semibold transition-all duration-200 transform hover:scale-105 flex items-center justify-center space-x-2"
                 >
@@ -313,7 +313,7 @@ const BrowseCampaigns = () => {
 
         {/* Load More */}
         <div className="text-center mt-12">
-          <button 
+          <button
             onClick={() => alert('Loading more campaigns...')}
             className="bg-white dark:bg-gray-800 text-gray-900 dark:text-white px-8 py-4 rounded-xl font-semibold border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 transition-all duration-200 transform hover:scale-105"
           >

@@ -2,8 +2,26 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { useAuth } from './useAuth';
-import { createFundFlowTransactions, CampaignData, MilestoneData, InvestmentData } from '@/lib/stacks-transactions';
-import { stacksApi } from '@/lib/stacks-api';
+// TODO: Import Hedera transaction types when implemented
+interface CampaignData {
+  title: string;
+  description: string;
+  targetAmount: number;
+  deadline: number;
+}
+
+interface MilestoneData {
+  campaignId: number;
+  title: string;
+  description: string;
+  targetAmount: number;
+  votingDeadline: number;
+}
+
+interface InvestmentData {
+  campaignId: number;
+  amount: number;
+}
 
 export interface Campaign {
   id: number;
@@ -45,18 +63,18 @@ interface UseCampaignsReturn {
   userInvestments: Investment[];
   loading: boolean;
   error: string | null;
-  
+
   // Campaign actions
   createCampaign: (data: CampaignData) => Promise<string>;
   investInCampaign: (data: InvestmentData) => Promise<string>;
   getCampaign: (id: number) => Promise<Campaign | null>;
-  
+
   // Milestone actions
   addMilestone: (data: MilestoneData) => Promise<string>;
   voteOnMilestone: (campaignId: number, milestoneId: number, voteFor: boolean) => Promise<string>;
   releaseMilestoneFunds: (campaignId: number, milestoneId: number) => Promise<string>;
   getMilestone: (campaignId: number, milestoneId: number) => Promise<Milestone | null>;
-  
+
   // Utility functions
   refreshCampaigns: () => Promise<void>;
   calculatePlatformFee: (amount: number) => Promise<number>;
@@ -64,15 +82,15 @@ interface UseCampaignsReturn {
 }
 
 export const useCampaigns = (): UseCampaignsReturn => {
-  const { user, userSession, network } = useAuth();
+  const { user } = useAuth();
   const [campaigns, setCampaigns] = useState<Campaign[]>([]);
   const [userCampaigns, setUserCampaigns] = useState<Campaign[]>([]);
   const [userInvestments, setUserInvestments] = useState<Investment[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // Initialize transaction handler
-  const txHandler = createFundFlowTransactions(userSession);
+  // Initialize transaction handler - will be updated when we have the contract
+  // const txHandler = createFundFlowTransactions(userSession);
 
   // Fetch all campaigns (mock data for now, will be replaced with actual contract calls)
   const fetchCampaigns = useCallback(async () => {
@@ -107,9 +125,9 @@ export const useCampaigns = (): UseCampaignsReturn => {
           daysLeft: 45
         }
       ];
-      
+
       setCampaigns(mockCampaigns);
-      
+
       // Filter user campaigns if user is connected
       if (user?.walletAddress) {
         const userCreatedCampaigns = mockCampaigns.filter(
@@ -117,7 +135,7 @@ export const useCampaigns = (): UseCampaignsReturn => {
         );
         setUserCampaigns(userCreatedCampaigns);
       }
-      
+
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to fetch campaigns');
     } finally {
@@ -128,7 +146,7 @@ export const useCampaigns = (): UseCampaignsReturn => {
   // Fetch user investments
   const fetchUserInvestments = useCallback(async () => {
     if (!user?.walletAddress) return;
-    
+
     try {
       // Mock data - replace with actual contract calls
       const mockInvestments: Investment[] = [
@@ -139,7 +157,7 @@ export const useCampaigns = (): UseCampaignsReturn => {
           timestamp: Date.now() - (7 * 24 * 60 * 60 * 1000) // 7 days ago
         }
       ];
-      
+
       setUserInvestments(mockInvestments);
     } catch (err) {
       console.error('Error fetching user investments:', err);
@@ -157,17 +175,19 @@ export const useCampaigns = (): UseCampaignsReturn => {
     if (!user?.walletAddress) {
       throw new Error('User not connected');
     }
-    
+
     setLoading(true);
     setError(null);
-    
+
     try {
-      const txId = await txHandler.createCampaign(data);
-      
+      // const txId = await txHandler.createCampaign(data);
+      // TODO: Implement with Hedera transaction service
+      throw new Error('Campaign creation not yet implemented');
+
       // Refresh campaigns after creation
       await fetchCampaigns();
-      
-      return txId;
+
+      return 'mock-transaction-id';
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Failed to create campaign';
       setError(errorMessage);
@@ -181,17 +201,19 @@ export const useCampaigns = (): UseCampaignsReturn => {
     if (!user?.walletAddress) {
       throw new Error('User not connected');
     }
-    
+
     setLoading(true);
     setError(null);
-    
+
     try {
-      const txId = await txHandler.investInCampaign(data);
-      
+      // const txId = await txHandler.investInCampaign(data);
+      // TODO: Implement with Hedera transaction service
+      throw new Error('Investment not yet implemented');
+
       // Refresh campaigns and investments after investment
       await Promise.all([fetchCampaigns(), fetchUserInvestments()]);
-      
-      return txId;
+
+      return 'mock-transaction-id';
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Failed to invest in campaign';
       setError(errorMessage);
@@ -203,24 +225,13 @@ export const useCampaigns = (): UseCampaignsReturn => {
 
   const getCampaign = async (id: number): Promise<Campaign | null> => {
     try {
-      const result = await txHandler.getCampaign(id);
-      
-      if (result && result.value) {
-        // Parse contract response and convert to Campaign object
-        // This would need to be adapted based on the actual contract response format
-        return {
-          id,
-          creator: result.value.creator.value,
-          title: result.value.title.value,
-          description: result.value.description.value,
-          targetAmount: parseInt(result.value['target-amount'].value) / 1000000, // Convert from microSTX
-          raisedAmount: parseInt(result.value['raised-amount'].value) / 1000000,
-          deadline: parseInt(result.value.deadline.value),
-          isActive: result.value['is-active'].value,
-          milestoneCount: parseInt(result.value['milestone-count'].value),
-        };
-      }
-      
+      // const result = await txHandler.getCampaign(id);
+      // TODO: Implement with Hedera transaction service
+      return null;
+
+      // TODO: Implement with Hedera transaction service
+      return null;
+
       return null;
     } catch (err) {
       console.error('Error fetching campaign:', err);
@@ -233,13 +244,14 @@ export const useCampaigns = (): UseCampaignsReturn => {
     if (!user?.walletAddress) {
       throw new Error('User not connected');
     }
-    
+
     setLoading(true);
     setError(null);
-    
+
     try {
-      const txId = await txHandler.addMilestone(data);
-      return txId;
+      // const txId = await txHandler.addMilestone(data);
+      // TODO: Implement with Hedera transaction service
+      throw new Error('Milestone creation not yet implemented');
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Failed to add milestone';
       setError(errorMessage);
@@ -253,13 +265,14 @@ export const useCampaigns = (): UseCampaignsReturn => {
     if (!user?.walletAddress) {
       throw new Error('User not connected');
     }
-    
+
     setLoading(true);
     setError(null);
-    
+
     try {
-      const txId = await txHandler.voteOnMilestone(campaignId, milestoneId, voteFor);
-      return txId;
+      // const txId = await txHandler.voteOnMilestone(campaignId, milestoneId, voteFor);
+      // TODO: Implement with Hedera transaction service
+      throw new Error('Voting not yet implemented');
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Failed to vote on milestone';
       setError(errorMessage);
@@ -273,13 +286,14 @@ export const useCampaigns = (): UseCampaignsReturn => {
     if (!user?.walletAddress) {
       throw new Error('User not connected');
     }
-    
+
     setLoading(true);
     setError(null);
-    
+
     try {
-      const txId = await txHandler.releaseMilestoneFunds(campaignId, milestoneId);
-      return txId;
+      // const txId = await txHandler.releaseMilestoneFunds(campaignId, milestoneId);
+      // TODO: Implement with Hedera transaction service
+      throw new Error('Fund release not yet implemented');
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Failed to release milestone funds';
       setError(errorMessage);
@@ -291,23 +305,7 @@ export const useCampaigns = (): UseCampaignsReturn => {
 
   const getMilestone = async (campaignId: number, milestoneId: number): Promise<Milestone | null> => {
     try {
-      const result = await txHandler.getMilestone(campaignId, milestoneId);
-      
-      if (result && result.value) {
-        // Parse contract response and convert to Milestone object
-        return {
-          id: milestoneId,
-          campaignId,
-          title: result.value.title.value,
-          description: result.value.description.value,
-          targetAmount: parseInt(result.value['target-amount'].value) / 1000000,
-          isCompleted: result.value['is-completed'].value,
-          votesFor: parseInt(result.value['votes-for'].value),
-          votesAgainst: parseInt(result.value['votes-against'].value),
-          votingDeadline: parseInt(result.value['voting-deadline'].value),
-        };
-      }
-      
+      // TODO: Implement with Hedera transaction service
       return null;
     } catch (err) {
       console.error('Error fetching milestone:', err);
@@ -323,11 +321,9 @@ export const useCampaigns = (): UseCampaignsReturn => {
 
   const calculatePlatformFee = async (amount: number): Promise<number> => {
     try {
-      const result = await txHandler.calculatePlatformFee(amount);
-      if (result && result.value) {
-        return parseInt(result.value) / 1000000; // Convert from microSTX
-      }
-      return 0;
+      // TODO: Implement with Hedera transaction service
+      // For now, use a simple 2.5% calculation
+      return amount * 0.025;
     } catch (err) {
       console.error('Error calculating platform fee:', err);
       // Fallback to 2.5% calculation
@@ -345,18 +341,18 @@ export const useCampaigns = (): UseCampaignsReturn => {
     userInvestments,
     loading,
     error,
-    
+
     // Campaign actions
     createCampaign,
     investInCampaign,
     getCampaign,
-    
+
     // Milestone actions
     addMilestone,
     voteOnMilestone,
     releaseMilestoneFunds,
     getMilestone,
-    
+
     // Utility functions
     refreshCampaigns,
     calculatePlatformFee,

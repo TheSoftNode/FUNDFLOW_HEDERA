@@ -1,10 +1,10 @@
 "use client";
 
 import React from 'react';
-import DashboardRouter from '@/components/dashboard/DashboardRouter';
+import DashboardLayout from '@/components/dashboard/DashboardLayout';
 
 const DashboardPage = () => {
-  return <DashboardRouter />;
+  return <DashboardLayout />;
 };
 
 export default DashboardPage;

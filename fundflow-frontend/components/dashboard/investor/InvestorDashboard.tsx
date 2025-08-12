@@ -10,9 +10,17 @@ import QuickActions from './QuickActions';
 import MilestoneAlerts from './MilestoneAlerts';
 import Sidebar from './InvestorSidebar';
 
-const InvestorDashboard: React.FC = () => {
-  const [sidebarCollapsed, setSidebarCollapsed] = useState(true);
-  const [activeNavItem, setActiveNavItem] = useState('dashboard');
+interface InvestorDashboardProps {
+  sidebarCollapsed?: boolean;
+  activeNavItem?: string;
+  onNavItemClick?: (itemId: string) => void;
+}
+
+const InvestorDashboard: React.FC<InvestorDashboardProps> = ({
+  sidebarCollapsed = true,
+  activeNavItem = 'dashboard',
+  onNavItemClick
+}) => {
   const [selectedInvestment, setSelectedInvestment] = useState<any>(null);
 
   // Mock data - replace with actual data from your API
@@ -110,61 +118,11 @@ const InvestorDashboard: React.FC = () => {
     setSidebarCollapsed(!sidebarCollapsed);
   };
 
-  // Initialize sidebar state based on screen size
-  React.useEffect(() => {
-    const handleResize = () => {
-      if (window.innerWidth >= 1024) {
-        setSidebarCollapsed(false);
-      } else {
-        setSidebarCollapsed(true);
-      }
-    };
 
-    handleResize();
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
-  }, []);
 
   const handleNavItemClick = (itemId: string) => {
-    setActiveNavItem(itemId);
-    // Handle navigation logic here
-    switch (itemId) {
-      case 'dashboard':
-        // Stay on current page
-        break;
-      case 'investments':
-        // Navigate to investments view
-        break;
-      case 'discover':
-        // Navigate to discover campaigns
-        window.location.href = '/campaign/browse';
-        break;
-      case 'milestones':
-        // Navigate to milestones view
-        break;
-      case 'analytics':
-        // Navigate to analytics view
-        break;
-      case 'community':
-        // Navigate to community
-        break;
-      case 'notifications':
-        // Open notifications panel
-        break;
-      case 'reports':
-        // Navigate to reports
-        break;
-      case 'profile':
-        // Navigate to profile
-        break;
-      case 'settings':
-        // Navigate to settings
-        break;
-      case 'help':
-        // Open help center
-        break;
-      default:
-        console.log('Navigate to:', itemId);
+    if (onNavItemClick) {
+      onNavItemClick(itemId);
     }
   };
 
@@ -196,12 +154,12 @@ const InvestorDashboard: React.FC = () => {
       })),
       exportDate: new Date().toISOString()
     };
-    
+
     const dataStr = JSON.stringify(portfolioData, null, 2);
-    const dataUri = 'data:application/json;charset=utf-8,'+ encodeURIComponent(dataStr);
-    
+    const dataUri = 'data:application/json;charset=utf-8,' + encodeURIComponent(dataStr);
+
     const exportFileDefaultName = `portfolio-export-${new Date().toISOString().split('T')[0]}.json`;
-    
+
     const linkElement = document.createElement('a');
     linkElement.setAttribute('href', dataUri);
     linkElement.setAttribute('download', exportFileDefaultName);
@@ -213,9 +171,8 @@ const InvestorDashboard: React.FC = () => {
       {/* Mobile Menu Button */}
       <button
         onClick={handleSidebarToggle}
-        className={`fixed top-4 left-4 z-50 lg:hidden bg-white dark:bg-gray-800 p-2 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 transition-opacity duration-300 ${
-          sidebarCollapsed ? 'opacity-100' : 'opacity-0 pointer-events-none'
-        }`}
+        className={`fixed top-4 left-4 z-50 lg:hidden bg-white dark:bg-gray-800 p-2 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 transition-opacity duration-300 ${sidebarCollapsed ? 'opacity-100' : 'opacity-0 pointer-events-none'
+          }`}
       >
         <svg className="w-5 h-5 text-gray-600 dark:text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
@@ -233,13 +190,12 @@ const InvestorDashboard: React.FC = () => {
       />
 
       {/* Main Content */}
-      <div className={`flex-1 transition-all duration-300 ${
-        sidebarCollapsed ? 'lg:ml-16' : 'lg:ml-64'
-      }`}>
+      <div className={`flex-1 transition-all duration-300 ${sidebarCollapsed ? 'lg:ml-16' : 'lg:ml-64'
+        }`}>
         <div className="min-h-screen">
           {/* Top Spacing for Mobile Menu */}
           <div className="h-16 lg:h-4"></div>
-          
+
           {/* Dashboard Content */}
           <div className="p-4 lg:p-8">
             {/* Dashboard Header */}
@@ -271,7 +227,7 @@ const InvestorDashboard: React.FC = () => {
                 <div className="w-full">
                   <MilestoneAlerts maxAlerts={5} />
                 </div>
-                
+
                 {/* Recent Activity - Half Width */}
                 <div className="w-full">
                   <RecentActivity maxItems={6} />
@@ -284,7 +240,7 @@ const InvestorDashboard: React.FC = () => {
                 <div className="w-full">
                   <PerformanceChart />
                 </div>
-                
+
                 {/* Quick Actions - Half Width */}
                 <div className="w-full">
                   <QuickActions />

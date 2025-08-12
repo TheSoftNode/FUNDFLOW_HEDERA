@@ -22,7 +22,7 @@ const ConnectWalletButton: React.FC<ConnectWalletButtonProps> = ({
   variant = 'default',
   className = ''
 }) => {
-  const { 
+  const {
     user,
     isConnected,
     isLoading,
@@ -32,23 +32,23 @@ const ConnectWalletButton: React.FC<ConnectWalletButtonProps> = ({
   } = useAuth();
 
   const walletOptions = [
-    { 
-      name: 'HashPack', 
-      id: WalletType.HASHPACK, 
+    {
+      name: 'HashPack',
+      id: WalletType.HASHPACK,
       description: 'Native Hedera wallet',
       recommended: true,
       icon: '🔗'
     },
-    { 
-      name: 'MetaMask', 
-      id: WalletType.METAMASK, 
+    {
+      name: 'MetaMask',
+      id: WalletType.METAMASK,
       description: 'EVM compatible wallet',
       recommended: false,
       icon: '🦊'
     },
-    { 
-      name: 'WalletConnect', 
-      id: WalletType.WALLETCONNECT, 
+    {
+      name: 'WalletConnect',
+      id: WalletType.WALLETCONNECT,
       description: 'Multi-wallet support',
       recommended: false,
       icon: '🔌'
@@ -56,16 +56,19 @@ const ConnectWalletButton: React.FC<ConnectWalletButtonProps> = ({
   ];
 
   const availableWallets = getAvailableWallets();
-  const filteredWalletOptions = walletOptions.filter(wallet => 
+  const filteredWalletOptions = walletOptions.filter(wallet =>
     availableWallets.includes(wallet.id)
   );
 
   const handleConnect = async (walletType: WalletType) => {
     try {
+      console.log(`Attempting to connect to ${walletType}...`);
       await connectWallet(walletType);
+      console.log(`Successfully connected to ${walletType}!`);
     } catch (error) {
-      console.error('Failed to connect wallet:', error);
+      console.error(`Failed to connect to ${walletType}:`, error);
       // You could add toast notification here
+      alert(`Failed to connect to ${walletType}: ${error instanceof Error ? error.message : 'Unknown error'}`);
     }
   };
 
@@ -101,9 +104,13 @@ const ConnectWalletButton: React.FC<ConnectWalletButtonProps> = ({
     }
   };
 
+  // Debug information
+  console.log('Available wallets:', availableWallets);
+  console.log('Filtered wallet options:', filteredWalletOptions);
+
   // Connected state - show user menu
   if (isConnected && user) {
-    
+
     return (
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
@@ -129,7 +136,7 @@ const ConnectWalletButton: React.FC<ConnectWalletButtonProps> = ({
             </div>
           </Button>
         </DropdownMenuTrigger>
-        
+
         <DropdownMenuContent align="end" className="w-64 bg-white dark:bg-gray-800 border border-gray-200/50 dark:border-gray-700/50 shadow-xl rounded-xl p-1">
           {/* User Info Header */}
           <div className="px-3 py-2 border-b border-gray-100 dark:border-gray-700/50 mb-1">
@@ -160,7 +167,7 @@ const ConnectWalletButton: React.FC<ConnectWalletButtonProps> = ({
           </div>
 
           {/* Status & Actions */}
-          <DropdownMenuItem 
+          <DropdownMenuItem
             onClick={handleGoToDashboard}
             className="text-[#7F56D9] hover:text-[#6D47C7] hover:bg-[#7F56D9]/10 rounded-lg mx-1 px-3 py-2.5 transition-all duration-200 cursor-pointer flex items-center space-x-2"
           >
@@ -169,9 +176,9 @@ const ConnectWalletButton: React.FC<ConnectWalletButtonProps> = ({
           </DropdownMenuItem>
 
           <DropdownMenuSeparator className="my-1" />
-          
-          <DropdownMenuItem 
-            onClick={handleDisconnect} 
+
+          <DropdownMenuItem
+            onClick={handleDisconnect}
             className="text-red-500 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg mx-1 px-3 py-2.5 transition-all duration-200 cursor-pointer flex items-center space-x-2"
           >
             <LogOut className="w-4 h-4" />
@@ -209,15 +216,15 @@ const ConnectWalletButton: React.FC<ConnectWalletButtonProps> = ({
           </div>
         </Button>
       </DropdownMenuTrigger>
-      
+
       <DropdownMenuContent align="end" className="w-72 bg-white dark:bg-gray-800 border border-gray-200/50 dark:border-gray-700/50 shadow-xl rounded-xl p-1.5">
-        
+
         <div className="px-3 py-1.5 border-b border-gray-100 dark:border-gray-700/50 mb-1">
           <p className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
             Select Wallet
           </p>
         </div>
-        
+
         {filteredWalletOptions.length > 0 ? (
           filteredWalletOptions.map((wallet) => (
             <DropdownMenuItem
@@ -277,7 +284,7 @@ const ConnectWalletButton: React.FC<ConnectWalletButtonProps> = ({
             </div>
           </div>
         )}
-        
+
         <div className="mt-1 pt-1.5 border-t border-gray-100 dark:border-gray-700/50">
           <p className="text-xs text-gray-400 dark:text-gray-500 px-3 py-1 text-center">
             Connect securely with your preferred wallet

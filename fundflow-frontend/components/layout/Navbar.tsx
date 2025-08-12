@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from 'react';
+import Link from 'next/link';
 import { Menu, TrendingUp, Shield, Users, BarChart3, Briefcase, Zap, ChevronDown, Search, Plus, FolderOpen } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
@@ -47,15 +48,17 @@ const Navbar = () => {
     <>
       <nav className={`
         fixed top-0 w-full z-50 transition-all duration-300
-        ${isScrolled 
-          ? 'bg-white/95 dark:bg-gray-900/95 backdrop-blur-xl border-b border-gray-200/20 dark:border-gray-700/30 shadow-lg shadow-gray-900/5' 
+        ${isScrolled
+          ? 'bg-white/95 dark:bg-gray-900/95 backdrop-blur-xl border-b border-gray-200/20 dark:border-gray-700/30 shadow-lg shadow-gray-900/5'
           : 'bg-white/80 dark:bg-gray-900/80 backdrop-blur-md border-b border-gray-200/10 dark:border-gray-700/20'
         }
       `}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
             {/* Logo */}
-            <Logo />
+            <Link href="/" className="flex items-center hover:opacity-80 transition-opacity duration-200">
+              <Logo />
+            </Link>
 
             {/* Desktop Navigation - Clean & Professional */}
             <div className="hidden lg:flex items-center space-x-6">
@@ -203,7 +206,7 @@ const Navbar = () => {
             <div className="lg:hidden flex items-center space-x-2">
               <ThemeToggle />
               <ConnectWalletButton variant="compact" />
-              
+
               <Sheet open={isMobileOpen} onOpenChange={setIsMobileOpen}>
                 <SheetTrigger asChild>
                   <Button
@@ -214,14 +217,16 @@ const Navbar = () => {
                     <Menu className="w-4 h-4 text-gray-600 dark:text-gray-300" />
                   </Button>
                 </SheetTrigger>
-                
-                <SheetContent 
-                  side="right" 
+
+                <SheetContent
+                  side="right"
                   className="w-80 bg-white dark:bg-gray-900 border-l border-gray-200 dark:border-gray-700 p-0"
                 >
                   <SheetHeader className="text-left p-4 pb-2">
                     <SheetTitle className="flex items-center justify-between">
-                      <Logo size="sm" />
+                      <Link href="/" className="flex items-center hover:opacity-80 transition-opacity duration-200">
+                        <Logo size="sm" />
+                      </Link>
                     </SheetTitle>
                   </SheetHeader>
 
@@ -252,9 +257,9 @@ const Navbar = () => {
                         ))}
                       </div>
                     </div>
-                        
+
                     <Separator className="bg-gray-200 dark:bg-gray-700" />
-                        
+
                     <div>
                       <h3 className="text-xs font-semibold text-gray-500 dark:text-gray-400 mb-2 uppercase tracking-wider px-2">
                         Quick Access
@@ -267,7 +272,7 @@ const Navbar = () => {
                         >
                           <span className="font-medium text-sm">Browse Campaigns</span>
                         </a>
-                        
+
                         <a
                           href="/campaign/create"
                           className="flex items-center px-3 py-2.5 rounded-lg text-gray-600 dark:text-gray-300 hover:text-[#2F80ED] dark:hover:text-[#2F80ED] hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-all duration-200"
@@ -275,7 +280,7 @@ const Navbar = () => {
                         >
                           <span className="font-medium text-sm">Create Campaign</span>
                         </a>
-                        
+
                         {/* Dashboard Link - Show current user role if connected */}
                         {isConnected && user?.role && (
                           <a

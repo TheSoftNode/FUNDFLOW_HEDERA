@@ -8,9 +8,12 @@ import React from 'react';
 const FundFlowLandingPage = () => {
   return (
     <>
+      <Navbar />
       <HeroSection />
       <FeaturesSection />
       <HowItWorksSection />
+      <Footer />
+
     </>
   );
 };

@@ -3,10 +3,10 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { useRouter } from 'next/navigation';
-import { 
-  ArrowRight, 
+import {
+  ArrowRight,
   ArrowLeft,
-  CheckCircle, 
+  CheckCircle,
   Users,
   TrendingUp,
   Target,
@@ -40,10 +40,10 @@ const ConnectWalletOnboarding = () => {
     role: '',
     experience: ''
   });
-  
-  const { 
+
+  const {
     user,
-    isConnected, 
+    isConnected,
     setUserRole,
     updateProfile
   } = useAuth();
@@ -155,8 +155,19 @@ const ConnectWalletOnboarding = () => {
     if (currentStep < onboardingSteps.length - 1) {
       handleStepTransition(currentStep + 1);
     } else {
-      // Complete onboarding - redirect to dashboard
-      router.push('/dashboard');
+      // Complete onboarding - redirect to role-specific dashboard
+      console.log('Completing onboarding, user role:', user?.role);
+      if (user?.role === 'startup') {
+        console.log('Redirecting to startup dashboard');
+        router.push('/dashboard/startup');
+      } else if (user?.role === 'investor') {
+        console.log('Redirecting to investor dashboard');
+        router.push('/dashboard/investor');
+      } else {
+        // Fallback to main dashboard if no role is set
+        console.log('No role set, redirecting to main dashboard');
+        router.push('/dashboard');
+      }
     }
   };
 
@@ -186,12 +197,25 @@ const ConnectWalletOnboarding = () => {
   };
 
   const isStepValid = () => {
-    switch (currentStep) {
-      case 0: return !!user?.role;
-      case 1: return !!(userData.name && userData.company && userData.role);
-      case 2: return selectedInterests.length > 0 && selectedGoals.length > 0;
-      default: return true;
-    }
+    const isValid = (() => {
+      switch (currentStep) {
+        case 0:
+          const hasRole = !!user?.role;
+          console.log('Step 0 validation - user role:', user?.role, 'isValid:', hasRole);
+          return hasRole;
+        case 1:
+          const hasInfo = !!(userData.name && userData.company && userData.role);
+          console.log('Step 1 validation - hasInfo:', hasInfo);
+          return hasInfo;
+        case 2:
+          const hasInterests = selectedInterests.length > 0 && selectedGoals.length > 0;
+          console.log('Step 2 validation - interests:', selectedInterests.length, 'goals:', selectedGoals.length, 'isValid:', hasInterests);
+          return hasInterests;
+        default: return true;
+      }
+    })();
+    console.log(`Step ${currentStep} validation result:`, isValid);
+    return isValid;
   };
 
   const renderStepContent = () => {
@@ -215,15 +239,23 @@ const ConnectWalletOnboarding = () => {
               {userTypes.map((type) => (
                 <div
                   key={type.id}
-                  onClick={() => setUserRole(type.id as 'startup' | 'investor')}
-                  className={`group relative cursor-pointer transition-all duration-500 ${
-                    user?.role === type.id
-                      ? 'transform scale-[1.02]'
-                      : 'hover:transform hover:scale-[1.01]'
-                  }`}
+                  onClick={() => {
+                    console.log('Setting user role to:', type.id);
+                    setUserRole(type.id as 'startup' | 'investor');
+                    // For demo: immediately navigate to dashboard
+                    if (type.id === 'startup') {
+                      router.push('/dashboard/startup');
+                    } else if (type.id === 'investor') {
+                      router.push('/dashboard/investor');
+                    }
+                  }}
+                  className={`group relative cursor-pointer transition-all duration-500 ${user?.role === type.id
+                    ? 'transform scale-[1.02]'
+                    : 'hover:transform hover:scale-[1.01]'
+                    }`}
                 >
                   <div className={`absolute inset-0 ${type.bg} rounded-3xl opacity-60 transition-opacity duration-300`} />
-                  
+
                   {user?.role === type.id && (
                     <>
                       <div className="absolute -top-3 -right-3 w-8 h-8 bg-gradient-to-r from-green-500 to-emerald-500 rounded-full flex items-center justify-center shadow-lg z-10 animate-pulse">
@@ -233,12 +265,11 @@ const ConnectWalletOnboarding = () => {
                     </>
                   )}
 
-                  <div className={`relative p-8 rounded-3xl bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm border transition-all duration-300 ${
-                    user?.role === type.id
-                      ? 'border-blue-200 dark:border-blue-800 shadow-2xl shadow-blue-500/10'
-                      : 'border-gray-200/60 dark:border-gray-700/60 hover:border-gray-300/80 dark:hover:border-gray-600/80 shadow-xl hover:shadow-2xl'
-                  }`}>
-                    
+                  <div className={`relative p-8 rounded-3xl bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm border transition-all duration-300 ${user?.role === type.id
+                    ? 'border-blue-200 dark:border-blue-800 shadow-2xl shadow-blue-500/10'
+                    : 'border-gray-200/60 dark:border-gray-700/60 hover:border-gray-300/80 dark:hover:border-gray-600/80 shadow-xl hover:shadow-2xl'
+                    }`}>
+
                     <div className="flex items-start justify-between mb-6">
                       <div className="flex items-center space-x-4">
                         <div className={`w-14 h-14 bg-gradient-to-br ${type.gradient} rounded-2xl flex items-center justify-center shadow-lg group-hover:shadow-xl transition-shadow duration-300`}>
@@ -327,7 +358,7 @@ const ConnectWalletOnboarding = () => {
                       placeholder="Enter your full name"
                     />
                   </div>
-                  
+
                   <div className="space-y-2">
                     <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300">
                       {user?.role === 'startup' ? 'Company Name' : 'Organization'} *
@@ -381,7 +412,7 @@ const ConnectWalletOnboarding = () => {
       case 2:
         const currentInterests = interests[user?.role as keyof typeof interests] || [];
         const currentGoals = goals[user?.role as keyof typeof goals] || [];
-        
+
         return (
           <div className="max-w-4xl mx-auto">
             <div className="text-center mb-10">
@@ -411,25 +442,22 @@ const ConnectWalletOnboarding = () => {
                     <button
                       key={interest.id}
                       onClick={() => handleInterestToggle(interest.id)}
-                      className={`group relative p-4 rounded-2xl border-2 transition-all duration-300 ${
-                        selectedInterests.includes(interest.id)
-                          ? 'border-blue-500 shadow-lg shadow-blue-500/20 scale-105'
-                          : 'border-gray-200 dark:border-gray-700 hover:border-blue-300 dark:hover:border-blue-600 hover:shadow-md'
-                      }`}
+                      className={`group relative p-4 rounded-2xl border-2 transition-all duration-300 ${selectedInterests.includes(interest.id)
+                        ? 'border-blue-500 shadow-lg shadow-blue-500/20 scale-105'
+                        : 'border-gray-200 dark:border-gray-700 hover:border-blue-300 dark:hover:border-blue-600 hover:shadow-md'
+                        }`}
                     >
                       <div className="flex flex-col items-center space-y-3">
-                        <div className={`w-12 h-12 rounded-xl flex items-center justify-center transition-all duration-300 ${
-                          selectedInterests.includes(interest.id)
-                            ? 'bg-blue-500 text-white shadow-lg'
-                            : `${interest.color} group-hover:scale-110`
-                        }`}>
+                        <div className={`w-12 h-12 rounded-xl flex items-center justify-center transition-all duration-300 ${selectedInterests.includes(interest.id)
+                          ? 'bg-blue-500 text-white shadow-lg'
+                          : `${interest.color} group-hover:scale-110`
+                          }`}>
                           <interest.icon className="w-6 h-6" />
                         </div>
-                        <span className={`text-sm font-semibold text-center transition-colors duration-300 ${
-                          selectedInterests.includes(interest.id)
-                            ? 'text-blue-700 dark:text-blue-300'
-                            : 'text-gray-700 dark:text-gray-300'
-                        }`}>
+                        <span className={`text-sm font-semibold text-center transition-colors duration-300 ${selectedInterests.includes(interest.id)
+                          ? 'text-blue-700 dark:text-blue-300'
+                          : 'text-gray-700 dark:text-gray-300'
+                          }`}>
                           {interest.label}
                         </span>
                       </div>
@@ -457,26 +485,23 @@ const ConnectWalletOnboarding = () => {
                     <button
                       key={goal.id}
                       onClick={() => handleGoalToggle(goal.id)}
-                      className={`group relative p-4 rounded-2xl border-2 text-left transition-all duration-300 ${
-                        selectedGoals.includes(goal.id)
-                          ? 'border-emerald-500 shadow-lg shadow-emerald-500/20 scale-[1.02]'
-                          : 'border-gray-200 dark:border-gray-700 hover:border-emerald-300 dark:hover:border-emerald-600 hover:shadow-md'
-                      }`}
+                      className={`group relative p-4 rounded-2xl border-2 text-left transition-all duration-300 ${selectedGoals.includes(goal.id)
+                        ? 'border-emerald-500 shadow-lg shadow-emerald-500/20 scale-[1.02]'
+                        : 'border-gray-200 dark:border-gray-700 hover:border-emerald-300 dark:hover:border-emerald-600 hover:shadow-md'
+                        }`}
                     >
                       <div className="flex items-start space-x-4">
-                        <div className={`w-12 h-12 rounded-xl flex items-center justify-center transition-all duration-300 ${
-                          selectedGoals.includes(goal.id)
-                            ? 'bg-emerald-500 text-white shadow-lg'
-                            : 'bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 group-hover:bg-emerald-100 dark:group-hover:bg-emerald-900/20'
-                        }`}>
+                        <div className={`w-12 h-12 rounded-xl flex items-center justify-center transition-all duration-300 ${selectedGoals.includes(goal.id)
+                          ? 'bg-emerald-500 text-white shadow-lg'
+                          : 'bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 group-hover:bg-emerald-100 dark:group-hover:bg-emerald-900/20'
+                          }`}>
                           <goal.icon className="w-6 h-6" />
                         </div>
                         <div className="flex-1 min-w-0">
-                          <div className={`font-semibold text-base mb-1 transition-colors duration-300 ${
-                            selectedGoals.includes(goal.id)
-                              ? 'text-emerald-700 dark:text-emerald-300'
-                              : 'text-gray-900 dark:text-white'
-                          }`}>
+                          <div className={`font-semibold text-base mb-1 transition-colors duration-300 ${selectedGoals.includes(goal.id)
+                            ? 'text-emerald-700 dark:text-emerald-300'
+                            : 'text-gray-900 dark:text-white'
+                            }`}>
                             {goal.label}
                           </div>
                           <div className="text-sm text-gray-500 dark:text-gray-400 leading-relaxed">
@@ -591,7 +616,7 @@ const ConnectWalletOnboarding = () => {
               </div>
             </div>
 
-            <button 
+            <button
               onClick={handleNext}
               className="group relative overflow-hidden bg-gradient-to-r from-blue-600 via-purple-600 to-indigo-600 hover:from-blue-700 hover:via-purple-700 hover:to-indigo-700 text-white px-10 py-4 rounded-2xl font-bold text-lg transition-all duration-500 transform hover:scale-105 shadow-2xl hover:shadow-purple-500/25 flex items-center space-x-3 mx-auto"
             >
@@ -620,7 +645,7 @@ const ConnectWalletOnboarding = () => {
           <p className="text-gray-600 dark:text-gray-300 mb-6 leading-relaxed">
             Please connect your Stacks wallet to continue with the onboarding process.
           </p>
-          <button 
+          <button
             onClick={() => router.push('/')}
             className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white px-8 py-3 rounded-xl font-semibold transition-all duration-300 transform hover:scale-105 shadow-lg"
           >
@@ -645,20 +670,18 @@ const ConnectWalletOnboarding = () => {
             <div className="flex items-center space-x-8">
               {onboardingSteps.map((step, index) => (
                 <div key={index} className="flex items-center space-x-3">
-                  <div className={`relative flex items-center space-x-3 ${
-                    index === currentStep 
-                      ? 'text-blue-600 dark:text-blue-400' 
-                      : index < currentStep 
-                        ? 'text-emerald-600 dark:text-emerald-400' 
-                        : 'text-gray-400 dark:text-gray-500'
-                  }`}>
-                    <div className={`relative w-10 h-10 rounded-full flex items-center justify-center font-bold transition-all duration-500 ${
-                      index === currentStep 
-                        ? 'bg-gradient-to-br from-blue-500 to-purple-600 text-white shadow-lg shadow-blue-500/30 scale-110' 
-                        : index < currentStep 
-                          ? 'bg-gradient-to-br from-emerald-500 to-teal-600 text-white shadow-lg shadow-emerald-500/30' 
-                          : 'bg-gray-100 dark:bg-gray-800 text-gray-400 dark:text-gray-500'
+                  <div className={`relative flex items-center space-x-3 ${index === currentStep
+                    ? 'text-blue-600 dark:text-blue-400'
+                    : index < currentStep
+                      ? 'text-emerald-600 dark:text-emerald-400'
+                      : 'text-gray-400 dark:text-gray-500'
                     }`}>
+                    <div className={`relative w-10 h-10 rounded-full flex items-center justify-center font-bold transition-all duration-500 ${index === currentStep
+                      ? 'bg-gradient-to-br from-blue-500 to-purple-600 text-white shadow-lg shadow-blue-500/30 scale-110'
+                      : index < currentStep
+                        ? 'bg-gradient-to-br from-emerald-500 to-teal-600 text-white shadow-lg shadow-emerald-500/30'
+                        : 'bg-gray-100 dark:bg-gray-800 text-gray-400 dark:text-gray-500'
+                      }`}>
                       {index < currentStep ? (
                         <Check className="w-5 h-5" />
                       ) : (
@@ -674,11 +697,10 @@ const ConnectWalletOnboarding = () => {
                     </div>
                   </div>
                   {index < onboardingSteps.length - 1 && (
-                    <div className={`hidden xl:block w-12 h-1 rounded-full transition-all duration-500 ${
-                      index < currentStep 
-                        ? 'bg-gradient-to-r from-emerald-400 to-teal-500 shadow-sm' 
-                        : 'bg-gray-200 dark:bg-gray-700'
-                    }`} />
+                    <div className={`hidden xl:block w-12 h-1 rounded-full transition-all duration-500 ${index < currentStep
+                      ? 'bg-gradient-to-r from-emerald-400 to-teal-500 shadow-sm'
+                      : 'bg-gray-200 dark:bg-gray-700'
+                      }`} />
                   )}
                 </div>
               ))}
@@ -689,7 +711,7 @@ const ConnectWalletOnboarding = () => {
                 {currentStep + 1} of {onboardingSteps.length}
               </span>
               <div className="w-20 h-2 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
-                <div 
+                <div
                   className="h-full bg-gradient-to-r from-blue-500 via-purple-500 to-indigo-500 transition-all duration-500 ease-out rounded-full"
                   style={{ width: `${((currentStep + 1) / onboardingSteps.length) * 100}%` }}
                 />
@@ -722,11 +744,10 @@ const ConnectWalletOnboarding = () => {
             <button
               onClick={handleNext}
               disabled={!isStepValid()}
-              className={`group flex items-center space-x-2 px-8 py-3 rounded-xl font-bold transition-all duration-500 transform ${
-                !isStepValid()
-                  ? 'bg-gray-300 dark:bg-gray-700 text-gray-500 dark:text-gray-400 cursor-not-allowed'
-                  : 'bg-gradient-to-r from-blue-600 via-purple-600 to-indigo-600 hover:from-blue-700 hover:via-purple-700 hover:to-indigo-700 text-white shadow-xl shadow-blue-500/25 hover:shadow-purple-500/25 hover:scale-105'
-              }`}
+              className={`group flex items-center space-x-2 px-8 py-3 rounded-xl font-bold transition-all duration-500 transform ${!isStepValid()
+                ? 'bg-gray-300 dark:bg-gray-700 text-gray-500 dark:text-gray-400 cursor-not-allowed'
+                : 'bg-gradient-to-r from-blue-600 via-purple-600 to-indigo-600 hover:from-blue-700 hover:via-purple-700 hover:to-indigo-700 text-white shadow-xl shadow-blue-500/25 hover:shadow-purple-500/25 hover:scale-105'
+                }`}
             >
               <span>{currentStep === 2 ? 'Complete Setup' : 'Continue'}</span>
               <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform duration-300" />

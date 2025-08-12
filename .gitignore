@@ -1,0 +1,179 @@
+# Root-level .gitignore for FundFlow project
+# This file covers all subprojects
+
+# ================================
+# Environment Variables & Config
+# ================================
+.env
+.env.local
+.env.production
+.env.development
+.env.test
+*.env
+
+# ================================
+# Dependencies & Package Managers
+# ================================
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+package-lock.json
+yarn.lock
+pnpm-lock.yaml
+
+# ================================
+# Build Outputs & Artifacts
+# ================================
+dist/
+build/
+out/
+coverage/
+.next/
+.nuxt/
+.output/
+.cache/
+
+# Smart Contract specific
+artifacts/
+cache/
+typechain/
+typechain-types/
+deployments/localhost/
+deployments/hardhat/
+deployments/.chainId
+
+# ================================
+# Testing & Coverage
+# ================================
+coverage/
+coverage.json
+.nyc_output/
+.coverage/
+lcov.info
+*.lcov
+test-results/
+playwright-report/
+test-results/
+
+# ================================
+# Logs
+# ================================
+*.log
+logs/
+lerna-debug.log*
+.pnpm-debug.log*
+
+# ================================
+# IDE & Editor Files
+# ================================
+.vscode/
+!.vscode/extensions.json
+.idea/
+*.swp
+*.swo
+*~
+.project
+.settings/
+.classpath
+
+# ================================
+# OS Generated Files
+# ================================
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+desktop.ini
+
+# ================================
+# Temporary Files
+# ================================
+*.tmp
+*.temp
+.tmp/
+.temp/
+*.backup
+*.bak
+
+# ================================
+# Runtime Data
+# ================================
+pids
+*.pid
+*.seed
+*.pid.lock
+
+# ================================
+# TypeScript
+# ================================
+*.tsbuildinfo
+.tsc/
+tsconfig.tsbuildinfo
+
+# ================================
+# Database
+# ================================
+*.db
+*.sqlite
+*.sqlite3
+
+# ================================
+# Frontend Specific (Next.js/React)
+# ================================
+# Next.js
+.next/
+out/
+.vercel
+
+# React
+build/
+.eslintcache
+
+# ================================
+# Backend/Server Specific
+# ================================
+# Runtime
+.pm2/
+
+# ================================
+# Blockchain/Crypto Specific
+# ================================
+# Private keys and sensitive data
+*.key
+*.pem
+mnemonic.txt
+private-key.txt
+
+# Local blockchain data
+.chaindata/
+geth/
+
+# ================================
+# Docker
+# ================================
+.dockerignore
+Dockerfile.local
+
+# ================================
+# Misc
+# ================================
+.env.example.local
+CURRENT_TEST_STATUS.md
+LATEST_PROGRESS.md
+
+# Keep important documentation and configuration
+!README.md
+!DOCUMENTATION.md
+!MIGRATION_TO_HEDERA.md
+!CLAUDE.md
+!package.json
+!tsconfig.json
+!hardhat.config.js
+!next.config.ts
+!docker-compose.yml
+!Dockerfile

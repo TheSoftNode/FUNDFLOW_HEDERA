@@ -40,10 +40,8 @@ export default function RootLayout({
         >
           <AuthProvider>
             <div className="min-h-screen bg-white dark:bg-gray-900 transition-colors duration-300">
-              <Navbar />
               {children}
               <Toaster />
-              <Footer />
             </div>
           </AuthProvider>
         </ThemeProvider>

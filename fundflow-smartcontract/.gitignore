@@ -1,23 +1,117 @@
-# Environment variables
+# Smart Contract specific .gitignore
+
+# ================================
+# Environment Variables & Secrets
+# ================================
 .env
 .env.local
 .env.production
+.env.development
+.env.test
+*.env
+mnemonic.txt
+private-key.txt
 
+# ================================
 # Dependencies
+# ================================
 node_modules/
 npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
 
-# Clarinet
-.cache/
+# ================================
+# Hardhat & Smart Contract Build
+# ================================
+artifacts/
+cache/
+dist/
+build/
+solidity-files-cache.json
+
+# TypeChain generated types
+typechain/
+typechain-types/
+
+# ================================
+# Testing & Coverage
+# ================================
+coverage/
+coverage.json
+.nyc_output/
 .coverage/
+lcov.info
+*.lcov
+test-results/
+allure-results/
 
-# IDE
+# ================================
+# Deployment Files
+# ================================
+# Keep deployments/ folder structure but ignore sensitive local data
+deployments/localhost/
+deployments/hardhat/
+deployments/.chainId
+deployments/*/solcInputs/
+deployments/*/.migrations.json
+
+# ================================
+# Documentation Generation
+# ================================
+docs/generated/
+natspec/
+
+# ================================
+# IDE & Editor
+# ================================
 .vscode/
+!.vscode/extensions.json
 .idea/
+*.swp
+*.swo
+*~
 
-# OS
+# ================================
+# OS Generated Files
+# ================================
 .DS_Store
+.DS_Store?
+._*
 Thumbs.db
+desktop.ini
 
-# Logs
+# ================================
+# Logs & Temporary Files
+# ================================
 *.log
+logs/
+*.tmp
+*.temp
+.tmp/
+*.backup
+*.bak
+
+# ================================
+# TypeScript
+# ================================
+*.tsbuildinfo
+tsconfig.tsbuildinfo
+
+# ================================
+# Gas Reports & Performance
+# ================================
+gas-report.txt
+.gas-snapshot
+
+# ================================
+# Scripts Output
+# ================================
+deployment-*.json
+verification-*.json
+
+# ================================
+# Test Status Files
+# ================================
+CURRENT_TEST_STATUS.md
+LATEST_PROGRESS.md

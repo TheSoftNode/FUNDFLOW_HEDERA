@@ -1,10 +1,11 @@
 "use client";
 
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import { 
-  hederaWalletService, 
-  WalletType, 
-  WalletConnection 
+import {
+  hederaWalletService,
+  HederaWalletService,
+  WalletType,
+  WalletConnection
 } from '../lib/hedera-wallet-service';
 
 export type UserRole = 'investor' | 'startup' | null;
@@ -47,8 +48,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   // Initialize wallet listeners on mount
   useEffect(() => {
-    initializeWalletListeners();
-    checkExistingSession();
+    if (typeof window !== 'undefined') {
+      initializeWalletListeners();
+      checkExistingSession();
+    }
   }, []);
 
   const initializeWalletListeners = () => {
@@ -56,7 +59,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     hederaWalletService.on('connected', (connection: WalletConnection) => {
       setConnection(connection);
       setIsConnected(true);
-      
+
       // Check if there's an existing user profile
       const existingUser = localStorage.getItem(`user_${connection.accountId}`);
       if (existingUser) {
@@ -117,7 +120,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       if (walletConnection && hederaWalletService.isConnected()) {
         setConnection(walletConnection);
         setIsConnected(true);
-        
+
         // Check if there's an existing user profile
         const existingUser = localStorage.getItem(`user_${walletConnection.accountId}`);
         if (existingUser) {
@@ -135,6 +138,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           };
           setUser(newUser);
         }
+
+        // Check for demo role from localStorage
+        const demoRole = localStorage.getItem('user_role');
+        if (demoRole && (demoRole === 'startup' || demoRole === 'investor')) {
+          const updatedUser = { ...user, role: demoRole as UserRole };
+          setUser(updatedUser);
+          localStorage.setItem(`user_${walletConnection.accountId}`, JSON.stringify(updatedUser));
+        }
       }
     } catch (error) {
       console.error('Error checking existing session:', error);
@@ -144,11 +155,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   const connectWallet = async (walletType: WalletType) => {
+    console.log(`Starting connection to ${walletType}...`);
     setIsLoading(true);
     try {
+      console.log('Calling hederaWalletService.connect...');
       const walletConnection = await hederaWalletService.connect(walletType);
+      console.log('Connection successful:', walletConnection);
       setConnection(walletConnection);
-      
+
       // Get balance
       let balance = walletConnection.balance || '0';
       try {
@@ -156,10 +170,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       } catch (error) {
         console.warn('Could not fetch balance:', error);
       }
-      
+
       // Check if user exists in our system
       const existingUser = localStorage.getItem(`user_${walletConnection.accountId}`);
-      
+
       if (existingUser) {
         // Existing user - load their role and profile
         const userProfile = JSON.parse(existingUser);
@@ -185,7 +199,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setUser(newUser);
         localStorage.setItem(`user_${walletConnection.accountId}`, JSON.stringify(newUser));
       }
-      
+
       setIsConnected(true);
     } catch (error) {
       console.error('Failed to connect wallet:', error);
@@ -208,7 +222,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const updateBalance = async () => {
     if (!isConnected || !user) return;
-    
+
     try {
       const balance = await hederaWalletService.getBalance();
       const updatedUser = { ...user, balance };
@@ -220,16 +234,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   const getAvailableWallets = (): WalletType[] => {
-    return hederaWalletService.getAvailableWallets();
+    return HederaWalletService.getAvailableWallets();
   };
 
   const setUserRole = async (role: UserRole) => {
     if (!user) return;
-    
+
     try {
       const updatedUser = { ...user, role };
       setUser(updatedUser);
       localStorage.setItem(`user_${user.accountId}`, JSON.stringify(updatedUser));
+      // Also save role globally for demo purposes
+      localStorage.setItem('user_role', role);
     } catch (error) {
       console.error('Failed to set user role:', error);
     }
@@ -237,7 +253,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const updateProfile = async (profileUpdate: Partial<User['profile']>) => {
     if (!user) return;
-    
+
     try {
       const updatedUser = {
         ...user,

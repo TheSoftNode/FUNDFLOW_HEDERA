@@ -1,11 +1,11 @@
 "use client";
 
 import React, { useState } from 'react';
-import { 
-  Eye, 
-  Edit, 
-  MoreHorizontal, 
-  Search, 
+import {
+  Eye,
+  Edit,
+  MoreHorizontal,
+  Search,
   Plus,
   TrendingUp,
   TrendingDown,
@@ -15,7 +15,8 @@ import {
   DollarSign,
   Play,
   Pause,
-  Settings
+  Settings,
+  FolderOpen
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -200,7 +201,7 @@ const CampaignsList: React.FC<CampaignsListProps> = ({ campaigns }) => {
                         </Badge>
                       </div>
                     </div>
-                    
+
                     {/* Actions Dropdown */}
                     <div className="flex space-x-2">
                       <Button
@@ -238,7 +239,7 @@ const CampaignsList: React.FC<CampaignsListProps> = ({ campaigns }) => {
                       <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">Progress</p>
                       <div className="flex items-center space-x-2">
                         <div className="flex-1 bg-gray-200 dark:bg-gray-700 rounded-full h-2">
-                          <div 
+                          <div
                             className="bg-blue-500 h-2 rounded-full transition-all duration-300"
                             style={{ width: `${Math.min(campaign.progressPercentage, 100)}%` }}
                           />
@@ -265,7 +266,7 @@ const CampaignsList: React.FC<CampaignsListProps> = ({ campaigns }) => {
                       <h3 className="font-semibold text-gray-900 dark:text-white text-lg mb-2 truncate">
                         {campaign.title}
                       </h3>
-                      
+
                       <div className="flex items-center space-x-4 mb-3">
                         <Badge className={statusConfig.color}>
                           {statusConfig.label}
@@ -317,9 +318,8 @@ const CampaignsList: React.FC<CampaignsListProps> = ({ campaigns }) => {
                         ) : (
                           <TrendingUp className="w-4 h-4 text-blue-500" />
                         )}
-                        <span className={`font-semibold ${
-                          isOverfunded ? 'text-green-600 dark:text-green-400' : 'text-blue-600 dark:text-blue-400'
-                        }`}>
+                        <span className={`font-semibold ${isOverfunded ? 'text-green-600 dark:text-green-400' : 'text-blue-600 dark:text-blue-400'
+                          }`}>
                           {campaign.progressPercentage}%
                         </span>
                       </div>
@@ -374,8 +374,8 @@ const CampaignsList: React.FC<CampaignsListProps> = ({ campaigns }) => {
               No campaigns found
             </h3>
             <p className="text-gray-500 dark:text-gray-400 mb-6">
-              {searchTerm || statusFilter !== 'all' 
-                ? 'Try adjusting your search or filters.' 
+              {searchTerm || statusFilter !== 'all'
+                ? 'Try adjusting your search or filters.'
                 : 'Create your first campaign to start fundraising.'
               }
             </p>

@@ -1,10 +1,10 @@
 "use client";
 
 import React from 'react';
-import { 
-  DollarSign, 
-  TrendingUp, 
-  Users, 
+import {
+  DollarSign,
+  TrendingUp,
+  Users,
   FolderOpen,
   Target,
   Calendar,
@@ -19,7 +19,12 @@ const StartupStats: React.FC = () => {
       title: 'Total Raised',
       value: '$185,000',
       change: '+12.5%',
-      trend: 'up' as const,
+      trend: {
+        value: 12.5,
+        icon: ArrowUp,
+        color: 'text-green-600 dark:text-green-400',
+        label: 'vs last month'
+      },
       icon: DollarSign,
       iconColor: 'bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-400',
       subtitle: 'Across all campaigns'
@@ -28,7 +33,12 @@ const StartupStats: React.FC = () => {
       title: 'Active Campaigns',
       value: '2',
       change: '+1',
-      trend: 'up' as const,
+      trend: {
+        value: 100,
+        icon: ArrowUp,
+        color: 'text-green-600 dark:text-green-400',
+        label: 'new campaign'
+      },
       icon: FolderOpen,
       iconColor: 'bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400',
       subtitle: 'Currently fundraising'
@@ -37,7 +47,12 @@ const StartupStats: React.FC = () => {
       title: 'Total Investors',
       value: '89',
       change: '+15',
-      trend: 'up' as const,
+      trend: {
+        value: 20.3,
+        icon: ArrowUp,
+        color: 'text-green-600 dark:text-green-400',
+        label: 'new investors'
+      },
       icon: Users,
       iconColor: 'bg-purple-100 dark:bg-purple-900/30 text-purple-600 dark:text-purple-400',
       subtitle: 'Unique backers'
@@ -46,7 +61,12 @@ const StartupStats: React.FC = () => {
       title: 'Avg. Investment',
       value: '$2,079',
       change: '-5.2%',
-      trend: 'down' as const,
+      trend: {
+        value: -5.2,
+        icon: ArrowDown,
+        color: 'text-red-600 dark:text-red-400',
+        label: 'vs last month'
+      },
       icon: TrendingUp,
       iconColor: 'bg-orange-100 dark:bg-orange-900/30 text-orange-600 dark:text-orange-400',
       subtitle: 'Per investor'
@@ -55,7 +75,12 @@ const StartupStats: React.FC = () => {
       title: 'Milestones Completed',
       value: '7/9',
       change: '+2',
-      trend: 'up' as const,
+      trend: {
+        value: 40,
+        icon: ArrowUp,
+        color: 'text-green-600 dark:text-green-400',
+        label: 'completed'
+      },
       icon: Target,
       iconColor: 'bg-teal-100 dark:bg-teal-900/30 text-teal-600 dark:text-teal-400',
       subtitle: 'On track for goals'
@@ -64,7 +89,12 @@ const StartupStats: React.FC = () => {
       title: 'Days to Goal',
       value: '23',
       change: '-7',
-      trend: 'down' as const,
+      trend: {
+        value: -23.3,
+        icon: ArrowDown,
+        color: 'text-red-600 dark:text-red-400',
+        label: 'days left'
+      },
       icon: Calendar,
       iconColor: 'bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400',
       subtitle: 'Avg. across campaigns'
@@ -82,9 +112,10 @@ const StartupStats: React.FC = () => {
             key={index}
             title={stat.title}
             value={stat.value}
-            change={stat.change}
+
             trend={stat.trend}
             icon={stat.icon}
+            bgColor={stat.iconColor.split(' ')[0]}
             iconColor={stat.iconColor}
             subtitle={stat.subtitle}
           />
