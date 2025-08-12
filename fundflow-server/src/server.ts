@@ -8,9 +8,12 @@ import { connectDatabase } from './config/database';
 import { connectRedis } from './config/redis';
 import { errorHandler } from './middleware/errorHandler';
 import { logger } from './utils/logger';
+import { specs, swaggerUi } from './config/swagger';
 import userRoutes from './routes/userRoutes';
 import authRoutes from './routes/authRoutes';
 import campaignRoutes from './routes/campaignRoutes';
+import blockchainRoutes from './routes/blockchainRoutes';
+import fundflowRoutes from './routes/fundflowRoutes';
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -43,10 +46,19 @@ app.get('/health', (req, res) => {
   });
 });
 
+// Swagger Documentation
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(specs, {
+  customCss: '.swagger-ui .topbar { display: none }',
+  customSiteTitle: 'FundFlow API Documentation',
+  customfavIcon: '/favicon.ico'
+}));
+
 // API Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/campaigns', campaignRoutes);
+app.use('/api/blockchain', blockchainRoutes);
+app.use('/api/fundflow', fundflowRoutes);
 
 // 404 handler
 app.use('*', (req, res) => {
