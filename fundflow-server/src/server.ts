@@ -9,6 +9,7 @@ import { connectRedis } from './config/redis';
 import { errorHandler } from './middleware/errorHandler';
 import { logger } from './utils/logger';
 import { specs, swaggerUi } from './config/swagger';
+import { config, validateConfig } from './config/environment';
 import userRoutes from './routes/userRoutes';
 import authRoutes from './routes/authRoutes';
 import campaignRoutes from './routes/campaignRoutes';
@@ -16,19 +17,28 @@ import blockchainRoutes from './routes/blockchainRoutes';
 import fundflowRoutes from './routes/fundflowRoutes';
 
 const app = express();
-const PORT = process.env.PORT || 5000;
+const PORT = config.PORT;
+
+// Validate configuration
+try {
+  validateConfig();
+  logger.info('Configuration validated successfully');
+} catch (error) {
+  logger.error('Configuration validation failed:', error);
+  process.exit(1);
+}
 
 // Rate limiting
 const limiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 100, // limit each IP to 100 requests per windowMs
+  windowMs: config.RATE_LIMIT_WINDOW_MS,
+  max: config.RATE_LIMIT_MAX_REQUESTS,
   message: 'Too many requests from this IP, please try again later.'
 });
 
 // Middleware
 app.use(helmet());
 app.use(cors({
-  origin: process.env.FRONTEND_URL || 'http://localhost:3000',
+  origin: config.CORS_ORIGINS,
   credentials: true
 }));
 app.use(compression());
@@ -80,7 +90,7 @@ async function startServer() {
     logger.info('Connected to Redis');
 
     app.listen(PORT, () => {
-      logger.info(`Server running on port ${PORT} in ${process.env.NODE_ENV || 'development'} mode`);
+      logger.info(`Server running on port ${PORT} in ${config.NODE_ENV} mode`);
     });
   } catch (error) {
     logger.error('Failed to start server:', error);

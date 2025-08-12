@@ -14,6 +14,7 @@ import {
   TransactionId
 } from '@hashgraph/sdk';
 import { logger } from '../utils/logger';
+import { config } from '../config/environment';
 
 export interface HederaConfig {
   network: string;
@@ -46,18 +47,18 @@ export class HederaService {
   constructor(config: HederaConfig) {
     this.config = config;
     this.operatorId = AccountId.fromString(config.accountId);
-    
+
     // Parse private key (remove 0x prefix if present)
     let privateKeyString = config.privateKey;
     if (privateKeyString.startsWith('0x')) {
       privateKeyString = privateKeyString.slice(2);
     }
     this.operatorKey = PrivateKey.fromStringECDSA(privateKeyString);
-    
+
     // Initialize client
     this.client = Client.forName(config.network);
     this.client.setOperator(this.operatorId, this.operatorKey);
-    
+
     logger.info(`HederaService initialized for network: ${config.network}`);
   }
 
@@ -72,9 +73,9 @@ export class HederaService {
   ): Promise<ContractCallResult> {
     try {
       logger.info(`Executing contract function: ${functionName} on contract: ${contractId}`);
-      
+
       const contractParams = this.buildContractParameters(parameters);
-      
+
       const transaction = new ContractExecuteTransaction()
         .setContractId(contractId)
         .setGas(gas)
@@ -83,9 +84,9 @@ export class HederaService {
 
       const txResponse = await transaction.execute(this.client);
       const receipt = await txResponse.getReceipt(this.client);
-      
+
       if (receipt.status !== Status.Success) {
-        throw new ReceiptStatusError(receipt, `Transaction failed with status: ${receipt.status}`);
+        throw new ReceiptStatusError(`Transaction failed with status: ${receipt.status}`);
       }
 
       logger.info(`Contract function ${functionName} executed successfully. Transaction ID: ${txResponse.transactionId}`);
@@ -115,21 +116,21 @@ export class HederaService {
   ): Promise<ContractQueryResult> {
     try {
       logger.info(`Querying contract function: ${functionName} on contract: ${contractId}`);
-      
+
       const contractParams = this.buildContractParameters(parameters);
-      
+
       const query = new ContractCallQuery()
         .setContractId(contractId)
         .setGas(this.config.gasLimit)
         .setFunction(functionName, contractParams);
 
       const response = await query.execute(this.client);
-      
+
       if (response.errorMessage) {
         throw new Error(`Contract query failed: ${response.errorMessage}`);
       }
 
-      const result = response.getResult();
+      const result = response.getResult([]);
       logger.info(`Contract function ${functionName} queried successfully`);
 
       return {
@@ -155,7 +156,7 @@ export class HederaService {
       const receipt = await new TransactionReceiptQuery()
         .setTransactionId(txId)
         .execute(this.client);
-      
+
       return receipt;
     } catch (error) {
       logger.error(`Failed to get transaction receipt for ${transactionId}:`, error);
@@ -169,7 +170,8 @@ export class HederaService {
   async getAccountBalance(accountId: string): Promise<Hbar> {
     try {
       const account = AccountId.fromString(accountId);
-      const balance = await new AccountId(account).getBalance(this.client);
+      const balance = await this.client.getAccountBalance(account);
+      return balance;
       return balance;
     } catch (error) {
       logger.error(`Failed to get account balance for ${accountId}:`, error);
@@ -182,7 +184,7 @@ export class HederaService {
    */
   private buildContractParameters(parameters: any[]): ContractFunctionParameters {
     const contractParams = new ContractFunctionParameters();
-    
+
     parameters.forEach(param => {
       if (typeof param === 'string') {
         if (param.startsWith('0x') && param.length === 42) {
@@ -209,7 +211,7 @@ export class HederaService {
         });
       }
     });
-    
+
     return contractParams;
   }
 
@@ -251,9 +253,9 @@ export class HederaService {
 
 // Export singleton instance
 export const hederaService = new HederaService({
-  network: process.env.HEDERA_NETWORK || 'testnet',
-  accountId: process.env.HEDERA_ACCOUNT_ID || '',
-  privateKey: process.env.HEDERA_PRIVATE_KEY || '',
-  gasLimit: parseInt(process.env.GAS_LIMIT || '8000000'),
-  maxTransactionFee: Hbar.from(20) // 20 HBAR
+  network: config.HEDERA_NETWORK,
+  accountId: config.HEDERA_OPERATOR_ID,
+  privateKey: config.HEDERA_OPERATOR_KEY,
+  gasLimit: config.GAS_LIMIT,
+  maxTransactionFee: Hbar.from(config.MAX_TRANSACTION_FEE)
 });

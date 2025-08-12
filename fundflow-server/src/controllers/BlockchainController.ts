@@ -1,6 +1,8 @@
 import { Request, Response } from 'express';
 import { hederaService } from '../services/HederaService';
 import { fundFlowContractService } from '../services/FundFlowContractService';
+import { smartContractIntegration } from '../services/SmartContractIntegrationService';
+import { blockchainSyncService } from '../services/BlockchainSyncService';
 import { logger } from '../utils/logger';
 import { ApiResponse } from '../utils/apiResponse';
 
@@ -272,11 +274,13 @@ export class BlockchainController {
             // Check if services are properly initialized
             const hederaInitialized = hederaService.getOperatorId() !== '';
             const contractsInitialized = fundFlowContractService.isInitialized();
+            const smartContractIntegrationStatus = smartContractIntegration.getServiceStatus();
 
             if (!hederaInitialized || !contractsInitialized) {
                 return ApiResponse.error(res, 'Blockchain service is unhealthy', 503, {
                     hederaInitialized,
                     contractsInitialized,
+                    smartContractIntegrationStatus,
                     timestamp: new Date().toISOString()
                 });
             }
@@ -284,11 +288,14 @@ export class BlockchainController {
             // Try to get a simple query to verify connectivity
             try {
                 await hederaService.getAccountBalance(hederaService.getOperatorId());
+                smartContractIntegrationStatus.blockchainHealth = true;
             } catch (error) {
                 logger.error('Blockchain connectivity check failed:', error);
+                smartContractIntegrationStatus.blockchainHealth = false;
                 return ApiResponse.error(res, 'Blockchain connectivity check failed', 503, {
                     hederaInitialized,
                     contractsInitialized,
+                    smartContractIntegrationStatus,
                     connectivity: false,
                     timestamp: new Date().toISOString()
                 });
@@ -301,6 +308,7 @@ export class BlockchainController {
                 contracts: fundFlowContractService.getContractAddresses(),
                 hederaInitialized,
                 contractsInitialized,
+                smartContractIntegrationStatus,
                 connectivity: true
             };
 
@@ -308,6 +316,365 @@ export class BlockchainController {
         } catch (error) {
             logger.error('Failed to check blockchain health:', error);
             return ApiResponse.error(res, 'Failed to check blockchain health', 500);
+        }
+    }
+
+    // ==================== SMART CONTRACT INTEGRATION ENDPOINTS ====================
+
+    /**
+     * Create campaign on blockchain
+     */
+    async createCampaignOnBlockchain(req: Request, res: Response) {
+        try {
+            const campaignData = req.body;
+            
+            if (!campaignData.title || !campaignData.description || !campaignData.targetAmount) {
+                return ApiResponse.error(res, 'Missing required campaign data', 400);
+            }
+
+            logger.info('Creating campaign on blockchain:', { title: campaignData.title });
+
+            const result = await smartContractIntegration.createCampaignOnChain(campaignData);
+
+            if (!result.success) {
+                return ApiResponse.error(res, result.error || 'Failed to create campaign on blockchain', 500);
+            }
+
+            return ApiResponse.success(res, 'Campaign created on blockchain successfully', {
+                transactionId: result.transactionId,
+                receipt: result.receipt
+            });
+        } catch (error) {
+            logger.error('Failed to create campaign on blockchain:', error);
+            return ApiResponse.error(res, 'Failed to create campaign on blockchain', 500);
+        }
+    }
+
+    /**
+     * Get campaign from blockchain
+     */
+    async getCampaignFromBlockchain(req: Request, res: Response) {
+        try {
+            const { campaignId } = req.params;
+
+            if (!campaignId) {
+                return ApiResponse.error(res, 'Campaign ID is required', 400);
+            }
+
+            const result = await smartContractIntegration.getCampaignFromChain(parseInt(campaignId));
+
+            if (!result.success) {
+                return ApiResponse.error(res, result.error || 'Failed to get campaign from blockchain', 500);
+            }
+
+            return ApiResponse.success(res, 'Campaign retrieved from blockchain successfully', result.data);
+        } catch (error) {
+            logger.error(`Failed to get campaign ${req.params.campaignId} from blockchain:`, error);
+            return ApiResponse.error(res, 'Failed to get campaign from blockchain', 500);
+        }
+    }
+
+    /**
+     * Submit milestone deliverable
+     */
+    async submitMilestoneDeliverable(req: Request, res: Response) {
+        try {
+            const { campaignId, milestoneIndex, deliverableHash } = req.body;
+
+            if (!campaignId || milestoneIndex === undefined || !deliverableHash) {
+                return ApiResponse.error(res, 'Missing required milestone data', 400);
+            }
+
+            logger.info(`Submitting milestone deliverable: Campaign ${campaignId}, Milestone ${milestoneIndex}`);
+
+            const result = await smartContractIntegration.submitMilestoneDeliverable(
+                parseInt(campaignId),
+                parseInt(milestoneIndex),
+                deliverableHash
+            );
+
+            if (!result.success) {
+                return ApiResponse.error(res, result.error || 'Failed to submit milestone deliverable', 500);
+            }
+
+            return ApiResponse.success(res, 'Milestone deliverable submitted successfully', {
+                transactionId: result.transactionId,
+                receipt: result.receipt
+            });
+        } catch (error) {
+            logger.error('Failed to submit milestone deliverable:', error);
+            return ApiResponse.error(res, 'Failed to submit milestone deliverable', 500);
+        }
+    }
+
+    /**
+     * Vote on milestone
+     */
+    async voteOnMilestone(req: Request, res: Response) {
+        try {
+            const { campaignId, milestoneIndex, vote, reason } = req.body;
+
+            if (!campaignId || milestoneIndex === undefined || vote === undefined) {
+                return ApiResponse.error(res, 'Missing required voting data', 400);
+            }
+
+            logger.info(`Voting on milestone: Campaign ${campaignId}, Milestone ${milestoneIndex}, Vote ${vote}`);
+
+            const result = await smartContractIntegration.voteOnMilestone(
+                parseInt(campaignId),
+                parseInt(milestoneIndex),
+                vote,
+                reason || ''
+            );
+
+            if (!result.success) {
+                return ApiResponse.error(res, result.error || 'Failed to vote on milestone', 500);
+            }
+
+            return ApiResponse.success(res, 'Vote submitted successfully', {
+                transactionId: result.transactionId,
+                receipt: result.receipt
+            });
+        } catch (error) {
+            logger.error('Failed to vote on milestone:', error);
+            return ApiResponse.error(res, 'Failed to vote on milestone', 500);
+        }
+    }
+
+    /**
+     * Complete milestone
+     */
+    async completeMilestone(req: Request, res: Response) {
+        try {
+            const { campaignId, milestoneIndex } = req.body;
+
+            if (!campaignId || milestoneIndex === undefined) {
+                return ApiResponse.error(res, 'Missing required milestone data', 400);
+            }
+
+            logger.info(`Completing milestone: Campaign ${campaignId}, Milestone ${milestoneIndex}`);
+
+            const result = await smartContractIntegration.completeMilestone(
+                parseInt(campaignId),
+                parseInt(milestoneIndex)
+            );
+
+            if (!result.success) {
+                return ApiResponse.error(res, result.error || 'Failed to complete milestone', 500);
+            }
+
+            return ApiResponse.success(res, 'Milestone completed successfully', {
+                transactionId: result.transactionId,
+                receipt: result.receipt
+            });
+        } catch (error) {
+            logger.error('Failed to complete milestone:', error);
+            return ApiResponse.error(res, 'Failed to complete milestone', 500);
+        }
+    }
+
+    /**
+     * Create governance proposal
+     */
+    async createGovernanceProposal(req: Request, res: Response) {
+        try {
+            const { campaignId, proposalType, title, description, executionData } = req.body;
+
+            if (!campaignId || !title || !description) {
+                return ApiResponse.error(res, 'Missing required proposal data', 400);
+            }
+
+            logger.info(`Creating governance proposal: Campaign ${campaignId}, Type ${proposalType}`);
+
+            const result = await smartContractIntegration.createGovernanceProposal(
+                parseInt(campaignId),
+                proposalType || 0,
+                title,
+                description,
+                executionData || ''
+            );
+
+            if (!result.success) {
+                return ApiResponse.error(res, result.error || 'Failed to create governance proposal', 500);
+            }
+
+            return ApiResponse.success(res, 'Governance proposal created successfully', {
+                transactionId: result.transactionId,
+                receipt: result.receipt
+            });
+        } catch (error) {
+            logger.error('Failed to create governance proposal:', error);
+            return ApiResponse.error(res, 'Failed to create governance proposal', 500);
+        }
+    }
+
+    /**
+     * Cast governance vote
+     */
+    async castGovernanceVote(req: Request, res: Response) {
+        try {
+            const { proposalId, support, reason } = req.body;
+
+            if (!proposalId || support === undefined) {
+                return ApiResponse.error(res, 'Missing required voting data', 400);
+            }
+
+            logger.info(`Casting governance vote: Proposal ${proposalId}, Support ${support}`);
+
+            const result = await smartContractIntegration.castGovernanceVote(
+                parseInt(proposalId),
+                support,
+                reason || ''
+            );
+
+            if (!result.success) {
+                return ApiResponse.error(res, result.error || 'Failed to cast governance vote', 500);
+            }
+
+            return ApiResponse.success(res, 'Governance vote cast successfully', {
+                transactionId: result.transactionId,
+                receipt: result.receipt
+            });
+        } catch (error) {
+            logger.error('Failed to cast governance vote:', error);
+            return ApiResponse.error(res, 'Failed to cast governance vote', 500);
+        }
+    }
+
+    // ==================== BLOCKCHAIN SYNCHRONIZATION ENDPOINTS ====================
+
+    /**
+     * Start blockchain synchronization
+     */
+    async startBlockchainSync(req: Request, res: Response) {
+        try {
+            const { intervalMinutes = 5 } = req.body;
+
+            blockchainSyncService.startAutoSync(intervalMinutes);
+
+            return ApiResponse.success(res, 'Blockchain synchronization started successfully', {
+                intervalMinutes,
+                status: 'started'
+            });
+        } catch (error) {
+            logger.error('Failed to start blockchain synchronization:', error);
+            return ApiResponse.error(res, 'Failed to start blockchain synchronization', 500);
+        }
+    }
+
+    /**
+     * Stop blockchain synchronization
+     */
+    async stopBlockchainSync(req: Request, res: Response) {
+        try {
+            blockchainSyncService.stopAutoSync();
+
+            return ApiResponse.success(res, 'Blockchain synchronization stopped successfully', {
+                status: 'stopped'
+            });
+        } catch (error) {
+            logger.error('Failed to stop blockchain synchronization:', error);
+            return ApiResponse.error(res, 'Failed to stop blockchain synchronization', 500);
+        }
+    }
+
+    /**
+     * Get blockchain sync status
+     */
+    async getBlockchainSyncStatus(req: Request, res: Response) {
+        try {
+            const syncStatus = blockchainSyncService.getSyncStatus();
+
+            return ApiResponse.success(res, 'Blockchain sync status retrieved successfully', syncStatus);
+        } catch (error) {
+            logger.error('Failed to get blockchain sync status:', error);
+            return ApiResponse.error(res, 'Failed to get blockchain sync status', 500);
+        }
+    }
+
+    /**
+     * Trigger manual blockchain sync
+     */
+    async triggerBlockchainSync(req: Request, res: Response) {
+        try {
+            const { options = {} } = req.body;
+
+            logger.info('Triggering manual blockchain synchronization');
+
+            const syncStatus = await blockchainSyncService.syncAll(options);
+
+            return ApiResponse.success(res, 'Blockchain synchronization completed', syncStatus);
+        } catch (error) {
+            logger.error('Failed to trigger blockchain synchronization:', error);
+            return ApiResponse.error(res, 'Failed to trigger blockchain synchronization', 500);
+        }
+    }
+
+    // ==================== UTILITY ENDPOINTS ====================
+
+    /**
+     * Get voting power
+     */
+    async getVotingPower(req: Request, res: Response) {
+        try {
+            const { campaignId, voter } = req.params;
+
+            if (!campaignId || !voter) {
+                return ApiResponse.error(res, 'Campaign ID and voter address are required', 400);
+            }
+
+            const result = await smartContractIntegration.getVotingPower(parseInt(campaignId), voter);
+
+            if (!result.success) {
+                return ApiResponse.error(res, result.error || 'Failed to get voting power', 500);
+            }
+
+            return ApiResponse.success(res, 'Voting power retrieved successfully', result.data);
+        } catch (error) {
+            logger.error(`Failed to get voting power for campaign ${req.params.campaignId}, voter ${req.params.voter}:`, error);
+            return ApiResponse.error(res, 'Failed to get voting power', 500);
+        }
+    }
+
+    /**
+     * Calculate platform fee
+     */
+    async calculatePlatformFee(req: Request, res: Response) {
+        try {
+            const { amount } = req.body;
+
+            if (!amount) {
+                return ApiResponse.error(res, 'Amount is required', 400);
+            }
+
+            const result = await smartContractIntegration.calculatePlatformFee(amount);
+
+            if (!result.success) {
+                return ApiResponse.error(res, result.error || 'Failed to calculate platform fee', 500);
+            }
+
+            return ApiResponse.success(res, 'Platform fee calculated successfully', result.data);
+        } catch (error) {
+            logger.error('Failed to calculate platform fee:', error);
+            return ApiResponse.error(res, 'Failed to calculate platform fee', 500);
+        }
+    }
+
+    /**
+     * Get contract balance
+     */
+    async getContractBalance(req: Request, res: Response) {
+        try {
+            const result = await smartContractIntegration.getContractBalance();
+
+            if (!result.success) {
+                return ApiResponse.error(res, result.error || 'Failed to get contract balance', 500);
+            }
+
+            return ApiResponse.success(res, 'Contract balance retrieved successfully', result.data);
+        } catch (error) {
+            logger.error('Failed to get contract balance:', error);
+            return ApiResponse.error(res, 'Failed to get contract balance', 500);
         }
     }
 }

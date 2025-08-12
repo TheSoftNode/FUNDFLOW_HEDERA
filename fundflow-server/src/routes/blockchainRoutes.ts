@@ -349,4 +349,437 @@ router.get('/network/info', blockchainController.getNetworkInfo);
  */
 router.get('/health', blockchainController.getBlockchainHealth);
 
+// ==================== SMART CONTRACT INTEGRATION ROUTES ====================
+
+/**
+ * @swagger
+ * /api/blockchain/campaigns/create:
+ *   post:
+ *     summary: Create campaign on blockchain
+ *     tags: [Blockchain, Campaigns]
+ *     description: Create a new fundraising campaign on the blockchain
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               title:
+ *                 type: string
+ *               description:
+ *                 type: string
+ *               targetAmount:
+ *                 type: string
+ *               durationDays:
+ *                 type: number
+ *               category:
+ *                 type: number
+ *               milestoneFundingPercentages:
+ *                 type: array
+ *               milestoneTitles:
+ *                 type: array
+ *               milestoneDescriptions:
+ *                 type: array
+ *     responses:
+ *       200:
+ *         description: Campaign created successfully on blockchain
+ */
+router.post('/campaigns/create',
+  authenticateToken,
+  body('title').isString().notEmpty(),
+  body('description').isString().notEmpty(),
+  body('targetAmount').isString().notEmpty(),
+  body('durationDays').isNumeric(),
+  body('category').isNumeric(),
+  validateRequest,
+  blockchainController.createCampaignOnBlockchain
+);
+
+/**
+ * @swagger
+ * /api/blockchain/campaigns/{campaignId}:
+ *   get:
+ *     summary: Get campaign from blockchain
+ *     tags: [Blockchain, Campaigns]
+ *     description: Retrieve campaign data directly from the blockchain
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: campaignId
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Campaign data retrieved successfully
+ */
+router.get('/campaigns/:campaignId',
+  authenticateToken,
+  param('campaignId').isNumeric(),
+  validateRequest,
+  blockchainController.getCampaignFromBlockchain
+);
+
+/**
+ * @swagger
+ * /api/blockchain/milestones/submit-deliverable:
+ *   post:
+ *     summary: Submit milestone deliverable
+ *     tags: [Blockchain, Milestones]
+ *     description: Submit a deliverable for milestone completion
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               campaignId:
+ *                 type: number
+ *               milestoneIndex:
+ *                 type: number
+ *               deliverableHash:
+ *                 type: string
+ *     responses:
+ *       200:
+ *         description: Milestone deliverable submitted successfully
+ */
+router.post('/milestones/submit-deliverable',
+  authenticateToken,
+  body('campaignId').isNumeric(),
+  body('milestoneIndex').isNumeric(),
+  body('deliverableHash').isString().notEmpty(),
+  validateRequest,
+  blockchainController.submitMilestoneDeliverable
+);
+
+/**
+ * @swagger
+ * /api/blockchain/milestones/vote:
+ *   post:
+ *     summary: Vote on milestone
+ *     tags: [Blockchain, Milestones]
+ *     description: Cast a vote on milestone completion
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               campaignId:
+ *                 type: number
+ *               milestoneIndex:
+ *                 type: number
+ *               vote:
+ *                 type: boolean
+ *               reason:
+ *                 type: string
+ *     responses:
+ *       200:
+ *         description: Vote submitted successfully
+ */
+router.post('/milestones/vote',
+  authenticateToken,
+  body('campaignId').isNumeric(),
+  body('milestoneIndex').isNumeric(),
+  body('vote').isBoolean(),
+  body('reason').optional().isString(),
+  validateRequest,
+  blockchainController.voteOnMilestone
+);
+
+/**
+ * @swagger
+ * /api/blockchain/milestones/complete:
+ *   post:
+ *     summary: Complete milestone
+ *     tags: [Blockchain, Milestones]
+ *     description: Complete a milestone after voting period
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               campaignId:
+ *                 type: number
+ *               milestoneIndex:
+ *                 type: number
+ *     responses:
+ *       200:
+ *         description: Milestone completed successfully
+ */
+router.post('/milestones/complete',
+  authenticateToken,
+  body('campaignId').isNumeric(),
+  body('milestoneIndex').isNumeric(),
+  validateRequest,
+  blockchainController.completeMilestone
+);
+
+/**
+ * @swagger
+ * /api/blockchain/governance/proposals/create:
+ *   post:
+ *     summary: Create governance proposal
+ *     tags: [Blockchain, Governance]
+ *     description: Create a new governance proposal
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               campaignId:
+ *                 type: number
+ *               proposalType:
+ *                 type: number
+ *               title:
+ *                 type: string
+ *               description:
+ *                 type: string
+ *               executionData:
+ *                 type: string
+ *     responses:
+ *       200:
+ *         description: Governance proposal created successfully
+ */
+router.post('/governance/proposals/create',
+  authenticateToken,
+  body('campaignId').isNumeric(),
+  body('title').isString().notEmpty(),
+  body('description').isString().notEmpty(),
+  body('proposalType').optional().isNumeric(),
+  body('executionData').optional().isString(),
+  validateRequest,
+  blockchainController.createGovernanceProposal
+);
+
+/**
+ * @swagger
+ * /api/blockchain/governance/proposals/vote:
+ *   post:
+ *     summary: Cast governance vote
+ *     tags: [Blockchain, Governance]
+ *     description: Cast a vote on a governance proposal
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               proposalId:
+ *                 type: number
+ *               support:
+ *                 type: boolean
+ *               reason:
+ *                 type: string
+ *     responses:
+ *       200:
+ *         description: Governance vote cast successfully
+ */
+router.post('/governance/proposals/vote',
+  authenticateToken,
+  body('proposalId').isNumeric(),
+  body('support').isBoolean(),
+  body('reason').optional().isString(),
+  validateRequest,
+  blockchainController.castGovernanceVote
+);
+
+// ==================== BLOCKCHAIN SYNCHRONIZATION ROUTES ====================
+
+/**
+ * @swagger
+ * /api/blockchain/sync/start:
+ *   post:
+ *     summary: Start blockchain synchronization
+ *     tags: [Blockchain, Sync]
+ *     description: Start automatic blockchain synchronization
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               intervalMinutes:
+ *                 type: number
+ *                 default: 5
+ *     responses:
+ *       200:
+ *         description: Blockchain synchronization started successfully
+ */
+router.post('/sync/start',
+  authenticateToken,
+  body('intervalMinutes').optional().isNumeric(),
+  validateRequest,
+  blockchainController.startBlockchainSync
+);
+
+/**
+ * @swagger
+ * /api/blockchain/sync/stop:
+ *   post:
+ *     summary: Stop blockchain synchronization
+ *     tags: [Blockchain, Sync]
+ *     description: Stop automatic blockchain synchronization
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Blockchain synchronization stopped successfully
+ */
+router.post('/sync/stop',
+  authenticateToken,
+  blockchainController.stopBlockchainSync
+);
+
+/**
+ * @swagger
+ * /api/blockchain/sync/status:
+ *   get:
+ *     summary: Get blockchain sync status
+ *     tags: [Blockchain, Sync]
+ *     description: Get current blockchain synchronization status
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Sync status retrieved successfully
+ */
+router.get('/sync/status',
+  authenticateToken,
+  blockchainController.getBlockchainSyncStatus
+);
+
+/**
+ * @swagger
+ * /api/blockchain/sync/trigger:
+ *   post:
+ *     summary: Trigger manual blockchain sync
+ *     tags: [Blockchain, Sync]
+ *     description: Trigger a manual blockchain synchronization
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               options:
+ *                 type: object
+ *     responses:
+ *       200:
+ *         description: Blockchain synchronization completed
+ */
+router.post('/sync/trigger',
+  authenticateToken,
+  body('options').optional().isObject(),
+  validateRequest,
+  blockchainController.triggerBlockchainSync
+);
+
+// ==================== UTILITY ROUTES ====================
+
+/**
+ * @swagger
+ * /api/blockchain/voting-power/{campaignId}/{voter}:
+ *   get:
+ *     summary: Get voting power
+ *     tags: [Blockchain, Voting]
+ *     description: Get voting power for a specific address in a campaign
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: campaignId
+ *         required: true
+ *         schema:
+ *           type: string
+ *       - in: path
+ *         name: voter
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Voting power retrieved successfully
+ */
+router.get('/voting-power/:campaignId/:voter',
+  authenticateToken,
+  param('campaignId').isNumeric(),
+  param('voter').isString().notEmpty(),
+  validateRequest,
+  blockchainController.getVotingPower
+);
+
+/**
+ * @swagger
+ * /api/blockchain/calculate-fee:
+ *   post:
+ *     summary: Calculate platform fee
+ *     tags: [Blockchain, Fees]
+ *     description: Calculate platform fee for a given amount
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               amount:
+ *                 type: string
+ *     responses:
+ *       200:
+ *         description: Platform fee calculated successfully
+ */
+router.post('/calculate-fee',
+  authenticateToken,
+  body('amount').isString().notEmpty(),
+  validateRequest,
+  blockchainController.calculatePlatformFee
+);
+
+/**
+ * @swagger
+ * /api/blockchain/contract-balance:
+ *   get:
+ *     summary: Get contract balance
+ *     tags: [Blockchain, Contracts]
+ *     description: Get the current balance of the FundFlow contract
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Contract balance retrieved successfully
+ */
+router.get('/contract-balance',
+  authenticateToken,
+  blockchainController.getContractBalance
+);
+
 export default router;
+

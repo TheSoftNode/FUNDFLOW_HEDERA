@@ -1,5 +1,6 @@
 import { hederaService, ContractCallResult, ContractQueryResult } from './HederaService';
 import { logger } from '../utils/logger';
+import { config } from '../config/environment';
 
 export interface CampaignData {
     id: number;
@@ -63,16 +64,16 @@ export class FundFlowContractService {
     private governanceManagerId: string;
 
     constructor() {
-        // Initialize contract IDs from environment variables
-        this.fundFlowCoreId = process.env.FUNDFLOWCORE_ID || '';
-        this.campaignManagerId = process.env.CAMPAIGNMANAGER_ID || '';
-        this.investmentManagerId = process.env.INVESTMENTMANAGER_ID || '';
-        this.milestoneManagerId = process.env.MILESTONEMANAGER_ID || '';
-        this.analyticsManagerId = process.env.ANALYTICSMANAGER_ID || '';
-        this.governanceManagerId = process.env.GOVERNANCEMANAGER_ID || '';
+        // Initialize contract IDs from configuration
+        this.fundFlowCoreId = config.FUNDFLOWCORE_ID;
+        this.campaignManagerId = config.CAMPAIGNMANAGER_ID;
+        this.investmentManagerId = config.INVESTMENTMANAGER_ID;
+        this.milestoneManagerId = config.MILESTONEMANAGER_ID;
+        this.analyticsManagerId = config.ANALYTICSMANAGER_ID;
+        this.governanceManagerId = config.GOVERNANCEMANAGER_ID;
 
         if (!this.fundFlowCoreId) {
-            throw new Error('FUNDFLOWCORE_ID environment variable is required');
+            throw new Error('FUNDFLOWCORE_ID configuration is required');
         }
 
         logger.info('FundFlowContractService initialized with contract IDs:', {
