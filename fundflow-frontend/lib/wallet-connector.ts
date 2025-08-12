@@ -2,6 +2,7 @@ import { ethers } from 'ethers';
 import { Client, AccountId, AccountBalanceQuery, Hbar, LedgerId } from '@hashgraph/sdk';
 import { EthereumProvider } from '@walletconnect/ethereum-provider';
 import { DAppConnector } from '@hashgraph/hedera-wallet-connect';
+import { MetaMaskInpageProvider } from '@metamask/providers';
 
 // Types
 export enum WalletType {
@@ -100,6 +101,14 @@ export class WalletConnector {
     });
   }
 
+  // Helper method to get ethereum provider with proper typing
+  private get ethereum(): MetaMaskInpageProvider | undefined {
+    if (typeof window !== 'undefined' && window.ethereum) {
+      return window.ethereum as unknown as MetaMaskInpageProvider;
+    }
+    return undefined;
+  }
+
   // HashPack Integration
   async connectHashPack(): Promise<WalletConnection> {
     try {
@@ -172,14 +181,15 @@ export class WalletConnector {
   // MetaMask Integration
   async connectMetaMask(): Promise<WalletConnection> {
     try {
-      if (!window.ethereum || !window.ethereum.isMetaMask) {
+      const ethereum = this.ethereum;
+      if (!ethereum?.isMetaMask) {
         throw new Error('MetaMask is not installed. Please install MetaMask extension.');
       }
 
       console.log('🔗 Connecting to MetaMask...');
 
       // Request accounts
-      const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
+      const accounts = await ethereum.request({ method: 'eth_requestAccounts' }) as string[];
       const account = accounts[0];
 
       if (!account) {
@@ -187,13 +197,13 @@ export class WalletConnector {
       }
 
       // Check if we're on the correct network
-      const chainId = await window.ethereum.request({ method: 'eth_chainId' });
+      const chainId = await ethereum.request({ method: 'eth_chainId' }) as string;
       const expectedChainId = process.env.NEXT_PUBLIC_METAMASK_CHAIN_ID || '296';
 
       if (chainId !== `0x${parseInt(expectedChainId).toString(16)}`) {
         // Request network switch
         try {
-          await window.ethereum.request({
+          await ethereum.request({
             method: 'wallet_switchEthereumChain',
             params: [{ chainId: `0x${parseInt(expectedChainId).toString(16)}` }]
           });
@@ -201,7 +211,7 @@ export class WalletConnector {
           // If the network doesn't exist, add it
           if (switchError.code === 4902) {
             const networkConfig = HEDERA_NETWORKS[process.env.NEXT_PUBLIC_HEDERA_NETWORK || 'testnet'];
-            await window.ethereum.request({
+            await ethereum.request({
               method: 'wallet_addEthereumChain',
               params: [{
                 chainId: `0x${networkConfig.chainId.toString(16)}`,
@@ -218,7 +228,7 @@ export class WalletConnector {
       }
 
       // Create provider and signer
-      const provider = new ethers.BrowserProvider(window.ethereum);
+      const provider = new ethers.BrowserProvider(ethereum);
       const signer = await provider.getSigner();
 
       // Get balance
@@ -273,7 +283,7 @@ export class WalletConnector {
       await this.walletConnectProvider.connect();
 
       // Get accounts
-      const accounts = await this.walletConnectProvider.request({ method: 'eth_accounts' });
+      const accounts = await this.walletConnectProvider.request({ method: 'eth_accounts' }) as string[];
       const account = accounts[0];
 
       if (!account) {
@@ -314,23 +324,26 @@ export class WalletConnector {
   }
 
   private setupMetaMaskListeners() {
-    if (window.ethereum) {
-      window.ethereum.on('accountsChanged', (accounts: string[]) => {
-        this.emit('accountsChanged', accounts);
-        if (accounts.length === 0) {
+    const ethereum = this.ethereum;
+    if (ethereum) {
+      ethereum.on('accountsChanged', (accounts: unknown) => {
+        const accountArray = accounts as string[];
+        this.emit('accountsChanged', accountArray);
+        if (accountArray.length === 0) {
           this.disconnect();
         } else {
           // Update connection with new account
-          this.updateConnection(accounts[0]);
+          this.updateConnection(accountArray[0]);
         }
       });
 
-      window.ethereum.on('chainChanged', (chainId: string) => {
-        this.emit('chainChanged', chainId);
+      ethereum.on('chainChanged', (chainId: unknown) => {
+        const chainIdStr = chainId as string;
+        this.emit('chainChanged', chainIdStr);
         // Check if we need to reconnect
         const expectedChainId = process.env.NEXT_PUBLIC_METAMASK_CHAIN_ID || '296';
-        if (parseInt(chainId, 16).toString() !== expectedChainId) {
-          this.emit('networkMismatch', { current: chainId, expected: expectedChainId });
+        if (parseInt(chainIdStr, 16).toString() !== expectedChainId) {
+          this.emit('networkMismatch', { current: chainIdStr, expected: expectedChainId });
         }
       });
     }
@@ -519,7 +532,8 @@ export class WalletConnector {
   }
 
   static isMetaMaskInstalled(): boolean {
-    return typeof window !== 'undefined' && !!window.ethereum && !!window.ethereum.isMetaMask;
+    if (typeof window === 'undefined') return false;
+    return !!window.ethereum?.isMetaMask;
   }
 
   static getAvailableWallets(): WalletType[] {
@@ -561,9 +575,9 @@ export class WalletConnector {
           console.error('Error loading saved connection:', error);
           this.clearSavedConnection();
         }
-        }
       }
     }
+  }
 
   private clearSavedConnection() {
     if (typeof window !== 'undefined') {

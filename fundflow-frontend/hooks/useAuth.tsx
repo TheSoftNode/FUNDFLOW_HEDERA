@@ -2,11 +2,11 @@
 
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import {
-  hederaWalletService,
-  HederaWalletService,
+  walletConnector,
+  WalletConnector,
   WalletType,
   WalletConnection
-} from '../lib/hedera-wallet-service';
+} from '../lib/wallet-connector';
 
 export type UserRole = 'investor' | 'startup' | null;
 
@@ -56,7 +56,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const initializeWalletListeners = () => {
     // Listen for wallet events
-    hederaWalletService.on('connected', (connection: WalletConnection) => {
+    walletConnector.on('connected', (connection: WalletConnection) => {
       setConnection(connection);
       setIsConnected(true);
 
@@ -79,13 +79,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }
     });
 
-    hederaWalletService.on('disconnected', () => {
+    walletConnector.on('disconnected', () => {
       setConnection(null);
       setIsConnected(false);
       setUser(null);
     });
 
-    hederaWalletService.on('accountsChanged', (accounts: string[]) => {
+    walletConnector.on('accountsChanged', (accounts: string[]) => {
       if (accounts.length === 0) {
         // User disconnected
         setConnection(null);
@@ -93,7 +93,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setUser(null);
       } else {
         // Account changed, update the connection
-        const currentConnection = hederaWalletService.getConnection();
+        const currentConnection = walletConnector.getConnection();
         if (currentConnection) {
           setConnection(currentConnection);
           // Update user with new account info
@@ -110,14 +110,28 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         }
       }
     });
+
+    walletConnector.on('accountChanged', (updatedConnection: WalletConnection) => {
+      setConnection(updatedConnection);
+      if (user) {
+        const updatedUser = {
+          ...user,
+          walletAddress: updatedConnection.address,
+          accountId: updatedConnection.accountId,
+          balance: updatedConnection.balance || '0'
+        };
+        setUser(updatedUser);
+        localStorage.setItem(`user_${updatedConnection.accountId}`, JSON.stringify(updatedUser));
+      }
+    });
   };
 
   const checkExistingSession = async () => {
     setIsLoading(true);
     try {
       // Check if there's an existing wallet connection
-      const walletConnection = hederaWalletService.getConnection();
-      if (walletConnection && hederaWalletService.isConnected()) {
+      const walletConnection = walletConnector.getConnection();
+      if (walletConnection && walletConnector.isConnected()) {
         setConnection(walletConnection);
         setIsConnected(true);
 
@@ -158,15 +172,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     console.log(`Starting connection to ${walletType}...`);
     setIsLoading(true);
     try {
-      console.log('Calling hederaWalletService.connect...');
-      const walletConnection = await hederaWalletService.connect(walletType);
+      console.log('Calling walletConnector.connect...');
+      const walletConnection = await walletConnector.connect(walletType);
       console.log('Connection successful:', walletConnection);
       setConnection(walletConnection);
 
       // Get balance
       let balance = walletConnection.balance || '0';
       try {
-        balance = await hederaWalletService.getBalance();
+        balance = await walletConnector.getBalance();
       } catch (error) {
         console.warn('Could not fetch balance:', error);
       }
@@ -211,7 +225,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const disconnectWallet = async () => {
     try {
-      await hederaWalletService.disconnect();
+      await walletConnector.disconnect();
       setConnection(null);
       setIsConnected(false);
       setUser(null);
@@ -224,7 +238,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     if (!isConnected || !user) return;
 
     try {
-      const balance = await hederaWalletService.getBalance();
+      const balance = await walletConnector.getBalance();
       const updatedUser = { ...user, balance };
       setUser(updatedUser);
       localStorage.setItem(`user_${user.accountId}`, JSON.stringify(updatedUser));
@@ -234,7 +248,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   const getAvailableWallets = (): WalletType[] => {
-    return HederaWalletService.getAvailableWallets();
+    return WalletConnector.getAvailableWallets();
   };
 
   const setUserRole = async (role: UserRole) => {

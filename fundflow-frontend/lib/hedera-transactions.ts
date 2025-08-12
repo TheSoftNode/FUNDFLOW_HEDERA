@@ -14,7 +14,7 @@ import {
   AccountBalanceQuery
 } from '@hashgraph/sdk';
 import { ethers } from 'ethers';
-import { hederaWalletService, WalletType } from './hedera-wallet-service';
+import { walletConnector, WalletType } from './wallet-connector';
 
 export interface TransactionResult {
   success: boolean;
@@ -72,7 +72,7 @@ export class HederaTransactionService {
     durationDays: number
   ): Promise<TransactionResult> {
     try {
-      const connection = hederaWalletService.getConnection();
+      const connection = walletConnector.getConnection();
       if (!connection) {
         throw new Error('No wallet connected');
       }
@@ -139,7 +139,7 @@ export class HederaTransactionService {
     durationDays: number
   ): Promise<TransactionResult> {
     try {
-      const connection = hederaWalletService.getConnection();
+      const connection = walletConnector.getConnection();
       if (!connection || !connection.signer) {
         throw new Error('MetaMask signer not available');
       }
@@ -183,7 +183,7 @@ export class HederaTransactionService {
   // Investment
   async investInCampaign(campaignId: number, amount: number): Promise<TransactionResult> {
     try {
-      const connection = hederaWalletService.getConnection();
+      const connection = walletConnector.getConnection();
       if (!connection) {
         throw new Error('No wallet connected');
       }
@@ -244,7 +244,7 @@ export class HederaTransactionService {
     amount: number
   ): Promise<TransactionResult> {
     try {
-      const connection = hederaWalletService.getConnection();
+      const connection = walletConnector.getConnection();
       if (!connection || !connection.signer) {
         throw new Error('MetaMask signer not available');
       }
@@ -288,7 +288,7 @@ export class HederaTransactionService {
     votingDurationDays: number
   ): Promise<TransactionResult> {
     try {
-      const connection = hederaWalletService.getConnection();
+      const connection = walletConnector.getConnection();
       if (!connection) {
         throw new Error('No wallet connected');
       }
@@ -358,7 +358,7 @@ export class HederaTransactionService {
     votingDurationDays: number
   ): Promise<TransactionResult> {
     try {
-      const connection = hederaWalletService.getConnection();
+      const connection = walletConnector.getConnection();
       if (!connection || !connection.signer) {
         throw new Error('MetaMask signer not available');
       }
@@ -405,7 +405,7 @@ export class HederaTransactionService {
     voteFor: boolean
   ): Promise<TransactionResult> {
     try {
-      const connection = hederaWalletService.getConnection();
+      const connection = walletConnector.getConnection();
       if (!connection) {
         throw new Error('No wallet connected');
       }
@@ -469,7 +469,7 @@ export class HederaTransactionService {
     voteFor: boolean
   ): Promise<TransactionResult> {
     try {
-      const connection = hederaWalletService.getConnection();
+      const connection = walletConnector.getConnection();
       if (!connection || !connection.signer) {
         throw new Error('MetaMask signer not available');
       }
@@ -571,7 +571,7 @@ export class HederaTransactionService {
 
   async transferHBAR(toAccountId: string, amount: number): Promise<TransactionResult> {
     try {
-      const connection = hederaWalletService.getConnection();
+      const connection = walletConnector.getConnection();
       if (!connection) {
         throw new Error('No wallet connected');
       }
@@ -627,7 +627,7 @@ export class HederaTransactionService {
     amount: number
   ): Promise<TransactionResult> {
     try {
-      const connection = hederaWalletService.getConnection();
+      const connection = walletConnector.getConnection();
       if (!connection || !connection.signer) {
         throw new Error('MetaMask signer not available');
       }

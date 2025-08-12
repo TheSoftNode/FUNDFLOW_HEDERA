@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useAuth } from '@/hooks/useAuth';
 import { hederaTransactionService } from '@/lib/hedera-transactions';
-import { WalletType } from '@/lib/hedera-wallet-service';
+import { WalletType } from '@/lib/wallet-connector';
 import { Wallet, Plus, TrendingUp, Target, CheckCircle, AlertCircle } from 'lucide-react';
 
 const WalletDemo: React.FC = () => {
@@ -171,8 +171,8 @@ const WalletDemo: React.FC = () => {
                         <AlertCircle className="w-4 h-4 text-red-500" />
                     )}
                     <span className={`text-sm ${message.type === 'success'
-                            ? 'text-green-700 dark:text-green-300'
-                            : 'text-red-700 dark:text-red-300'
+                        ? 'text-green-700 dark:text-green-300'
+                        : 'text-red-700 dark:text-red-300'
                         }`}>
                         {message.text}
                     </span>

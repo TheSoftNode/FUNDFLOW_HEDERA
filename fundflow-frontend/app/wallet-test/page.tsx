@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from 'react';
-import { HederaWalletService, WalletType } from '@/lib/hedera-wallet-service';
+import { WalletConnector, WalletType } from '@/lib/wallet-connector';
 
 export default function WalletTestPage() {
     const [availableWallets, setAvailableWallets] = useState<WalletType[]>([]);
@@ -22,15 +22,15 @@ export default function WalletTestPage() {
         addLog('Checking available wallets...');
 
         // Check HashPack
-        const hashpackInstalled = HederaWalletService.isHashPackInstalled();
+        const hashpackInstalled = WalletConnector.isHashPackInstalled();
         addLog(`HashPack installed: ${hashpackInstalled}`);
 
         // Check MetaMask
-        const metamaskInstalled = HederaWalletService.isMetaMaskInstalled();
+        const metamaskInstalled = WalletConnector.isMetaMaskInstalled();
         addLog(`MetaMask installed: ${metamaskInstalled}`);
 
         // Get all available wallets
-        const available = HederaWalletService.getAvailableWallets();
+        const available = WalletConnector.getAvailableWallets();
         setAvailableWallets(available);
         addLog(`Available wallets: ${available.join(', ')}`);
     };
@@ -40,8 +40,8 @@ export default function WalletTestPage() {
         setError('');
 
         try {
-            const service = new HederaWalletService();
-            const connection = await service.connect(walletType);
+            const connector = new WalletConnector();
+            const connection = await connector.connect(walletType);
             setConnectionStatus(`Connected to ${walletType}: ${connection.address}`);
             addLog(`Successfully connected to ${walletType}`);
             addLog(`Address: ${connection.address}`);
