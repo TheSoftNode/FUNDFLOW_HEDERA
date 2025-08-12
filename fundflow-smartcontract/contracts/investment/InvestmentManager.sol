@@ -289,7 +289,7 @@ contract InvestmentManager is
         uint256 investmentAmount
     )
         external
-        pure
+        view
         override
         validCampaign(campaignId)
         returns (uint256 expectedReturns, uint256 confidence)
@@ -349,10 +349,10 @@ contract InvestmentManager is
      * @dev Get diversification advice for an investor
      */
     function getDiversificationAdvice(
-        address /* investor */
+        address investor
     )
         external
-        pure
+        view
         override
         returns (
             string[] memory recommendations,
@@ -392,17 +392,17 @@ contract InvestmentManager is
     }
 
     function getCampaignInvestors(
-        uint256 /* campaignId */
-    ) external pure override returns (address[] memory) {
+        uint256 campaignId
+    ) external view override returns (address[] memory) {
         // Would maintain a list of investors per campaign
         return new address[](0);
     }
 
     function getInvestmentHistory(
-        address /* investor */
+        address investor
     )
         external
-        pure
+        view
         override
         returns (
             uint256[] memory campaignIds,
@@ -414,16 +414,16 @@ contract InvestmentManager is
     }
 
     function calculateEquityPercentage(
-        uint256 /* campaignId */,
-        address /* investor */
-    ) external pure override returns (uint256) {
+        uint256 campaignId,
+        address investor
+    ) external view override returns (uint256) {
         // Would calculate based on total campaign equity
         return 0;
     }
 
     function getPlatformInvestmentStats()
         external
-        pure
+        view
         override
         returns (
             uint256 totalInvestments,
@@ -459,23 +459,21 @@ contract InvestmentManager is
     // Token management functions
 
     function updateExternalTokenPrice(
-        address /* token */,
-        uint256 /* price */
+        address token,
+        uint256 price
     ) external override onlyOwner {
         // Token price update implementation
     }
 
     function addSupportedToken(
-        address /* token */,
-        string memory /* name */,
-        string memory /* symbol */
+        address token,
+        string memory name,
+        string memory symbol
     ) external override onlyOwner {
         // Add supported token implementation
     }
 
-    function removeSupportedToken(
-        address /* token */
-    ) external override onlyOwner {
+    function removeSupportedToken(address token) external override onlyOwner {
         // Remove supported token implementation
     }
 
@@ -493,6 +491,7 @@ contract InvestmentManager is
 
         profile.totalInvested = profile.totalInvested.add(investmentAmount);
         profile.activeCampaigns = profile.activeCampaigns.add(1);
+        profile.riskScore = this.calculateRiskScore(investor);
         profile.riskScore = this.calculateRiskScore(investor);
     }
 

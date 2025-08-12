@@ -36,7 +36,7 @@ const NETWORKS = {
     }
 };
 
-class HederaFundFlowDeployer {
+class HederaContractDeployer {
     constructor() {
         this.network = process.env.HEDERA_NETWORK || "testnet";
         this.operatorId = AccountId.fromString(process.env.HEDERA_ACCOUNT_ID);
@@ -85,7 +85,7 @@ class HederaFundFlowDeployer {
      */
     async deployContract(contractName, bytecode, constructorParams = [], gas = 4000000) {
         try {
-            console.log(`\n🚀 Deploying ${contractName} contract...`);
+            console.log(`\\n🚀 Deploying ${contractName} contract...`);
             console.log(`⛽ Gas limit: ${gas.toLocaleString()}`);
             
             // Remove 0x prefix if present
@@ -95,20 +95,30 @@ class HederaFundFlowDeployer {
             let contractParams = new ContractFunctionParameters();
             
             // Add constructor parameters based on contract type
-            if (contractName === "FundFlow" && constructorParams.length > 0) {
-                // FundFlow constructor doesn't take parameters currently
-                // But we can add them if needed in the future
-                constructorParams.forEach((param, index) => {
-                    if (typeof param === "string" && param.startsWith("0.0.")) {
-                        contractParams.addAddress(param);
-                    } else if (typeof param === "string") {
-                        contractParams.addString(param);
-                    } else if (typeof param === "number" || typeof param === "bigint") {
-                        contractParams.addUint256(param);
-                    } else if (typeof param === "boolean") {
-                        contractParams.addBool(param);
-                    }
-                });
+            if (contractName === "SkillToken" && constructorParams.length >= 3) {
+                contractParams.addString(constructorParams[0]); // name
+                contractParams.addString(constructorParams[1]); // symbol
+                contractParams.addAddress(constructorParams[2]); // initialAdmin
+            } else if (contractName === "TalentPool" && constructorParams.length >= 3) {
+                contractParams.addAddress(constructorParams[0]); // skillToken address
+                contractParams.addAddress(constructorParams[1]); // feeCollector
+                contractParams.addAddress(constructorParams[2]); // initialAdmin
+            } else if (contractName === "ReputationOracle" && constructorParams.length >= 2) {
+                contractParams.addAddress(constructorParams[0]); // skillToken address
+                contractParams.addAddress(constructorParams[1]); // initialAdmin
+            } else if (contractName === "Governance" && constructorParams.length >= 3) {
+                contractParams.addAddress(constructorParams[0]); // skillToken address
+                contractParams.addAddress(constructorParams[1]); // initialAdmin
+                
+                // Add GovernanceSettings struct
+                const settings = constructorParams[2];
+                contractParams.addUint256(settings.votingDelay);
+                contractParams.addUint256(settings.votingPeriod);
+                contractParams.addUint256(settings.executionDelay);
+                contractParams.addUint256(settings.proposalThreshold);
+                contractParams.addUint32(settings.quorumPercentage);
+                contractParams.addUint256(settings.emergencyVotingPeriod);
+                contractParams.addUint32(settings.emergencyQuorumPercentage);
             }
             
             // Deploy contract
@@ -158,7 +168,10 @@ class HederaFundFlowDeployer {
         try {
             // Map contract names to their directory structure
             const contractPaths = {
-                "FundFlow": "core/FundFlow.sol"
+                "SkillToken": "token/SkillToken.sol",
+                "TalentPool": "core/TalentPool.sol", 
+                "Governance": "governance/Governance.sol",
+                "ReputationOracle": "oracle/ReputationOracle.sol"
             };
             
             const contractPath = contractPaths[contractName];
@@ -191,17 +204,17 @@ class HederaFundFlowDeployer {
      */
     async callContractFunction(contractId, functionName, params = [], gas = 100000) {
         try {
-            console.log(`\n📞 Calling ${functionName} on contract ${contractId}...`);
+            console.log(`\\n📞 Calling ${functionName} on contract ${contractId}...`);
             
             let contractParams = new ContractFunctionParameters();
             
-            // Add parameters based on function
+            // Add parameters based on function (this would need to be expanded for specific functions)
             params.forEach((param, index) => {
                 if (typeof param === "string" && param.startsWith("0.0.")) {
                     contractParams.addAddress(param);
                 } else if (typeof param === "string") {
                     contractParams.addString(param);
-                } else if (typeof param === "number" || typeof param === "bigint") {
+                } else if (typeof param === "number") {
                     contractParams.addUint256(param);
                 } else if (typeof param === "boolean") {
                     contractParams.addBool(param);
@@ -244,7 +257,7 @@ class HederaFundFlowDeployer {
      */
     async queryContractFunction(contractId, functionName, params = []) {
         try {
-            console.log(`\n🔍 Querying ${functionName} on contract ${contractId}...`);
+            console.log(`\\n🔍 Querying ${functionName} on contract ${contractId}...`);
             
             let contractParams = new ContractFunctionParameters();
             
@@ -253,7 +266,7 @@ class HederaFundFlowDeployer {
                     contractParams.addAddress(param);
                 } else if (typeof param === "string") {
                     contractParams.addString(param);
-                } else if (typeof param === "number" || typeof param === "bigint") {
+                } else if (typeof param === "number") {
                     contractParams.addUint256(param);
                 } else if (typeof param === "boolean") {
                     contractParams.addBool(param);
@@ -305,7 +318,7 @@ class HederaFundFlowDeployer {
         }
         
         fs.writeFileSync(outputPath, JSON.stringify(deploymentInfo, null, 2));
-        console.log(`\n💾 Deployment info saved to: ${outputPath}`);
+        console.log(`\\n💾 Deployment info saved to: ${outputPath}`);
         
         // Update environment file
         this.updateEnvironmentFile(deployments);
@@ -317,19 +330,19 @@ class HederaFundFlowDeployer {
      */
     updateEnvironmentFile(deployments) {
         // Update root .env file
-        const rootEnvPath = path.join(__dirname, "..", ".env");
-        this.updateEnvFile(rootEnvPath, deployments, false);
+        const rootEnvPath = path.join(__dirname, "..", "..", ".env");
+        this.updateEnvFile(rootEnvPath, deployments, true);
         
-        // Update frontend .env.local file if it exists
-        const frontendEnvPath = path.join(__dirname, "..", "..", "fundflow-frontend", ".env.local");
-        if (fs.existsSync(path.dirname(frontendEnvPath))) {
-            this.updateEnvFile(frontendEnvPath, deployments, true);
+        // Update backend .env file if it exists
+        const backendEnvPath = path.join(__dirname, "..", "..", "backend", ".env");
+        if (fs.existsSync(path.dirname(backendEnvPath))) {
+            this.updateEnvFile(backendEnvPath, deployments, false);
         }
         
-        // Update server .env file if it exists  
-        const serverEnvPath = path.join(__dirname, "..", "..", "fundflow-server", ".env");
-        if (fs.existsSync(path.dirname(serverEnvPath))) {
-            this.updateEnvFile(serverEnvPath, deployments, false);
+        // Update frontend .env.local file if it exists
+        const frontendEnvPath = path.join(__dirname, "..", "..", "frontend", ".env.local");
+        if (fs.existsSync(path.dirname(frontendEnvPath))) {
+            this.updateEnvFile(frontendEnvPath, deployments, true);
         }
     }
     
@@ -378,41 +391,74 @@ class HederaFundFlowDeployer {
  * Main deployment script
  */
 async function main() {
-    console.log("🚀 FundFlow - Smart Contract Deployment");
+    console.log("🚀 TalentChain Pro - Smart Contract Deployment");
     console.log("=" .repeat(50));
     
-    const deployer = new HederaFundFlowDeployer();
+    const deployer = new HederaContractDeployer();
     const deployments = {};
     
     try {
         // Check if contracts are compiled
         console.log("\n🔍 Checking compiled contracts...");
         
-        let fundFlowBytecode;
+        // Read contract bytecodes directly
+        let skillTokenBytecode, talentPoolBytecode, governanceBytecode, reputationOracleBytecode;
         
         try {
-            fundFlowBytecode = deployer.readContractBytecode("FundFlow");
-            console.log(`✅ Found FundFlow contract`);
+            skillTokenBytecode = deployer.readContractBytecode("SkillToken");
+            console.log(`✅ Found SkillToken contract`);
         } catch (error) {
-            console.error("❌ FundFlow contract not found!");
+            console.error("❌ SkillToken contract not found!");
+            console.error("Please run 'npm run compile' first to compile the contracts.");
+            process.exit(1);
+        }
+        
+        try {
+            talentPoolBytecode = deployer.readContractBytecode("TalentPool");
+            console.log(`✅ Found TalentPool contract`);
+        } catch (error) {
+            console.error("❌ TalentPool contract not found!");
+            console.error("Please run 'npm run compile' first to compile the contracts.");
+            process.exit(1);
+        }
+        
+        try {
+            governanceBytecode = deployer.readContractBytecode("Governance");
+            console.log(`✅ Found Governance contract`);
+        } catch (error) {
+            console.error("❌ Governance contract not found!");
+            console.error("Please run 'npm run compile' first to compile the contracts.");
+            process.exit(1);
+        }
+        
+        try {
+            reputationOracleBytecode = deployer.readContractBytecode("ReputationOracle");
+            console.log(`✅ Found ReputationOracle contract`);
+        } catch (error) {
+            console.error("❌ ReputationOracle contract not found!");
             console.error("Please run 'npm run compile' first to compile the contracts.");
             process.exit(1);
         }
 
-        // Deploy FundFlow contract
-        console.log("\n1️⃣  Deploying FundFlow contract...");
+        // Deploy SkillToken contract
+        console.log("\n1️⃣  Deploying SkillToken contract...");
+        const skillTokenParams = [
+            "TalentChain Skill Token", // name
+            "TCST", // symbol  
+            deployer.operatorId.toSolidityAddress() // initialAdmin
+        ];
         
-        const fundFlowDeployment = await deployer.deployContract(
-            "FundFlow",
-            fundFlowBytecode,
-            [], // No constructor parameters needed
-            6000000  // Increased gas limit for complex contract
+        const skillTokenDeployment = await deployer.deployContract(
+            "SkillToken",
+            skillTokenBytecode,
+            skillTokenParams,
+            6000000  // Increased gas limit
         );
         
-        deployments.fundflow = fundFlowDeployment;
+        deployments.skillToken = skillTokenDeployment;
         
-        if (!fundFlowDeployment.success) {
-            console.error("❌ FundFlow deployment failed. Aborting.");
+        if (!skillTokenDeployment.success) {
+            console.error("❌ SkillToken deployment failed. Aborting.");
             process.exit(1);
         }
         
@@ -420,28 +466,101 @@ async function main() {
         console.log("⏳ Waiting for contract to be available...");
         await new Promise(resolve => setTimeout(resolve, 5000));
         
-        // Test contract functionality
-        console.log("\n2️⃣  Testing contract functionality...");
+        // Deploy ReputationOracle contract
+        console.log("\n2️⃣  Deploying ReputationOracle contract...");
+        const reputationOracleParams = [
+            skillTokenDeployment.contractAddress, // skillToken address in 0x format
+            deployer.operatorId.toSolidityAddress() // initialAdmin
+        ];
         
-        // Query initial state
-        const totalCampaignsResult = await deployer.queryContractFunction(
-            fundFlowDeployment.contractId,
-            "getTotalCampaigns",
-            []
+        const reputationOracleDeployment = await deployer.deployContract(
+            "ReputationOracle",
+            reputationOracleBytecode,
+            reputationOracleParams,
+            6000000  // Increased gas limit
         );
         
-        if (totalCampaignsResult.success) {
-            console.log("✅ Contract state query successful");
+        deployments.reputationOracle = reputationOracleDeployment;
+        
+        if (!reputationOracleDeployment.success) {
+            console.error("❌ ReputationOracle deployment failed. Aborting.");
+            process.exit(1);
         }
         
-        const platformFeeResult = await deployer.queryContractFunction(
-            fundFlowDeployment.contractId,
-            "platformFeePercent",
-            []
+        // Wait a bit for the contract to be available
+        console.log("⏳ Waiting for contract to be available...");
+        await new Promise(resolve => setTimeout(resolve, 5000));
+        
+        // Deploy TalentPool contract
+        console.log("\n3️⃣  Deploying TalentPool contract...");
+        const talentPoolParams = [
+            skillTokenDeployment.contractAddress, // skillToken address in 0x format
+            deployer.operatorId.toSolidityAddress(), // feeCollector
+            deployer.operatorId.toSolidityAddress()  // initialAdmin
+        ];
+        
+        const talentPoolDeployment = await deployer.deployContract(
+            "TalentPool",
+            talentPoolBytecode,
+            talentPoolParams,
+            6000000  // Increased gas limit
         );
         
-        if (platformFeeResult.success) {
-            console.log("✅ Platform fee query successful");
+        deployments.talentPool = talentPoolDeployment;
+        
+        if (!talentPoolDeployment.success) {
+            console.error("❌ TalentPool deployment failed. Aborting.");
+            process.exit(1);
+        }
+        
+        // Wait a bit for the contract to be available
+        console.log("⏳ Waiting for contract to be available...");
+        await new Promise(resolve => setTimeout(resolve, 5000));
+        
+        // Deploy Governance contract
+        console.log("\n4️⃣  Deploying Governance contract...");
+        // First create the GovernanceSettings struct parameters
+        const governanceParams = [
+            skillTokenDeployment.contractAddress, // skillToken address in 0x format
+            deployer.operatorId.toSolidityAddress(), // initialAdmin
+            {
+                votingDelay: 86400, // 24 hours
+                votingPeriod: 604800, // 7 days
+                executionDelay: 172800, // 48 hours
+                proposalThreshold: 1000000000000000000n, // 1 token
+                quorumPercentage: 20, // 20%
+                emergencyVotingPeriod: 43200, // 12 hours
+                emergencyQuorumPercentage: 30 // 30%
+            }
+        ];
+        
+        const governanceDeployment = await deployer.deployContract(
+            "Governance",
+            governanceBytecode,
+            governanceParams,
+            6000000  // Increased gas limit
+        );
+        
+        deployments.governance = governanceDeployment;
+        
+        // Setup initial configuration
+        if (skillTokenDeployment.success && talentPoolDeployment.success) {
+            console.log("\n5️⃣  Setting up initial configuration...");
+            
+            // Add TalentPool as minter role to SkillToken
+            const addMinterResult = await deployer.callContractFunction(
+                skillTokenDeployment.contractId,
+                "grantRole",
+                [
+                    "0x9f2df0fed2c77648de5860a4cc508cd0818c85b8b8a1ab4ceeef8d981c8956a6", // MINTER_ROLE hash
+                    talentPoolDeployment.contractAddress // Use Solidity address format
+                ],
+                200000
+            );
+            
+            if (addMinterResult.success) {
+                console.log("✅ TalentPool granted MINTER_ROLE on SkillToken");
+            }
         }
         
         // Save deployment information
@@ -466,7 +585,6 @@ async function main() {
         console.log("1. Update your frontend with the contract addresses");
         console.log("2. Start the backend server to test API integration");
         console.log("3. Test contract functions through the web interface");
-        console.log("4. Run verification script to validate deployment");
         
     } catch (error) {
         console.error("💥 Deployment failed:", error);
@@ -485,6 +603,6 @@ if (require.main === module) {
 }
 
 module.exports = {
-    HederaFundFlowDeployer,
+    HederaContractDeployer,
     NETWORKS
 };

@@ -29,7 +29,7 @@ contract AnalyticsManager is IAnalyticsManager, Ownable, Pausable {
     mapping(uint256 => bool) private _anomaliesDetected;
 
     address public fundFlowCore;
-    uint256 public updateFrequency = 1 hours;
+    uint256 public updateFrequency = 24 hours; // Fixed: Changed from 1 hours to 24 hours
     bool public realTimeEnabled = true;
     address[] public dataProviders;
 
