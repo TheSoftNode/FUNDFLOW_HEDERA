@@ -32,7 +32,6 @@ const ConnectWalletButton: React.FC<ConnectWalletButtonProps> = ({
   } = useAuth();
 
   const walletOptions = [
-
     {
       name: 'MetaMask',
       id: WalletType.METAMASK,
@@ -45,7 +44,6 @@ const ConnectWalletButton: React.FC<ConnectWalletButtonProps> = ({
       name: 'WalletConnect',
       id: WalletType.WALLETCONNECT,
       description: 'Multi-wallet support',
-      recommended: false,
       icon: '🔌',
       color: 'from-blue-500 to-blue-600',
       installUrl: 'https://walletconnect.com'
@@ -53,19 +51,24 @@ const ConnectWalletButton: React.FC<ConnectWalletButtonProps> = ({
   ];
 
   const availableWallets = getAvailableWallets();
-  const filteredWalletOptions = walletOptions.filter(wallet =>
-    availableWallets.includes(wallet.id)
-  );
 
-  const handleConnect = async (walletType: WalletType) => {
+  const handleWalletAction = async (wallet: typeof walletOptions[0]) => {
+    const isInstalled = availableWallets.includes(wallet.id);
+
+    if (!isInstalled) {
+      // Redirect to installation page
+      window.open(wallet.installUrl, '_blank', 'noopener,noreferrer');
+      return;
+    }
+
+    // Try to connect to installed wallet
     try {
-      console.log(`Attempting to connect to ${walletType}...`);
-      await connectWallet(walletType);
-      console.log(`Successfully connected to ${walletType}!`);
+      console.log(`Attempting to connect to ${wallet.id}...`);
+      await connectWallet(wallet.id);
+      console.log(`Successfully connected to ${wallet.id}!`);
     } catch (error) {
-      console.error(`Failed to connect to ${walletType}:`, error);
-      // You could add toast notification here
-      alert(`Failed to connect to ${walletType}: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      console.error(`Failed to connect to ${wallet.id}:`, error);
+      alert(`Failed to connect to ${wallet.id}: ${error instanceof Error ? error.message : 'Unknown error'}`);
     }
   };
 
@@ -97,7 +100,6 @@ const ConnectWalletButton: React.FC<ConnectWalletButtonProps> = ({
 
   // Debug information
   console.log('Available wallets:', availableWallets);
-  console.log('Filtered wallet options:', filteredWalletOptions);
 
   // Connected state - show user menu
   if (isConnected && user) {
@@ -226,11 +228,12 @@ const ConnectWalletButton: React.FC<ConnectWalletButtonProps> = ({
           </p>
         </div>
 
-        {filteredWalletOptions.length > 0 ? (
-          filteredWalletOptions.map((wallet) => (
+        {walletOptions.map((wallet) => {
+          const isInstalled = availableWallets.includes(wallet.id);
+          return (
             <DropdownMenuItem
               key={wallet.id}
-              onClick={() => handleConnect(wallet.id)}
+              onClick={() => handleWalletAction(wallet)}
               className="flex items-center justify-between p-3 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700/50 rounded-lg mx-1 transition-all duration-200 group"
               disabled={isLoading}
             >
@@ -249,45 +252,26 @@ const ConnectWalletButton: React.FC<ConnectWalletButtonProps> = ({
                         <span>Recommended</span>
                       </span>
                     )}
+                    {!isInstalled && (
+                      <span className="inline-flex items-center space-x-1 text-xs bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300 px-2 py-0.5 rounded-full font-medium">
+                        <ExternalLink className="w-2.5 h-2.5" />
+                        <span>Install</span>
+                      </span>
+                    )}
                   </div>
                   <p className="text-xs text-gray-500 dark:text-gray-400 leading-tight mt-0.5">
                     {wallet.description}
                   </p>
+                  {!isInstalled && (
+                    <p className="text-xs text-amber-600 dark:text-amber-400 leading-tight mt-1 font-medium">
+                      Click to install {wallet.name}
+                    </p>
+                  )}
                 </div>
               </div>
             </DropdownMenuItem>
-          ))
-        ) : (
-          <div className="px-3 py-4 text-center">
-            <p className="text-sm text-gray-500 dark:text-gray-400 mb-2">
-              No compatible wallets found
-            </p>
-            <p className="text-xs text-gray-400 dark:text-gray-500">
-              Please install HashPack or MetaMask to continue
-            </p>
-            <div className="mt-3 space-y-2">
-              <a
-                href="https://hashpack.app"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex items-center space-x-1 text-xs text-[#7F56D9] hover:text-[#6D47C7] transition-colors"
-              >
-                <span>Install HashPack</span>
-                <ExternalLink className="w-3 h-3" />
-              </a>
-              <br />
-              <a
-                href="https://metamask.io"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex items-center space-x-1 text-xs text-[#7F56D9] hover:text-[#6D47C7] transition-colors"
-              >
-                <span>Install MetaMask</span>
-                <ExternalLink className="w-3 h-3" />
-              </a>
-            </div>
-          </div>
-        )}
+          );
+        })}
 
         <div className="mt-1 pt-1.5 border-t border-gray-100 dark:border-gray-700/50">
           <p className="text-xs text-gray-400 dark:text-gray-500 px-3 py-1 text-center">
