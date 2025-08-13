@@ -376,32 +376,6 @@ npm run lint:fix
 
 This project is licensed under the MIT License. See the LICENSE file for details.
 
-## 🗺️ Roadmap
-
-### Phase 1 - Foundation (Q1 2025) ✅
-- [x] Core smart contract functionality
-- [x] Basic web interface for campaigns and investments
-- [x] Wallet integration and authentication
-- [x] Milestone creation and voting system
-
-### Phase 2 - Enhanced Features (Q2 2025)
-- [ ] Advanced analytics dashboard
-- [ ] Mobile-responsive design
-- [ ] Enhanced governance features
-- [ ] Performance optimizations
-
-### Phase 3 - Scale & Compliance (Q3 2025)
-- [ ] Mainnet launch with security audits
-- [ ] Regulatory compliance framework
-- [ ] Enterprise-grade features
-- [ ] Global market expansion
-
-### Phase 4 - Innovation (Q4 2025)
-- [ ] AI-powered investment recommendations
-- [ ] Cross-chain bridge integration
-- [ ] Advanced DeFi features
-- [ ] Institutional investor tools
-
 ## 🌟 Why Hedera?
 
 **Hedera Hashgraph** provides the ideal foundation for FundFlow:
@@ -413,13 +387,6 @@ This project is licensed under the MIT License. See the LICENSE file for details
 - **Regulatory Ready**: Built with compliance in mind
 - **EVM Compatible**: Seamless integration with existing Ethereum tools
 
-## 📞 Support
 
-- **Documentation**: [docs.fundflow.io](https://docs.fundflow.io)
-- **Discord**: [discord.gg/fundflow](https://discord.gg/fundflow)
-- **Twitter**: [@fundflow_io](https://twitter.com/fundflow_io)
-- **Email**: support@fundflow.io
-
----
 
 **FundFlow** - Revolutionizing startup fundraising with blockchain technology. 🚀
