@@ -246,12 +246,7 @@ const ConnectWalletButton: React.FC<ConnectWalletButtonProps> = ({
                     <span className="font-medium text-gray-900 dark:text-white group-hover:text-[#7F56D9] transition-colors">
                       {wallet.name}
                     </span>
-                    {wallet.recommended && (
-                      <span className="inline-flex items-center space-x-1 text-xs bg-gradient-to-r from-[#00C9A7] to-[#00E6A7] text-white px-2 py-0.5 rounded-full font-medium">
-                        <Sparkles className="w-2.5 h-2.5" />
-                        <span>Recommended</span>
-                      </span>
-                    )}
+
                     {!isInstalled && (
                       <span className="inline-flex items-center space-x-1 text-xs bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300 px-2 py-0.5 rounded-full font-medium">
                         <ExternalLink className="w-2.5 h-2.5" />
