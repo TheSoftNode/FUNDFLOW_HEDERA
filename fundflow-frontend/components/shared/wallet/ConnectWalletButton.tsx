@@ -73,13 +73,7 @@ const ConnectWalletButton: React.FC<ConnectWalletButtonProps> = ({
     disconnectWallet();
   };
 
-  const handleGoToDashboard = () => {
-    if (user?.role) {
-      window.location.href = `/dashboard/${user.role}`;
-    } else {
-      window.location.href = '/dashboard';
-    }
-  };
+
 
   // Format address for display
   const formatAddress = (addr: string) => {
@@ -162,13 +156,17 @@ const ConnectWalletButton: React.FC<ConnectWalletButtonProps> = ({
             </div>
           </div>
 
-          {/* Status & Actions */}
-          <DropdownMenuItem
-            onClick={handleGoToDashboard}
-            className="text-[#7F56D9] hover:text-[#6D47C7] hover:bg-[#7F56D9]/10 rounded-lg mx-1 px-3 py-2.5 transition-all duration-200 cursor-pointer flex items-center space-x-2"
-          >
+          {/* Dashboard Options */}
+          <DropdownMenuItem className="text-[#7F56D9] hover:text-[#6D47C7] hover:bg-[#7F56D9]/10 rounded-lg mx-1 px-3 py-2.5 transition-all duration-200 cursor-pointer flex items-center space-x-2 relative">
             <User className="w-4 h-4" />
-            <span className="font-medium">Go to Dashboard</span>
+            <span className="font-medium">Go to Startup Dashboard</span>
+            <a href="/dashboard/startup" className="block w-full h-full absolute inset-0"></a>
+          </DropdownMenuItem>
+
+          <DropdownMenuItem className="text-[#7F56D9] hover:text-[#6D47C7] hover:bg-[#7F56D9]/10 rounded-lg mx-1 px-3 py-2.5 transition-all duration-200 cursor-pointer flex items-center space-x-2 relative">
+            <User className="w-4 h-4" />
+            <span className="font-medium">Go to Investor Dashboard</span>
+            <a href="/dashboard/investor" className="block w-full h-full absolute inset-0"></a>
           </DropdownMenuItem>
 
           <DropdownMenuSeparator className="my-1" />

@@ -395,7 +395,7 @@ export class PaymentService {
      */
     async getPaymentStats(userId: string): Promise<PaymentStats> {
         try {
-            const stats = await Payment.getPaymentStats(userId);
+            const stats = await (Payment as any).getPaymentStats(userId);
 
             if (stats.length === 0) {
                 return {
@@ -456,7 +456,7 @@ export class PaymentService {
                 throw new Error('Payment not found');
             }
 
-            const updatedPayment = await payment.updateStatus(status, confirmations);
+            const updatedPayment = await (payment as any).updateStatus(status, confirmations);
             logger.info(`Payment status updated: ${paymentId} -> ${status}`);
 
             return updatedPayment;
@@ -492,9 +492,9 @@ export class PaymentService {
                 currency: payment.currency,
                 paymentType: 'refund',
                 description: `Refund: ${reason}`,
-                campaignId: payment.campaignId?.toString(),
-                investmentId: payment.investmentId?.toString(),
-                milestoneId: payment.milestoneId?.toString(),
+                campaignId: payment.campaignId?.toString() || undefined,
+                investmentId: payment.investmentId?.toString() || undefined,
+                milestoneId: payment.milestoneId?.toString() || undefined,
                 metadata: {
                     originalPaymentId: payment.paymentId,
                     refundReason: reason,
