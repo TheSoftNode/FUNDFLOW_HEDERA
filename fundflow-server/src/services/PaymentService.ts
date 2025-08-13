@@ -130,9 +130,23 @@ export class PaymentService {
                 throw new Error('Campaign not found');
             }
 
+            // Get user IDs from wallet addresses
+            const [investor, creator] = await Promise.all([
+                User.findOne({ walletAddress: investment.investorAddress }),
+                User.findOne({ walletAddress: campaign.creatorAddress })
+            ]);
+
+            if (!investor) {
+                throw new Error('Investor user not found');
+            }
+
+            if (!creator) {
+                throw new Error('Campaign creator user not found');
+            }
+
             const paymentData: CreatePaymentData = {
-                payerId: investment.investorAddress, // This should be the user ID, not address
-                payeeId: campaign.creatorAddress, // This should be the user ID, not address
+                payerId: (investor._id as any).toString(), // Use user ID, not wallet address
+                payeeId: (creator._id as any).toString(), // Use user ID, not wallet address
                 amount,
                 currency,
                 paymentType: 'investment',
@@ -141,7 +155,6 @@ export class PaymentService {
                 investmentId: investmentId,
                 metadata: {
                     investmentAmount: investment.amount,
-                    equityTokens: investment.equityTokens,
                     votingPower: investment.votingPower
                 }
             };
@@ -174,9 +187,16 @@ export class PaymentService {
                 throw new Error('Campaign not found');
             }
 
+            // Get user ID from wallet address
+            const creator = await User.findOne({ walletAddress: campaign.creatorAddress });
+
+            if (!creator) {
+                throw new Error('Campaign creator user not found');
+            }
+
             const paymentData: CreatePaymentData = {
-                payerId: campaign.creatorAddress, // This should be the user ID, not address
-                payeeId: campaign.creatorAddress, // This should be the user ID, not address
+                payerId: (creator._id as any).toString(), // Use user ID, not wallet address
+                payeeId: (creator._id as any).toString(), // Use user ID, not wallet address
                 amount,
                 currency,
                 paymentType: 'milestone',
@@ -208,11 +228,11 @@ export class PaymentService {
 
             // Simulate transaction hash generation
             const transactionHash = `tx_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-            const blockHeight = Math.floor(Math.random() * 1000000) + 1000000;
+            const blockNumber = Math.floor(Math.random() * 1000000) + 1000000;
 
             // Update payment with transaction details
             payment.transactionHash = transactionHash;
-            payment.blockHeight = blockHeight;
+            payment.blockNumber = blockNumber;
             payment.status = 'processing';
             payment.confirmations = 1;
 

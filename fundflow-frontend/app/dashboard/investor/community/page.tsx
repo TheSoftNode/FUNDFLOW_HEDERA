@@ -231,7 +231,12 @@ export default function CommunityPage() {
 
     return (
         <div className="flex h-screen bg-gray-50">
-            <InvestorSidebar activeItem="community" />
+            <InvestorSidebar
+                activeItem="community"
+                isCollapsed={false}
+                onToggle={() => { }}
+                onItemClick={() => { }}
+            />
             <div className="flex-1 flex flex-col overflow-hidden">
                 <DashboardNavbar />
 
@@ -299,8 +304,8 @@ export default function CommunityPage() {
                             <button
                                 onClick={() => setActiveTab('members')}
                                 className={`flex-1 py-2 px-4 rounded-md text-sm font-medium transition-colors ${activeTab === 'members'
-                                        ? 'bg-white text-gray-900 shadow-sm'
-                                        : 'text-gray-600 hover:text-gray-900'
+                                    ? 'bg-white text-gray-900 shadow-sm'
+                                    : 'text-gray-600 hover:text-gray-900'
                                     }`}
                             >
                                 Members ({mockCommunityMembers.length})
@@ -308,8 +313,8 @@ export default function CommunityPage() {
                             <button
                                 onClick={() => setActiveTab('events')}
                                 className={`flex-1 py-2 px-4 rounded-md text-sm font-medium transition-colors ${activeTab === 'events'
-                                        ? 'bg-white text-gray-900 shadow-sm'
-                                        : 'text-gray-600 hover:text-gray-900'
+                                    ? 'bg-white text-gray-900 shadow-sm'
+                                    : 'text-gray-600 hover:text-gray-900'
                                     }`}
                             >
                                 Events ({mockEvents.length})
@@ -317,8 +322,8 @@ export default function CommunityPage() {
                             <button
                                 onClick={() => setActiveTab('discussions')}
                                 className={`flex-1 py-2 px-4 rounded-md text-sm font-medium transition-colors ${activeTab === 'discussions'
-                                        ? 'bg-white text-gray-900 shadow-sm'
-                                        : 'text-gray-600 hover:text-gray-900'
+                                    ? 'bg-white text-gray-900 shadow-sm'
+                                    : 'text-gray-600 hover:text-gray-900'
                                     }`}
                             >
                                 Discussions ({mockDiscussions.length})
