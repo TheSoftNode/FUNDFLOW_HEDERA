@@ -15,6 +15,7 @@ import authRoutes from './routes/authRoutes';
 import campaignRoutes from './routes/campaignRoutes';
 import blockchainRoutes from './routes/blockchainRoutes';
 import fundflowRoutes from './routes/fundflowRoutes';
+import notificationRoutes from './routes/notificationRoutes';
 
 const app = express();
 const PORT = config.PORT;
@@ -91,6 +92,7 @@ app.use('/api/users', userRoutes);
 app.use('/api/campaigns', campaignRoutes);
 app.use('/api/blockchain', blockchainRoutes);
 app.use('/api/fundflow', fundflowRoutes);
+app.use('/api/notifications', notificationRoutes);
 
 // 404 handler
 app.use('*', (req, res) => {
