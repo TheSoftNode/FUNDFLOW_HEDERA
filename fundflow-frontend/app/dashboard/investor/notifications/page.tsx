@@ -267,7 +267,12 @@ export default function NotificationsPage() {
 
     return (
         <div className="flex h-screen bg-gray-50">
-            <InvestorSidebar activeItem="notifications" />
+            <InvestorSidebar
+                activeItem="notifications"
+                isCollapsed={false}
+                onToggle={() => { }}
+                onItemClick={() => { }}
+            />
             <div className="flex-1 flex flex-col overflow-hidden">
                 <DashboardNavbar />
 

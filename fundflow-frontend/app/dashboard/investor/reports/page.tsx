@@ -228,7 +228,12 @@ export default function ReportsPage() {
 
     return (
         <div className="flex h-screen bg-gray-50">
-            <InvestorSidebar activeItem="reports" />
+            <InvestorSidebar
+                activeItem="reports"
+                isCollapsed={false}
+                onToggle={() => { }}
+                onItemClick={() => { }}
+            />
             <div className="flex-1 flex flex-col overflow-hidden">
                 <DashboardNavbar />
 
@@ -312,8 +317,8 @@ export default function ReportsPage() {
                             <button
                                 onClick={() => setActiveTab('reports')}
                                 className={`flex-1 py-2 px-4 rounded-md text-sm font-medium transition-colors ${activeTab === 'reports'
-                                        ? 'bg-white text-gray-900 shadow-sm'
-                                        : 'text-gray-600 hover:text-gray-900'
+                                    ? 'bg-white text-gray-900 shadow-sm'
+                                    : 'text-gray-600 hover:text-gray-900'
                                     }`}
                             >
                                 Available Reports ({mockReports.length})
@@ -321,8 +326,8 @@ export default function ReportsPage() {
                             <button
                                 onClick={() => setActiveTab('templates')}
                                 className={`flex-1 py-2 px-4 rounded-md text-sm font-medium transition-colors ${activeTab === 'templates'
-                                        ? 'bg-white text-gray-900 shadow-sm'
-                                        : 'text-gray-600 hover:text-gray-900'
+                                    ? 'bg-white text-gray-900 shadow-sm'
+                                    : 'text-gray-600 hover:text-gray-900'
                                     }`}
                             >
                                 Report Templates ({mockTemplates.length})

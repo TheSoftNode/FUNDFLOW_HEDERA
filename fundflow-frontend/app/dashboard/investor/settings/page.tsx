@@ -201,8 +201,8 @@ export default function SettingsPage() {
                             <button
                                 onClick={() => setActiveTab('account')}
                                 className={`flex-1 py-2 px-4 rounded-md text-sm font-medium transition-colors ${activeTab === 'account'
-                                        ? 'bg-white text-gray-900 shadow-sm'
-                                        : 'text-gray-600 hover:text-gray-900'
+                                    ? 'bg-white text-gray-900 shadow-sm'
+                                    : 'text-gray-600 hover:text-gray-900'
                                     }`}
                             >
                                 Account
@@ -210,8 +210,8 @@ export default function SettingsPage() {
                             <button
                                 onClick={() => setActiveTab('security')}
                                 className={`flex-1 py-2 px-4 rounded-md text-sm font-medium transition-colors ${activeTab === 'security'
-                                        ? 'bg-white text-gray-900 shadow-sm'
-                                        : 'text-gray-600 hover:text-gray-900'
+                                    ? 'bg-white text-gray-900 shadow-sm'
+                                    : 'text-gray-600 hover:text-gray-900'
                                     }`}
                             >
                                 Security
@@ -219,8 +219,8 @@ export default function SettingsPage() {
                             <button
                                 onClick={() => setActiveTab('notifications')}
                                 className={`flex-1 py-2 px-4 rounded-md text-sm font-medium transition-colors ${activeTab === 'notifications'
-                                        ? 'bg-white text-gray-900 shadow-sm'
-                                        : 'text-gray-600 hover:text-gray-900'
+                                    ? 'bg-white text-gray-900 shadow-sm'
+                                    : 'text-gray-600 hover:text-gray-900'
                                     }`}
                             >
                                 Notifications
@@ -228,8 +228,8 @@ export default function SettingsPage() {
                             <button
                                 onClick={() => setActiveTab('privacy')}
                                 className={`flex-1 py-2 px-4 rounded-md text-sm font-medium transition-colors ${activeTab === 'privacy'
-                                        ? 'bg-white text-gray-900 shadow-sm'
-                                        : 'text-gray-600 hover:text-gray-900'
+                                    ? 'bg-white text-gray-900 shadow-sm'
+                                    : 'text-gray-600 hover:text-gray-900'
                                     }`}
                             >
                                 Privacy
@@ -237,8 +237,8 @@ export default function SettingsPage() {
                             <button
                                 onClick={() => setActiveTab('preferences')}
                                 className={`flex-1 py-2 px-4 rounded-md text-sm font-medium transition-colors ${activeTab === 'preferences'
-                                        ? 'bg-white text-gray-900 shadow-sm'
-                                        : 'text-gray-600 hover:text-gray-900'
+                                    ? 'bg-white text-gray-900 shadow-sm'
+                                    : 'text-gray-600 hover:text-gray-900'
                                     }`}
                             >
                                 Preferences

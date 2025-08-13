@@ -154,7 +154,12 @@ export default function ProfilePage() {
 
     return (
         <div className="flex h-screen bg-gray-50">
-            <InvestorSidebar activeItem="profile" />
+            <InvestorSidebar
+                activeItem="profile"
+                isCollapsed={false}
+                onToggle={() => { }}
+                onItemClick={() => { }}
+            />
             <div className="flex-1 flex flex-col overflow-hidden">
                 <DashboardNavbar />
 
@@ -376,8 +381,8 @@ export default function ProfilePage() {
                             <button
                                 onClick={() => setActiveTab('overview')}
                                 className={`flex-1 py-2 px-4 rounded-md text-sm font-medium transition-colors ${activeTab === 'overview'
-                                        ? 'bg-white text-gray-900 shadow-sm'
-                                        : 'text-gray-600 hover:text-gray-900'
+                                    ? 'bg-white text-gray-900 shadow-sm'
+                                    : 'text-gray-600 hover:text-gray-900'
                                     }`}
                             >
                                 Overview
@@ -385,8 +390,8 @@ export default function ProfilePage() {
                             <button
                                 onClick={() => setActiveTab('preferences')}
                                 className={`flex-1 py-2 px-4 rounded-md text-sm font-medium transition-colors ${activeTab === 'preferences'
-                                        ? 'bg-white text-gray-900 shadow-sm'
-                                        : 'text-gray-600 hover:text-gray-900'
+                                    ? 'bg-white text-gray-900 shadow-sm'
+                                    : 'text-gray-600 hover:text-gray-900'
                                     }`}
                             >
                                 Preferences
@@ -394,8 +399,8 @@ export default function ProfilePage() {
                             <button
                                 onClick={() => setActiveTab('documents')}
                                 className={`flex-1 py-2 px-4 rounded-md text-sm font-medium transition-colors ${activeTab === 'documents'
-                                        ? 'bg-white text-gray-900 shadow-sm'
-                                        : 'text-gray-600 hover:text-gray-900'
+                                    ? 'bg-white text-gray-900 shadow-sm'
+                                    : 'text-gray-600 hover:text-gray-900'
                                     }`}
                             >
                                 Documents
