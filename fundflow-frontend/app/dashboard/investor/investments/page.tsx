@@ -32,6 +32,7 @@ import {
 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import InvestorSidebar from '@/components/dashboard/investor/InvestorSidebar';
+import DashboardNavbar from '@/components/dashboard/DashboardNavbar';
 
 interface Investment {
     id: string;
@@ -238,363 +239,366 @@ const InvestmentsPage = () => {
     const completedInvestments = mockInvestments.filter(i => i.status === 'completed').length;
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-slate-50 via-emerald-50/20 to-teal-50/20 dark:from-slate-900 dark:via-slate-800/30 dark:to-slate-900/30">
-            <InvestorSidebar
-                isCollapsed={sidebarCollapsed}
-                onToggle={() => setSidebarCollapsed(!sidebarCollapsed)}
-                activeItem={activeItem}
-                onItemClick={handleItemClick}
-                userName="John Doe"
-                userRole="Professional Investor"
-            />
-            <div className={`transition-all duration-300 ${sidebarCollapsed ? 'lg:ml-16' : 'lg:ml-64'}`}>
-                {/* Main Content */}
-                <main className="pt-10 p-6">
-                    {/* Header */}
-                    <div className="mb-8">
-                        <div className="flex items-center justify-between">
-                            <div>
-                                <h1 className="text-3xl font-bold text-slate-900 dark:text-white mb-2">
-                                    My Investments
-                                </h1>
-                                <p className="text-slate-600 dark:text-slate-400">
-                                    Track your investment portfolio performance and manage your startup investments
-                                </p>
-                            </div>
-                            <div className="flex items-center space-x-3">
-                                <Button variant="outline" size="sm" onClick={() => setViewMode(viewMode === 'list' ? 'grid' : 'list')}>
-                                    {viewMode === 'list' ? 'Grid View' : 'List View'}
-                                </Button>
-                                <Button className="bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700">
-                                    <Plus className="w-4 h-4 mr-2" />
-                                    New Investment
-                                </Button>
-                            </div>
-                        </div>
-                    </div>
-
-                    {/* Portfolio Overview Stats */}
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6 mb-8">
-                        <Card className="bg-white/80 dark:bg-slate-800/80 backdrop-blur-xl border-0 shadow-xl">
-                            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                                <CardTitle className="text-sm font-medium text-slate-600 dark:text-slate-400">
-                                    Total Invested
-                                </CardTitle>
-                                <DollarSign className="h-4 w-4 text-blue-600" />
-                            </CardHeader>
-                            <CardContent>
-                                <div className="text-2xl font-bold text-slate-900 dark:text-white">
-                                    {formatCurrency(totalInvested)}
-                                </div>
-                                <p className="text-xs text-slate-500 dark:text-slate-400">
-                                    Across all investments
-                                </p>
-                            </CardContent>
-                        </Card>
-
-                        <Card className="bg-white/80 dark:bg-slate-800/80 backdrop-blur-xl border-0 shadow-xl">
-                            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                                <CardTitle className="text-sm font-medium text-slate-600 dark:text-slate-400">
-                                    Current Value
-                                </CardTitle>
-                                <BarChart3 className="h-4 w-4 text-green-600" />
-                            </CardHeader>
-                            <CardContent>
-                                <div className="text-2xl font-bold text-slate-900 dark:text-white">
-                                    {formatCurrency(totalCurrentValue)}
-                                </div>
-                                <p className="text-xs text-slate-500 dark:text-slate-400">
-                                    Portfolio valuation
-                                </p>
-                            </CardContent>
-                        </Card>
-
-                        <Card className="bg-white/80 dark:bg-slate-800/80 backdrop-blur-xl border-0 shadow-xl">
-                            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                                <CardTitle className="text-sm font-medium text-slate-600 dark:text-slate-400">
-                                    Total Return
-                                </CardTitle>
-                                <TrendingUp className="h-4 w-4 text-emerald-600" />
-                            </CardHeader>
-                            <CardContent>
-                                <div className="text-2xl font-bold text-slate-900 dark:text-white">
-                                    {formatCurrency(totalReturn)}
-                                </div>
-                                <p className="text-xs text-slate-500 dark:text-slate-400">
-                                    {totalReturnPercentage.toFixed(1)}% return
-                                </p>
-                            </CardContent>
-                        </Card>
-
-                        <Card className="bg-white/80 dark:bg-slate-800/80 backdrop-blur-xl border-0 shadow-xl">
-                            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                                <CardTitle className="text-sm font-medium text-slate-600 dark:text-slate-400">
-                                    Active Investments
-                                </CardTitle>
-                                <Target className="h-4 w-4 text-purple-600" />
-                            </CardHeader>
-                            <CardContent>
-                                <div className="text-2xl font-bold text-slate-900 dark:text-white">{activeInvestments}</div>
-                                <p className="text-xs text-slate-500 dark:text-slate-400">
-                                    Currently active
-                                </p>
-                            </CardContent>
-                        </Card>
-
-                        <Card className="bg-white/80 dark:bg-slate-800/80 backdrop-blur-xl border-0 shadow-xl">
-                            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                                <CardTitle className="text-sm font-medium text-slate-600 dark:text-slate-400">
-                                    Completed
-                                </CardTitle>
-                                <CheckCircle className="h-4 w-4 text-green-600" />
-                            </CardHeader>
-                            <CardContent>
-                                <div className="text-2xl font-bold text-slate-900 dark:text-white">{completedInvestments}</div>
-                                <p className="text-xs text-slate-500 dark:text-slate-400">
-                                    Exited investments
-                                </p>
-                            </CardContent>
-                        </Card>
-                    </div>
-
-                    {/* Filters and Search */}
-                    <Card className="bg-white/80 dark:bg-slate-800/80 backdrop-blur-xl border-0 shadow-xl mb-6">
-                        <CardContent className="p-6">
-                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
-                                {/* Search */}
-                                <div className="relative">
-                                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400 w-4 h-4" />
-                                    <Input
-                                        placeholder="Search investments..."
-                                        value={searchTerm}
-                                        onChange={(e) => setSearchTerm(e.target.value)}
-                                        className="pl-10"
-                                    />
-                                </div>
-
-                                {/* Status Filter */}
-                                <Select value={selectedStatus} onValueChange={setSelectedStatus}>
-                                    <SelectTrigger>
-                                        <SelectValue placeholder="All Statuses" />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                        <SelectItem value="all">All Statuses</SelectItem>
-                                        <SelectItem value="active">Active</SelectItem>
-                                        <SelectItem value="milestone_pending">Milestone Pending</SelectItem>
-                                        <SelectItem value="completed">Completed</SelectItem>
-                                        <SelectItem value="at_risk">At Risk</SelectItem>
-                                    </SelectContent>
-                                </Select>
-
-                                {/* Category Filter */}
-                                <Select value={selectedCategory} onValueChange={setSelectedCategory}>
-                                    <SelectTrigger>
-                                        <SelectValue placeholder="All Categories" />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                        <SelectItem value="all">All Categories</SelectItem>
-                                        <SelectItem value="HealthTech">HealthTech</SelectItem>
-                                        <SelectItem value="CleanTech">CleanTech</SelectItem>
-                                        <SelectItem value="Blockchain">Blockchain</SelectItem>
-                                        <SelectItem value="AgTech">AgTech</SelectItem>
-                                        <SelectItem value="DeepTech">DeepTech</SelectItem>
-                                    </SelectContent>
-                                </Select>
-
-                                {/* Risk Level Filter */}
-                                <Select value={selectedRiskLevel} onValueChange={setSelectedRiskLevel}>
-                                    <SelectTrigger>
-                                        <SelectValue placeholder="All Risk Levels" />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                        <SelectItem value="all">All Risk Levels</SelectItem>
-                                        <SelectItem value="low">Low Risk</SelectItem>
-                                        <SelectItem value="medium">Medium Risk</SelectItem>
-                                        <SelectItem value="high">High Risk</SelectItem>
-                                    </SelectContent>
-                                </Select>
-
-                                {/* Sort by */}
-                                <Select>
-                                    <SelectTrigger>
-                                        <SelectValue placeholder="Sort by" />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                        <SelectItem value="recent">Most Recent</SelectItem>
-                                        <SelectItem value="return">Highest Return</SelectItem>
-                                        <SelectItem value="amount">Investment Amount</SelectItem>
-                                        <SelectItem value="progress">Progress</SelectItem>
-                                    </SelectContent>
-                                </Select>
-                            </div>
-                        </CardContent>
-                    </Card>
-
-                    {/* Investments List */}
-                    <div className="space-y-6">
-                        {filteredInvestments.map((investment) => (
-                            <Card key={investment.id} className="bg-white/80 dark:bg-slate-800/80 backdrop-blur-xl border-0 shadow-xl">
-                                <CardContent className="p-6">
-                                    <div className="flex items-start justify-between mb-4">
-                                        <div className="flex items-start space-x-4">
-                                            {/* Startup Logo */}
-                                            <div className="w-16 h-16 bg-gradient-to-br from-emerald-500 to-teal-600 rounded-2xl flex items-center justify-center text-white font-semibold text-xl">
-                                                {investment.startupName.split(' ').map(n => n[0]).join('')}
-                                            </div>
-
-                                            {/* Investment Info */}
-                                            <div className="flex-1">
-                                                <div className="flex items-center space-x-3 mb-2">
-                                                    <h3 className="text-xl font-semibold text-slate-900 dark:text-white">
-                                                        {investment.campaignTitle}
-                                                    </h3>
-                                                    <Badge className={getStatusColor(investment.status)}>
-                                                        {investment.status.replace('_', ' ').charAt(0).toUpperCase() + investment.status.replace('_', ' ').slice(1)}
-                                                    </Badge>
-                                                    <Badge className={getRiskLevelColor(investment.riskLevel)}>
-                                                        {investment.riskLevel.charAt(0).toUpperCase() + investment.riskLevel.slice(1)} Risk
-                                                    </Badge>
-                                                </div>
-                                                <p className="text-slate-600 dark:text-slate-400 mb-2">
-                                                    {investment.startupName} • {investment.category}
-                                                </p>
-                                                <div className="flex items-center space-x-6 text-sm text-slate-500 dark:text-slate-400 mb-3">
-                                                    <span className="flex items-center">
-                                                        <Users className="w-4 h-4 mr-1" />
-                                                        {investment.founder}
-                                                    </span>
-                                                    <span className="flex items-center">
-                                                        <MapPin className="w-4 h-4 mr-1" />
-                                                        {investment.location}
-                                                    </span>
-                                                    <span className="flex items-center">
-                                                        <Building className="w-4 h-4 mr-1" />
-                                                        {investment.sector}
-                                                    </span>
-                                                </div>
-                                            </div>
-                                        </div>
-
-                                        {/* Actions */}
-                                        <div className="flex items-center space-x-2">
-                                            <Button variant="ghost" size="sm" className="text-slate-400 hover:text-blue-600">
-                                                <Eye className="w-4 h-4" />
-                                            </Button>
-                                            <Button variant="ghost" size="sm" className="text-slate-400 hover:text-green-600">
-                                                <BarChart3 className="w-4 h-4" />
-                                            </Button>
-                                        </div>
-                                    </div>
-
-                                    {/* Investment Metrics */}
-                                    <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-4">
-                                        <div className="text-center p-4 bg-slate-50 dark:bg-slate-800/50 rounded-lg">
-                                            <div className="text-2xl font-bold text-slate-900 dark:text-white">
-                                                {formatCurrency(investment.investedAmount)}
-                                            </div>
-                                            <div className="text-sm text-slate-600 dark:text-slate-400">
-                                                Invested Amount
-                                            </div>
-                                        </div>
-                                        <div className="text-center p-4 bg-slate-50 dark:bg-slate-800/50 rounded-lg">
-                                            <div className="text-2xl font-bold text-slate-900 dark:text-white">
-                                                {formatCurrency(investment.currentValue)}
-                                            </div>
-                                            <div className="text-sm text-slate-600 dark:text-slate-400">
-                                                Current Value
-                                            </div>
-                                        </div>
-                                        <div className="text-center p-4 bg-slate-50 dark:bg-slate-800/50 rounded-lg">
-                                            <div className="text-2xl font-bold text-slate-900 dark:text-white">
-                                                {investment.returnPercentage.toFixed(1)}%
-                                            </div>
-                                            <div className="text-sm text-slate-600 dark:text-slate-400">
-                                                Return
-                                            </div>
-                                        </div>
-                                        <div className="text-center p-4 bg-slate-50 dark:bg-slate-800/50 rounded-lg">
-                                            <div className="text-2xl font-bold text-slate-900 dark:text-white">
-                                                {investment.equityTokens}
-                                            </div>
-                                            <div className="text-sm text-slate-600 dark:text-slate-400">
-                                                Equity Tokens
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    {/* Progress and Milestones */}
-                                    <div className="mb-4">
-                                        <div className="flex items-center justify-between mb-2">
-                                            <span className="text-sm font-medium text-slate-600 dark:text-slate-400">
-                                                Progress: {investment.milestones.completed}/{investment.milestones.total} milestones
-                                            </span>
-                                            <span className="text-sm text-slate-500 dark:text-slate-400">
-                                                {investment.progress}% complete
-                                            </span>
-                                        </div>
-                                        <Progress value={investment.progress} className="h-2" />
-                                    </div>
-
-                                    {/* Additional Details */}
-                                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
-                                        <div>
-                                            <span className="text-slate-600 dark:text-slate-400">Investment Date:</span>
-                                            <p className="text-slate-900 dark:text-white mt-1 font-medium">
-                                                {formatDate(investment.investmentDate)}
-                                            </p>
-                                        </div>
-                                        <div>
-                                            <span className="text-slate-600 dark:text-slate-400">Expected Exit:</span>
-                                            <p className="text-slate-900 dark:text-white mt-1 font-medium">
-                                                {investment.expectedExit}
-                                            </p>
-                                        </div>
-                                        <div>
-                                            <span className="text-slate-600 dark:text-slate-400">Monthly Return:</span>
-                                            <p className="text-slate-900 dark:text-white mt-1 font-medium">
-                                                {investment.monthlyReturn}%
-                                            </p>
-                                        </div>
-                                    </div>
-
-                                    {/* Timeline */}
-                                    <div className="mt-4 pt-4 border-t border-slate-200 dark:border-slate-700">
-                                        <div className="flex items-center justify-between text-sm text-slate-500 dark:text-slate-400">
-                                            <span>Last update: {investment.lastUpdate}</span>
-                                            <Button variant="outline" size="sm" className="text-emerald-600 border-emerald-200 hover:bg-emerald-50">
-                                                View Details
-                                                <ArrowUpRight className="w-4 h-4 ml-1" />
-                                            </Button>
-                                        </div>
-                                    </div>
-                                </CardContent>
-                            </Card>
-                        ))}
-
-                        {filteredInvestments.length === 0 && (
-                            <Card className="bg-white/80 dark:bg-slate-800/80 backdrop-blur-xl border-0 shadow-xl">
-                                <CardContent className="p-12 text-center">
-                                    <DollarSign className="w-16 h-16 text-slate-300 dark:text-slate-600 mx-auto mb-4" />
-                                    <h3 className="text-xl font-semibold text-slate-700 dark:text-slate-300 mb-2">
-                                        No investments found
-                                    </h3>
-                                    <p className="text-slate-500 dark:text-slate-400 mb-4">
-                                        {searchTerm || selectedStatus !== 'all' || selectedCategory !== 'all' || selectedRiskLevel !== 'all'
-                                            ? 'Try adjusting your filters or search terms.'
-                                            : 'You haven\'t made any investments yet.'
-                                        }
+        <>
+            <DashboardNavbar dashboardType="investor" />
+            <div className="min-h-screen bg-gradient-to-br from-slate-50 via-emerald-50/20 to-teal-50/20 dark:from-slate-900 dark:via-slate-800/30 dark:to-slate-900/30">
+                <InvestorSidebar
+                    isCollapsed={sidebarCollapsed}
+                    onToggle={() => setSidebarCollapsed(!sidebarCollapsed)}
+                    activeItem={activeItem}
+                    onItemClick={handleItemClick}
+                    userName="John Doe"
+                    userRole="Professional Investor"
+                />
+                <div className={`transition-all duration-300 ${sidebarCollapsed ? 'lg:ml-16' : 'lg:ml-64'}`}>
+                    {/* Main Content */}
+                    <main className="pt-16 p-6">
+                        {/* Header */}
+                        <div className="mb-8">
+                            <div className="flex items-center justify-between">
+                                <div>
+                                    <h1 className="text-3xl font-bold text-slate-900 dark:text-white mb-2">
+                                        My Investments
+                                    </h1>
+                                    <p className="text-slate-600 dark:text-slate-400">
+                                        Track your investment portfolio performance and manage your startup investments
                                     </p>
+                                </div>
+                                <div className="flex items-center space-x-3">
+                                    <Button variant="outline" size="sm" onClick={() => setViewMode(viewMode === 'list' ? 'grid' : 'list')}>
+                                        {viewMode === 'list' ? 'Grid View' : 'List View'}
+                                    </Button>
                                     <Button className="bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700">
                                         <Plus className="w-4 h-4 mr-2" />
-                                        Discover Opportunities
+                                        New Investment
                                     </Button>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Portfolio Overview Stats */}
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6 mb-8">
+                            <Card className="bg-white/80 dark:bg-slate-800/80 backdrop-blur-xl border-0 shadow-xl">
+                                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                                    <CardTitle className="text-sm font-medium text-slate-600 dark:text-slate-400">
+                                        Total Invested
+                                    </CardTitle>
+                                    <DollarSign className="h-4 w-4 text-blue-600" />
+                                </CardHeader>
+                                <CardContent>
+                                    <div className="text-2xl font-bold text-slate-900 dark:text-white">
+                                        {formatCurrency(totalInvested)}
+                                    </div>
+                                    <p className="text-xs text-slate-500 dark:text-slate-400">
+                                        Across all investments
+                                    </p>
                                 </CardContent>
                             </Card>
-                        )}
-                    </div>
-                </main>
+
+                            <Card className="bg-white/80 dark:bg-slate-800/80 backdrop-blur-xl border-0 shadow-xl">
+                                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                                    <CardTitle className="text-sm font-medium text-slate-600 dark:text-slate-400">
+                                        Current Value
+                                    </CardTitle>
+                                    <BarChart3 className="h-4 w-4 text-green-600" />
+                                </CardHeader>
+                                <CardContent>
+                                    <div className="text-2xl font-bold text-slate-900 dark:text-white">
+                                        {formatCurrency(totalCurrentValue)}
+                                    </div>
+                                    <p className="text-xs text-slate-500 dark:text-slate-400">
+                                        Portfolio valuation
+                                    </p>
+                                </CardContent>
+                            </Card>
+
+                            <Card className="bg-white/80 dark:bg-slate-800/80 backdrop-blur-xl border-0 shadow-xl">
+                                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                                    <CardTitle className="text-sm font-medium text-slate-600 dark:text-slate-400">
+                                        Total Return
+                                    </CardTitle>
+                                    <TrendingUp className="h-4 w-4 text-emerald-600" />
+                                </CardHeader>
+                                <CardContent>
+                                    <div className="text-2xl font-bold text-slate-900 dark:text-white">
+                                        {formatCurrency(totalReturn)}
+                                    </div>
+                                    <p className="text-xs text-slate-500 dark:text-slate-400">
+                                        {totalReturnPercentage.toFixed(1)}% return
+                                    </p>
+                                </CardContent>
+                            </Card>
+
+                            <Card className="bg-white/80 dark:bg-slate-800/80 backdrop-blur-xl border-0 shadow-xl">
+                                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                                    <CardTitle className="text-sm font-medium text-slate-600 dark:text-slate-400">
+                                        Active Investments
+                                    </CardTitle>
+                                    <Target className="h-4 w-4 text-purple-600" />
+                                </CardHeader>
+                                <CardContent>
+                                    <div className="text-2xl font-bold text-slate-900 dark:text-white">{activeInvestments}</div>
+                                    <p className="text-xs text-slate-500 dark:text-slate-400">
+                                        Currently active
+                                    </p>
+                                </CardContent>
+                            </Card>
+
+                            <Card className="bg-white/80 dark:bg-slate-800/80 backdrop-blur-xl border-0 shadow-xl">
+                                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                                    <CardTitle className="text-sm font-medium text-slate-600 dark:text-slate-400">
+                                        Completed
+                                    </CardTitle>
+                                    <CheckCircle className="h-4 w-4 text-green-600" />
+                                </CardHeader>
+                                <CardContent>
+                                    <div className="text-2xl font-bold text-slate-900 dark:text-white">{completedInvestments}</div>
+                                    <p className="text-xs text-slate-500 dark:text-slate-400">
+                                        Exited investments
+                                    </p>
+                                </CardContent>
+                            </Card>
+                        </div>
+
+                        {/* Filters and Search */}
+                        <Card className="bg-white/80 dark:bg-slate-800/80 backdrop-blur-xl border-0 shadow-xl mb-6">
+                            <CardContent className="p-6">
+                                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
+                                    {/* Search */}
+                                    <div className="relative">
+                                        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400 w-4 h-4" />
+                                        <Input
+                                            placeholder="Search investments..."
+                                            value={searchTerm}
+                                            onChange={(e) => setSearchTerm(e.target.value)}
+                                            className="pl-10"
+                                        />
+                                    </div>
+
+                                    {/* Status Filter */}
+                                    <Select value={selectedStatus} onValueChange={setSelectedStatus}>
+                                        <SelectTrigger>
+                                            <SelectValue placeholder="All Statuses" />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            <SelectItem value="all">All Statuses</SelectItem>
+                                            <SelectItem value="active">Active</SelectItem>
+                                            <SelectItem value="milestone_pending">Milestone Pending</SelectItem>
+                                            <SelectItem value="completed">Completed</SelectItem>
+                                            <SelectItem value="at_risk">At Risk</SelectItem>
+                                        </SelectContent>
+                                    </Select>
+
+                                    {/* Category Filter */}
+                                    <Select value={selectedCategory} onValueChange={setSelectedCategory}>
+                                        <SelectTrigger>
+                                            <SelectValue placeholder="All Categories" />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            <SelectItem value="all">All Categories</SelectItem>
+                                            <SelectItem value="HealthTech">HealthTech</SelectItem>
+                                            <SelectItem value="CleanTech">CleanTech</SelectItem>
+                                            <SelectItem value="Blockchain">Blockchain</SelectItem>
+                                            <SelectItem value="AgTech">AgTech</SelectItem>
+                                            <SelectItem value="DeepTech">DeepTech</SelectItem>
+                                        </SelectContent>
+                                    </Select>
+
+                                    {/* Risk Level Filter */}
+                                    <Select value={selectedRiskLevel} onValueChange={setSelectedRiskLevel}>
+                                        <SelectTrigger>
+                                            <SelectValue placeholder="All Risk Levels" />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            <SelectItem value="all">All Risk Levels</SelectItem>
+                                            <SelectItem value="low">Low Risk</SelectItem>
+                                            <SelectItem value="medium">Medium Risk</SelectItem>
+                                            <SelectItem value="high">High Risk</SelectItem>
+                                        </SelectContent>
+                                    </Select>
+
+                                    {/* Sort by */}
+                                    <Select>
+                                        <SelectTrigger>
+                                            <SelectValue placeholder="Sort by" />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            <SelectItem value="recent">Most Recent</SelectItem>
+                                            <SelectItem value="return">Highest Return</SelectItem>
+                                            <SelectItem value="amount">Investment Amount</SelectItem>
+                                            <SelectItem value="progress">Progress</SelectItem>
+                                        </SelectContent>
+                                    </Select>
+                                </div>
+                            </CardContent>
+                        </Card>
+
+                        {/* Investments List */}
+                        <div className="space-y-6">
+                            {filteredInvestments.map((investment) => (
+                                <Card key={investment.id} className="bg-white/80 dark:bg-slate-800/80 backdrop-blur-xl border-0 shadow-xl">
+                                    <CardContent className="p-6">
+                                        <div className="flex items-start justify-between mb-4">
+                                            <div className="flex items-start space-x-4">
+                                                {/* Startup Logo */}
+                                                <div className="w-16 h-16 bg-gradient-to-br from-emerald-500 to-teal-600 rounded-2xl flex items-center justify-center text-white font-semibold text-xl">
+                                                    {investment.startupName.split(' ').map(n => n[0]).join('')}
+                                                </div>
+
+                                                {/* Investment Info */}
+                                                <div className="flex-1">
+                                                    <div className="flex items-center space-x-3 mb-2">
+                                                        <h3 className="text-xl font-semibold text-slate-900 dark:text-white">
+                                                            {investment.campaignTitle}
+                                                        </h3>
+                                                        <Badge className={getStatusColor(investment.status)}>
+                                                            {investment.status.replace('_', ' ').charAt(0).toUpperCase() + investment.status.replace('_', ' ').slice(1)}
+                                                        </Badge>
+                                                        <Badge className={getRiskLevelColor(investment.riskLevel)}>
+                                                            {investment.riskLevel.charAt(0).toUpperCase() + investment.riskLevel.slice(1)} Risk
+                                                        </Badge>
+                                                    </div>
+                                                    <p className="text-slate-600 dark:text-slate-400 mb-2">
+                                                        {investment.startupName} • {investment.category}
+                                                    </p>
+                                                    <div className="flex items-center space-x-6 text-sm text-slate-500 dark:text-slate-400 mb-3">
+                                                        <span className="flex items-center">
+                                                            <Users className="w-4 h-4 mr-1" />
+                                                            {investment.founder}
+                                                        </span>
+                                                        <span className="flex items-center">
+                                                            <MapPin className="w-4 h-4 mr-1" />
+                                                            {investment.location}
+                                                        </span>
+                                                        <span className="flex items-center">
+                                                            <Building className="w-4 h-4 mr-1" />
+                                                            {investment.sector}
+                                                        </span>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            {/* Actions */}
+                                            <div className="flex items-center space-x-2">
+                                                <Button variant="ghost" size="sm" className="text-slate-400 hover:text-blue-600">
+                                                    <Eye className="w-4 h-4" />
+                                                </Button>
+                                                <Button variant="ghost" size="sm" className="text-slate-400 hover:text-green-600">
+                                                    <BarChart3 className="w-4 h-4" />
+                                                </Button>
+                                            </div>
+                                        </div>
+
+                                        {/* Investment Metrics */}
+                                        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-4">
+                                            <div className="text-center p-4 bg-slate-50 dark:bg-slate-800/50 rounded-lg">
+                                                <div className="text-2xl font-bold text-slate-900 dark:text-white">
+                                                    {formatCurrency(investment.investedAmount)}
+                                                </div>
+                                                <div className="text-sm text-slate-600 dark:text-slate-400">
+                                                    Invested Amount
+                                                </div>
+                                            </div>
+                                            <div className="text-center p-4 bg-slate-50 dark:bg-slate-800/50 rounded-lg">
+                                                <div className="text-2xl font-bold text-slate-900 dark:text-white">
+                                                    {formatCurrency(investment.currentValue)}
+                                                </div>
+                                                <div className="text-sm text-slate-600 dark:text-slate-400">
+                                                    Current Value
+                                                </div>
+                                            </div>
+                                            <div className="text-center p-4 bg-slate-50 dark:bg-slate-800/50 rounded-lg">
+                                                <div className="text-2xl font-bold text-slate-900 dark:text-white">
+                                                    {investment.returnPercentage.toFixed(1)}%
+                                                </div>
+                                                <div className="text-sm text-slate-600 dark:text-slate-400">
+                                                    Return
+                                                </div>
+                                            </div>
+                                            <div className="text-center p-4 bg-slate-50 dark:bg-slate-800/50 rounded-lg">
+                                                <div className="text-2xl font-bold text-slate-900 dark:text-white">
+                                                    {investment.equityTokens}
+                                                </div>
+                                                <div className="text-sm text-slate-600 dark:text-slate-400">
+                                                    Equity Tokens
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        {/* Progress and Milestones */}
+                                        <div className="mb-4">
+                                            <div className="flex items-center justify-between mb-2">
+                                                <span className="text-sm font-medium text-slate-600 dark:text-slate-400">
+                                                    Progress: {investment.milestones.completed}/{investment.milestones.total} milestones
+                                                </span>
+                                                <span className="text-sm text-slate-500 dark:text-slate-400">
+                                                    {investment.progress}% complete
+                                                </span>
+                                            </div>
+                                            <Progress value={investment.progress} className="h-2" />
+                                        </div>
+
+                                        {/* Additional Details */}
+                                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
+                                            <div>
+                                                <span className="text-slate-600 dark:text-slate-400">Investment Date:</span>
+                                                <p className="text-slate-900 dark:text-white mt-1 font-medium">
+                                                    {formatDate(investment.investmentDate)}
+                                                </p>
+                                            </div>
+                                            <div>
+                                                <span className="text-slate-600 dark:text-slate-400">Expected Exit:</span>
+                                                <p className="text-slate-900 dark:text-white mt-1 font-medium">
+                                                    {investment.expectedExit}
+                                                </p>
+                                            </div>
+                                            <div>
+                                                <span className="text-slate-600 dark:text-slate-400">Monthly Return:</span>
+                                                <p className="text-slate-900 dark:text-white mt-1 font-medium">
+                                                    {investment.monthlyReturn}%
+                                                </p>
+                                            </div>
+                                        </div>
+
+                                        {/* Timeline */}
+                                        <div className="mt-4 pt-4 border-t border-slate-200 dark:border-slate-700">
+                                            <div className="flex items-center justify-between text-sm text-slate-500 dark:text-slate-400">
+                                                <span>Last update: {investment.lastUpdate}</span>
+                                                <Button variant="outline" size="sm" className="text-emerald-600 border-emerald-200 hover:bg-emerald-50">
+                                                    View Details
+                                                    <ArrowUpRight className="w-4 h-4 ml-1" />
+                                                </Button>
+                                            </div>
+                                        </div>
+                                    </CardContent>
+                                </Card>
+                            ))}
+
+                            {filteredInvestments.length === 0 && (
+                                <Card className="bg-white/80 dark:bg-slate-800/80 backdrop-blur-xl border-0 shadow-xl">
+                                    <CardContent className="p-12 text-center">
+                                        <DollarSign className="w-16 h-16 text-slate-300 dark:text-slate-600 mx-auto mb-4" />
+                                        <h3 className="text-xl font-semibold text-slate-700 dark:text-slate-300 mb-2">
+                                            No investments found
+                                        </h3>
+                                        <p className="text-slate-500 dark:text-slate-400 mb-4">
+                                            {searchTerm || selectedStatus !== 'all' || selectedCategory !== 'all' || selectedRiskLevel !== 'all'
+                                                ? 'Try adjusting your filters or search terms.'
+                                                : 'You haven\'t made any investments yet.'
+                                            }
+                                        </p>
+                                        <Button className="bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700">
+                                            <Plus className="w-4 h-4 mr-2" />
+                                            Discover Opportunities
+                                        </Button>
+                                    </CardContent>
+                                </Card>
+                            )}
+                        </div>
+                    </main>
+                </div>
             </div>
-        </div>
+        </>
     );
 };
 

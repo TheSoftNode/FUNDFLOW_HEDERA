@@ -106,67 +106,7 @@ const mockNotifications = [
             avatar: '/avatars/market.jpg',
             type: 'platform'
         },
-        action: 'Read Report',
-        metadata: {
-            sector: 'AI/ML',
-            growth: '+23%',
-            period: 'Q1 2024'
-        }
-    },
-    {
-        id: 6,
-        type: 'reminder',
-        title: 'Document Due Soon',
-        message: 'Your KYC documents are due for renewal. Please update within 7 days.',
-        timestamp: '4 days ago',
-        isRead: false,
-        priority: 'high',
-        sender: {
-            name: 'FundFlow Compliance',
-            avatar: '/avatars/compliance.jpg',
-            type: 'platform'
-        },
-        action: 'Update Now',
-        metadata: {
-            deadline: '7 days',
-            type: 'KYC Renewal',
-            status: 'Urgent'
-        }
-    },
-    {
-        id: 7,
-        type: 'event',
-        title: 'Upcoming Event',
-        message: 'AI Investment Summit 2024 is happening next week. Don\'t miss out!',
-        timestamp: '5 days ago',
-        isRead: true,
-        priority: 'medium',
-        sender: {
-            name: 'Events Team',
-            avatar: '/avatars/events.jpg',
-            type: 'platform'
-        },
-        action: 'Register Now',
-        metadata: {
-            event: 'AI Investment Summit',
-            date: '2024-03-15',
-            location: 'San Francisco'
-        }
-    },
-    {
-        id: 8,
-        type: 'portfolio',
-        title: 'Portfolio Performance',
-        message: 'Your portfolio has grown 8.5% this month. View detailed analytics.',
-        timestamp: '1 week ago',
-        isRead: true,
-        priority: 'medium',
-        sender: {
-            name: 'Portfolio Analytics',
-            avatar: '/avatars/analytics.jpg',
-            type: 'platform'
-        },
-        action: 'View Analytics',
+        action: 'View Report',
         metadata: {
             growth: '+8.5%',
             period: 'This Month',
@@ -177,10 +117,11 @@ const mockNotifications = [
 
 export default function NotificationsPage() {
     const [notifications, setNotifications] = useState(mockNotifications);
-    const [filterType, setFilterType] = useState('');
-    const [filterPriority, setFilterPriority] = useState('');
-    const [filterRead, setFilterRead] = useState('');
+    const [filterType, setFilterType] = useState('all');
+    const [filterPriority, setFilterPriority] = useState('all');
+    const [filterRead, setFilterRead] = useState('all');
     const [showSettings, setShowSettings] = useState(false);
+    const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
     const [notificationSettings, setNotificationSettings] = useState({
         investment: true,
         milestone: true,
@@ -192,10 +133,15 @@ export default function NotificationsPage() {
         portfolio: true
     });
 
+    const handleItemClick = (itemId: string) => {
+        // Handle navigation item clicks if needed
+        console.log('Navigation item clicked:', itemId);
+    };
+
     const filteredNotifications = notifications.filter(notification => {
-        const matchesType = !filterType || notification.type === filterType;
-        const matchesPriority = !filterPriority || notification.priority === filterPriority;
-        const matchesRead = filterRead === '' ||
+        const matchesType = filterType === 'all' || notification.type === filterType;
+        const matchesPriority = filterPriority === 'all' || notification.priority === filterPriority;
+        const matchesRead = filterRead === 'all' ||
             (filterRead === 'read' && notification.isRead) ||
             (filterRead === 'unread' && !notification.isRead);
 
@@ -266,308 +212,291 @@ export default function NotificationsPage() {
     };
 
     return (
-        <div className="flex h-screen bg-gray-50">
-            <InvestorSidebar
-                activeItem="notifications"
-                isCollapsed={false}
-                onToggle={() => { }}
-                onItemClick={() => { }}
-            />
-            <div className="flex-1 flex flex-col overflow-hidden">
-                <DashboardNavbar />
-
-                <div className="flex-1 overflow-y-auto p-6">
-                    <div className="max-w-6xl mx-auto">
-                        {/* Header */}
-                        <div className="flex items-center justify-between mb-8">
-                            <div>
-                                <h1 className="text-3xl font-bold text-gray-900 mb-2">Notifications</h1>
-                                <p className="text-gray-600">Stay updated with your investments and platform activities</p>
-                            </div>
-                            <div className="flex items-center space-x-3">
-                                <Button
-                                    variant="outline"
-                                    onClick={() => setShowSettings(!showSettings)}
-                                    className="flex items-center space-x-2"
-                                >
-                                    <Settings className="h-4 w-4" />
-                                    <span>Settings</span>
-                                </Button>
-                                <Button
-                                    onClick={markAllAsRead}
-                                    disabled={unreadCount === 0}
-                                    className="flex items-center space-x-2"
-                                >
-                                    <Check className="h-4 w-4" />
-                                    <span>Mark All Read</span>
-                                </Button>
-                            </div>
-                        </div>
-
-                        {/* Notification Settings */}
-                        {showSettings && (
-                            <Card className="mb-6">
-                                <CardHeader>
-                                    <CardTitle className="flex items-center space-x-2">
-                                        <Settings className="h-5 w-5" />
-                                        <span>Notification Preferences</span>
-                                    </CardTitle>
-                                </CardHeader>
-                                <CardContent>
-                                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                                        {Object.entries(notificationSettings).map(([key, value]) => (
-                                            <div key={key} className="flex items-center space-x-3">
-                                                <Switch
-                                                    checked={value}
-                                                    onCheckedChange={(checked) =>
-                                                        setNotificationSettings(prev => ({ ...prev, [key]: checked }))
-                                                    }
-                                                />
-                                                <label className="text-sm font-medium capitalize">
-                                                    {key.replace(/([A-Z])/g, ' $1').trim()}
-                                                </label>
-                                            </div>
-                                        ))}
-                                    </div>
-                                </CardContent>
-                            </Card>
-                        )}
-
-                        {/* Stats */}
-                        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-6">
-                            <Card>
-                                <CardContent className="p-4">
-                                    <div className="flex items-center">
-                                        <Bell className="h-8 w-8 text-blue-600 mr-3" />
-                                        <div>
-                                            <p className="text-sm font-medium text-gray-600">Total</p>
-                                            <p className="text-2xl font-bold text-gray-900">{notifications.length}</p>
-                                        </div>
-                                    </div>
-                                </CardContent>
-                            </Card>
-
-                            <Card>
-                                <CardContent className="p-4">
-                                    <div className="flex items-center">
-                                        <div className="h-8 w-8 bg-red-100 rounded-full flex items-center justify-center mr-3">
-                                            <span className="text-red-600 font-bold">{unreadCount}</span>
-                                        </div>
-                                        <div>
-                                            <p className="text-sm font-medium text-gray-600">Unread</p>
-                                            <p className="text-2xl font-bold text-gray-900">{unreadCount}</p>
-                                        </div>
-                                    </div>
-                                </CardContent>
-                            </Card>
-
-                            <Card>
-                                <CardContent className="p-4">
-                                    <div className="flex items-center">
-                                        <div className="h-8 w-8 bg-yellow-100 rounded-full flex items-center justify-center mr-3">
-                                            <span className="text-yellow-600 font-bold">
-                                                {notifications.filter(n => n.priority === 'high').length}
-                                            </span>
-                                        </div>
-                                        <div>
-                                            <p className="text-sm font-medium text-gray-600">High Priority</p>
-                                            <p className="text-2xl font-bold text-gray-900">
-                                                {notifications.filter(n => n.priority === 'high').length}
-                                            </p>
-                                        </div>
-                                    </div>
-                                </CardContent>
-                            </Card>
-
-                            <Card>
-                                <CardContent className="p-4">
-                                    <div className="flex items-center">
-                                        <div className="h-8 w-8 bg-green-100 rounded-full flex items-center justify-center mr-3">
-                                            <span className="text-green-600 font-bold">
-                                                {notifications.filter(n => n.type === 'investment').length}
-                                            </span>
-                                        </div>
-                                        <div>
-                                            <p className="text-sm font-medium text-gray-600">Investment</p>
-                                            <p className="text-2xl font-bold text-gray-900">
-                                                {notifications.filter(n => n.type === 'investment').length}
-                                            </p>
-                                        </div>
-                                    </div>
-                                </CardContent>
-                            </Card>
-                        </div>
-
-                        {/* Filters */}
-                        <div className="bg-white p-4 rounded-lg shadow-sm mb-6">
-                            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <>
+            <DashboardNavbar dashboardType="investor" />
+            <div className="min-h-screen bg-gradient-to-br from-slate-50 via-emerald-50/20 to-teal-50/20 dark:from-slate-900 dark:via-slate-800/30 dark:to-slate-900/30">
+                <InvestorSidebar
+                    isCollapsed={sidebarCollapsed}
+                    onToggle={() => setSidebarCollapsed(!sidebarCollapsed)}
+                    activeItem="notifications"
+                    onItemClick={handleItemClick}
+                    userName="John Doe"
+                    userRole="Professional Investor"
+                />
+                <div className={`transition-all duration-300 ${sidebarCollapsed ? 'lg:ml-16' : 'lg:ml-64'}`}>
+                    {/* Main Content */}
+                    <main className="pt-16 p-6">
+                        <div className="max-w-6xl mx-auto">
+                            {/* Header */}
+                            <div className="flex items-center justify-between mb-8">
                                 <div>
-                                    <Select value={filterType} onValueChange={setFilterType}>
-                                        <SelectTrigger>
-                                            <SelectValue placeholder="All Types" />
-                                        </SelectTrigger>
-                                        <SelectContent>
-                                            <SelectItem value="">All Types</SelectItem>
-                                            <SelectItem value="investment">Investment</SelectItem>
-                                            <SelectItem value="milestone">Milestone</SelectItem>
-                                            <SelectItem value="payment">Payment</SelectItem>
-                                            <SelectItem value="community">Community</SelectItem>
-                                            <SelectItem value="market">Market</SelectItem>
-                                            <SelectItem value="reminder">Reminder</SelectItem>
-                                            <SelectItem value="event">Event</SelectItem>
-                                            <SelectItem value="portfolio">Portfolio</SelectItem>
-                                        </SelectContent>
-                                    </Select>
+                                    <h1 className="text-3xl font-bold text-slate-900 dark:text-white mb-2">Notifications</h1>
+                                    <p className="text-slate-600 dark:text-slate-400">Stay updated with your investments and platform activities</p>
                                 </div>
-                                <div>
-                                    <Select value={filterPriority} onValueChange={setFilterPriority}>
-                                        <SelectTrigger>
-                                            <SelectValue placeholder="All Priorities" />
-                                        </SelectTrigger>
-                                        <SelectContent>
-                                            <SelectItem value="">All Priorities</SelectItem>
-                                            <SelectItem value="high">High Priority</SelectItem>
-                                            <SelectItem value="medium">Medium Priority</SelectItem>
-                                            <SelectItem value="low">Low Priority</SelectItem>
-                                        </SelectContent>
-                                    </Select>
-                                </div>
-                                <div>
-                                    <Select value={filterRead} onValueChange={setFilterRead}>
-                                        <SelectTrigger>
-                                            <SelectValue placeholder="All Notifications" />
-                                        </SelectTrigger>
-                                        <SelectContent>
-                                            <SelectItem value="">All Notifications</SelectItem>
-                                            <SelectItem value="unread">Unread Only</SelectItem>
-                                            <SelectItem value="read">Read Only</SelectItem>
-                                        </SelectContent>
-                                    </Select>
-                                </div>
-                                <div className="flex items-center space-x-2">
-                                    <Filter className="h-4 w-4 text-gray-500" />
-                                    <span className="text-sm text-gray-600">
-                                        {filteredNotifications.length} of {notifications.length}
-                                    </span>
+                                <div className="flex items-center space-x-3">
+                                    <Button
+                                        variant="outline"
+                                        onClick={() => setShowSettings(!showSettings)}
+                                        className="flex items-center space-x-2"
+                                    >
+                                        <Settings className="h-4 w-4" />
+                                        <span>Settings</span>
+                                    </Button>
+                                    <Button
+                                        onClick={markAllAsRead}
+                                        disabled={unreadCount === 0}
+                                        className="flex items-center space-x-2"
+                                    >
+                                        <Check className="h-4 w-4" />
+                                        <span>Mark All Read</span>
+                                    </Button>
                                 </div>
                             </div>
-                        </div>
 
-                        {/* Notifications List */}
-                        <div className="space-y-4">
-                            {filteredNotifications.map((notification) => (
-                                <Card
-                                    key={notification.id}
-                                    className={`transition-all duration-200 ${!notification.isRead ? 'border-l-4 border-l-blue-500 bg-blue-50' : ''
-                                        }`}
-                                >
-                                    <CardContent className="p-6">
-                                        <div className="flex items-start space-x-4">
-                                            {/* Icon */}
-                                            <div className="text-2xl">
-                                                {getNotificationIcon(notification.type)}
-                                            </div>
-
-                                            {/* Content */}
-                                            <div className="flex-1 min-w-0">
-                                                <div className="flex items-start justify-between mb-2">
-                                                    <div className="flex items-center space-x-3">
-                                                        <Avatar className="h-8 w-8">
-                                                            <AvatarImage src={notification.sender.avatar} alt={notification.sender.name} />
-                                                            <AvatarFallback>
-                                                                {notification.sender.name.split(' ').map(n => n[0]).join('')}
-                                                            </AvatarFallback>
-                                                        </Avatar>
-                                                        <div>
-                                                            <h3 className="font-semibold text-gray-900">{notification.title}</h3>
-                                                            <p className="text-sm text-gray-600">
-                                                                {notification.sender.name} • {notification.sender.type}
-                                                            </p>
-                                                        </div>
-                                                    </div>
-                                                    <div className="flex items-center space-x-2">
-                                                        <Badge className={getPriorityColor(notification.priority)}>
-                                                            {notification.priority}
-                                                        </Badge>
-                                                        <span className="text-sm text-gray-500">
-                                                            {formatTimestamp(notification.timestamp)}
-                                                        </span>
-                                                    </div>
+                            {/* Notification Settings */}
+                            {showSettings && (
+                                <Card className="mb-6 bg-white/80 dark:bg-slate-800/80 backdrop-blur-xl border-0 shadow-xl">
+                                    <CardHeader>
+                                        <CardTitle className="flex items-center space-x-2">
+                                            <Settings className="h-5 w-5" />
+                                            <span>Notification Preferences</span>
+                                        </CardTitle>
+                                    </CardHeader>
+                                    <CardContent>
+                                        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                                            {Object.entries(notificationSettings).map(([key, value]) => (
+                                                <div key={key} className="flex items-center space-x-3">
+                                                    <Switch
+                                                        checked={value}
+                                                        onCheckedChange={(checked) =>
+                                                            setNotificationSettings(prev => ({ ...prev, [key]: checked }))
+                                                        }
+                                                    />
+                                                    <label className="text-sm font-medium capitalize">
+                                                        {key.replace(/([A-Z])/g, ' $1').trim()}
+                                                    </label>
                                                 </div>
-
-                                                <p className="text-gray-700 mb-3">{notification.message}</p>
-
-                                                {/* Metadata */}
-                                                {notification.metadata && (
-                                                    <div className="bg-gray-50 p-3 rounded-lg mb-3">
-                                                        <div className="flex flex-wrap gap-2">
-                                                            {Object.entries(notification.metadata).map(([key, value]) => (
-                                                                <div key={key} className="text-sm">
-                                                                    <span className="font-medium text-gray-600 capitalize">
-                                                                        {key.replace(/([A-Z])/g, ' $1').trim()}:
-                                                                    </span>
-                                                                    <span className="text-gray-900 ml-1">{value}</span>
-                                                                </div>
-                                                            ))}
-                                                        </div>
-                                                    </div>
-                                                )}
-
-                                                {/* Actions */}
-                                                <div className="flex items-center justify-between">
-                                                    <div className="flex items-center space-x-2">
-                                                        <Button size="sm" variant="outline">
-                                                            {notification.action}
-                                                        </Button>
-                                                        {!notification.isRead && (
-                                                            <Button
-                                                                size="sm"
-                                                                variant="ghost"
-                                                                onClick={() => markAsRead(notification.id)}
-                                                            >
-                                                                <Eye className="h-4 w-4 mr-1" />
-                                                                Mark Read
-                                                            </Button>
-                                                        )}
-                                                    </div>
-
-                                                    <div className="flex items-center space-x-2">
-                                                        <Button
-                                                            size="sm"
-                                                            variant="ghost"
-                                                            onClick={() => archiveNotification(notification.id)}
-                                                        >
-                                                            <Archive className="h-4 w-4" />
-                                                        </Button>
-                                                        <Button
-                                                            size="sm"
-                                                            variant="ghost"
-                                                            onClick={() => deleteNotification(notification.id)}
-                                                            className="text-red-600 hover:text-red-700"
-                                                        >
-                                                            <Trash2 className="h-4 w-4" />
-                                                        </Button>
-                                                    </div>
-                                                </div>
-                                            </div>
+                                            ))}
                                         </div>
-                                    </CardContent>
-                                </Card>
-                            ))}
-
-                            {filteredNotifications.length === 0 && (
-                                <Card>
-                                    <CardContent className="p-12 text-center">
-                                        <Bell className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                                        <h3 className="text-lg font-medium text-gray-900 mb-2">No notifications found</h3>
-                                        <p className="text-gray-600">Try adjusting your filters or check back later for new updates.</p>
                                     </CardContent>
                                 </Card>
                             )}
+
+                            {/* Stats */}
+                            <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-6">
+                                <Card className="bg-white/80 dark:bg-slate-800/80 backdrop-blur-xl border-0 shadow-xl">
+                                    <CardContent className="p-4">
+                                        <div className="flex items-center">
+                                            <Bell className="h-8 w-8 text-blue-600 mr-3" />
+                                            <div>
+                                                <p className="text-sm font-medium text-slate-600 dark:text-slate-400">Total</p>
+                                                <p className="text-2xl font-bold text-slate-900 dark:text-white">{notifications.length}</p>
+                                            </div>
+                                        </div>
+                                    </CardContent>
+                                </Card>
+
+                                <Card className="bg-white/80 dark:bg-slate-800/80 backdrop-blur-xl border-0 shadow-xl">
+                                    <CardContent className="p-4">
+                                        <div className="flex items-center">
+                                            <div className="h-8 w-8 bg-red-100 dark:bg-red-900/20 rounded-full flex items-center justify-center mr-3">
+                                                <span className="text-red-600 dark:text-red-400 font-bold">{unreadCount}</span>
+                                            </div>
+                                            <div>
+                                                <p className="text-sm font-medium text-slate-600 dark:text-slate-400">Unread</p>
+                                                <p className="text-2xl font-bold text-slate-900 dark:text-white">{unreadCount}</p>
+                                            </div>
+                                        </div>
+                                    </CardContent>
+                                </Card>
+
+                                <Card className="bg-white/80 dark:bg-slate-800/80 backdrop-blur-xl border-0 shadow-xl">
+                                    <CardContent className="p-4">
+                                        <div className="flex items-center">
+                                            <div className="h-8 w-8 bg-green-100 dark:bg-green-900/20 rounded-full flex items-center justify-center mr-3">
+                                                <span className="text-green-600 dark:text-green-400 font-bold">{notifications.length - unreadCount}</span>
+                                            </div>
+                                            <div>
+                                                <p className="text-sm font-medium text-slate-600 dark:text-slate-400">Read</p>
+                                                <p className="text-2xl font-bold text-slate-900 dark:text-white">{notifications.length - unreadCount}</p>
+                                            </div>
+                                        </div>
+                                    </CardContent>
+                                </Card>
+
+                                <Card className="bg-white/80 dark:bg-slate-800/80 backdrop-blur-xl border-0 shadow-xl">
+                                    <CardContent className="p-4">
+                                        <div className="flex items-center">
+                                            <div className="h-8 w-8 bg-purple-100 dark:bg-purple-900/20 rounded-full flex items-center justify-center mr-3">
+                                                <span className="text-purple-600 dark:text-purple-400 font-bold">5</span>
+                                            </div>
+                                            <div>
+                                                <p className="text-sm font-medium text-slate-600 dark:text-slate-400">High Priority</p>
+                                                <p className="text-2xl font-bold text-slate-900 dark:text-white">5</p>
+                                            </div>
+                                        </div>
+                                    </CardContent>
+                                </Card>
+                            </div>
+
+                            {/* Filters */}
+                            <Card className="mb-6 bg-white/80 dark:bg-slate-800/80 backdrop-blur-xl border-0 shadow-xl">
+                                <CardContent className="p-6">
+                                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                        <div>
+                                            <label className="text-sm font-medium text-slate-600 dark:text-slate-400 mb-2 block">Type</label>
+                                            <Select value={filterType} onValueChange={setFilterType}>
+                                                <SelectTrigger>
+                                                    <SelectValue placeholder="All Types" />
+                                                </SelectTrigger>
+                                                <SelectContent>
+                                                    <SelectItem value="all">All Types</SelectItem>
+                                                    <SelectItem value="investment">Investment</SelectItem>
+                                                    <SelectItem value="milestone">Milestone</SelectItem>
+                                                    <SelectItem value="payment">Payment</SelectItem>
+                                                    <SelectItem value="community">Community</SelectItem>
+                                                    <SelectItem value="market">Market</SelectItem>
+                                                    <SelectItem value="reminder">Reminder</SelectItem>
+                                                    <SelectItem value="event">Event</SelectItem>
+                                                    <SelectItem value="portfolio">Portfolio</SelectItem>
+                                                </SelectContent>
+                                            </Select>
+                                        </div>
+
+                                        <div>
+                                            <label className="text-sm font-medium text-slate-600 dark:text-slate-400 mb-2 block">Priority</label>
+                                            <Select value={filterPriority} onValueChange={setFilterPriority}>
+                                                <SelectTrigger>
+                                                    <SelectValue placeholder="All Priorities" />
+                                                </SelectTrigger>
+                                                <SelectContent>
+                                                    <SelectItem value="all">All Priorities</SelectItem>
+                                                    <SelectItem value="high">High Priority</SelectItem>
+                                                    <SelectItem value="medium">Medium Priority</SelectItem>
+                                                    <SelectItem value="low">Low Priority</SelectItem>
+                                                </SelectContent>
+                                            </Select>
+                                        </div>
+
+                                        <div>
+                                            <label className="text-sm font-medium text-slate-600 dark:text-slate-400 mb-2 block">Status</label>
+                                            <Select value={filterRead} onValueChange={setFilterRead}>
+                                                <SelectTrigger>
+                                                    <SelectValue placeholder="All Notifications" />
+                                                </SelectTrigger>
+                                                <SelectContent>
+                                                    <SelectItem value="all">All Notifications</SelectItem>
+                                                    <SelectItem value="unread">Unread Only</SelectItem>
+                                                    <SelectItem value="read">Read Only</SelectItem>
+                                                </SelectContent>
+                                            </Select>
+                                        </div>
+                                    </div>
+                                </CardContent>
+                            </Card>
+
+                            {/* Notifications List */}
+                            <div className="space-y-4">
+                                {filteredNotifications.map((notification) => (
+                                    <Card key={notification.id} className={`bg-white/80 dark:bg-slate-800/80 backdrop-blur-xl border-0 shadow-xl ${!notification.isRead ? 'ring-2 ring-blue-200 dark:ring-blue-800' : ''}`}>
+                                        <CardContent className="p-6">
+                                            <div className="flex items-start justify-between mb-4">
+                                                <div className="flex items-start space-x-4">
+                                                    <Avatar className="h-8 w-8">
+                                                        <AvatarImage src={notification.sender.avatar} alt={notification.sender.name} />
+                                                        <AvatarFallback>
+                                                            {notification.sender.name.split(' ').map(n => n[0]).join('')}
+                                                        </AvatarFallback>
+                                                    </Avatar>
+                                                    <div>
+                                                        <h3 className="font-semibold text-slate-900 dark:text-white">{notification.title}</h3>
+                                                        <p className="text-sm text-slate-600 dark:text-slate-400">
+                                                            {notification.sender.name} • {notification.sender.type}
+                                                        </p>
+                                                    </div>
+                                                </div>
+                                                <div className="flex items-center space-x-2">
+                                                    <Badge className={getPriorityColor(notification.priority)}>
+                                                        {notification.priority}
+                                                    </Badge>
+                                                    <span className="text-sm text-slate-500 dark:text-slate-400">
+                                                        {formatTimestamp(notification.timestamp)}
+                                                    </span>
+                                                </div>
+                                            </div>
+
+                                            <p className="text-slate-700 dark:text-slate-300 mb-3">{notification.message}</p>
+
+                                            {/* Metadata */}
+                                            {notification.metadata && (
+                                                <div className="bg-slate-50 dark:bg-slate-800/50 p-3 rounded-lg mb-3">
+                                                    <div className="flex flex-wrap gap-2">
+                                                        {Object.entries(notification.metadata).map(([key, value]) => (
+                                                            <div key={key} className="text-sm">
+                                                                <span className="font-medium text-slate-600 dark:text-slate-400 capitalize">
+                                                                    {key.replace(/([A-Z])/g, ' $1').trim()}:
+                                                                </span>
+                                                                <span className="text-slate-900 dark:text-white ml-1">{value}</span>
+                                                            </div>
+                                                        ))}
+                                                    </div>
+                                                </div>
+                                            )}
+
+                                            {/* Actions */}
+                                            <div className="flex items-center justify-between">
+                                                <div className="flex items-center space-x-2">
+                                                    <Button size="sm" variant="outline">
+                                                        {notification.action}
+                                                    </Button>
+                                                    {!notification.isRead && (
+                                                        <Button
+                                                            size="sm"
+                                                            variant="ghost"
+                                                            onClick={() => markAsRead(notification.id)}
+                                                        >
+                                                            <Eye className="h-4 w-4 mr-1" />
+                                                            Mark Read
+                                                        </Button>
+                                                    )}
+                                                </div>
+
+                                                <div className="flex items-center space-x-2">
+                                                    <Button
+                                                        size="sm"
+                                                        variant="ghost"
+                                                        onClick={() => archiveNotification(notification.id)}
+                                                    >
+                                                        <Archive className="h-4 w-4" />
+                                                    </Button>
+                                                    <Button
+                                                        size="sm"
+                                                        variant="ghost"
+                                                        onClick={() => deleteNotification(notification.id)}
+                                                        className="text-red-600 hover:text-red-700"
+                                                    >
+                                                        <Trash2 className="h-4 w-4" />
+                                                    </Button>
+                                                </div>
+                                            </div>
+                                        </CardContent>
+                                    </Card>
+                                ))}
+
+                                {filteredNotifications.length === 0 && (
+                                    <Card className="bg-white/80 dark:bg-slate-800/80 backdrop-blur-xl border-0 shadow-xl">
+                                        <CardContent className="p-12 text-center">
+                                            <Bell className="h-12 w-12 text-slate-400 dark:text-slate-600 mx-auto mb-4" />
+                                            <h3 className="text-lg font-medium text-slate-700 dark:text-slate-300 mb-2">No notifications found</h3>
+                                            <p className="text-slate-500 dark:text-slate-400">Try adjusting your filters or check back later for new updates.</p>
+                                        </CardContent>
+                                    </Card>
+                                )}
+                            </div>
                         </div>
-                    </div>
+                    </main>
                 </div>
             </div>
-        </div>
+        </>
     );
 }

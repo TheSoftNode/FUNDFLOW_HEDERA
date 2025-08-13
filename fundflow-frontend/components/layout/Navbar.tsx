@@ -260,9 +260,7 @@ const Navbar = () => {
                 >
                   <SheetHeader className="text-left p-4 pb-2">
                     <SheetTitle className="flex items-center justify-between">
-                      <Link href="/" className="flex items-center hover:opacity-80 transition-opacity duration-200">
-                        <Logo size="sm" />
-                      </Link>
+                      <Logo size="sm" />
                     </SheetTitle>
                   </SheetHeader>
 

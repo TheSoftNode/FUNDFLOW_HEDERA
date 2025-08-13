@@ -159,13 +159,13 @@ const Footer = () => {
 
             <p className="text-gray-400 text-sm leading-relaxed max-w-sm">
               Revolutionizing startup fundraising with transparent, milestone-based funding
-              secured by Bitcoin-level security on the Stacks blockchain.
+              secured by enterprise-grade security on the Hedera Hashgraph network.
             </p>
 
             <div className="flex flex-col space-y-2">
               <div className="flex items-center space-x-2 text-sm text-gray-400">
                 <Shield className="w-4 h-4 text-emerald-400" />
-                <span>Secured by Bitcoin</span>
+                <span>Secured by Hedera</span>
               </div>
               <div className="flex items-center space-x-2 text-sm text-gray-400">
                 <Globe className="w-4 h-4 text-blue-400" />
@@ -228,8 +228,8 @@ const Footer = () => {
               <button
                 onClick={handleSubscribe}
                 className={`px-6 py-3 rounded-xl font-semibold transition-all duration-300 transform hover:scale-105 flex items-center space-x-2 ${isSubscribed
-                    ? 'bg-emerald-600 hover:bg-emerald-700'
-                    : 'bg-gradient-to-r from-blue-600 to-teal-500 hover:from-blue-700 hover:to-teal-600'
+                  ? 'bg-emerald-600 hover:bg-emerald-700'
+                  : 'bg-gradient-to-r from-blue-600 to-teal-500 hover:from-blue-700 hover:to-teal-600'
                   }`}
               >
                 {isSubscribed ? (
@@ -254,7 +254,7 @@ const Footer = () => {
             {/* Copyright */}
             <div className="text-sm text-gray-400 text-center lg:text-left">
               © 2025 FundFlow. All rights reserved. Built on{' '}
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-orange-400 to-orange-500 font-semibold">Stacks</span>{' '}
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 to-emerald-500 font-semibold">Hedera</span>{' '}
               with <span className="text-red-500">❤️</span>
             </div>
 

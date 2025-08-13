@@ -253,7 +253,7 @@ const StartupSidebar: React.FC<StartupSidebarProps> = ({
         </div>
 
         {/* User Profile */}
-        {/* <div className={`p-4 border-b border-slate-200 dark:border-slate-700 bg-gradient-to-r from-slate-50 to-blue-50 dark:from-slate-800 dark:to-blue-900/20 ${isCollapsed ? 'hidden lg:block' : ''}`}>
+        <div className={`p-4 border-b border-slate-200 dark:border-slate-700 bg-gradient-to-r from-slate-50 to-blue-50 dark:from-slate-800 dark:to-blue-900/20 ${isCollapsed ? 'hidden lg:block' : ''}`}>
           <div className={`flex items-center ${isCollapsed ? 'justify-center' : 'space-x-3'}`}>
             <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-full flex items-center justify-center shadow-lg">
               <User className="w-5 h-5 text-white" />
@@ -272,7 +272,7 @@ const StartupSidebar: React.FC<StartupSidebarProps> = ({
               </>
             )}
           </div>
-        </div> */}
+        </div>
 
         {/* Quick Action */}
         {!isCollapsed && (

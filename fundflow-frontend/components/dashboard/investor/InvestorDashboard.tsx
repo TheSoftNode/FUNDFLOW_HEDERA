@@ -192,8 +192,8 @@ const InvestorDashboard: React.FC<InvestorDashboardProps> = ({
       {/* Main Content */}
       <div className={`flex-1 transition-all duration-500 ${sidebarCollapsed ? 'lg:ml-16' : 'lg:ml-64'}`}>
         <div className="min-h-screen">
-          {/* Top Spacing for Mobile Menu */}
-          <div className="h-16 lg:h-6"></div>
+          {/* Top Spacing for Navbar */}
+          <div className="h-16"></div>
 
           {/* Dashboard Content */}
           <div className="p-4 lg:p-8 space-y-8">

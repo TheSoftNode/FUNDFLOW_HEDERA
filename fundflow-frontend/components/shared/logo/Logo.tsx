@@ -1,4 +1,5 @@
 import React from 'react';
+import Link from 'next/link';
 
 interface LogoProps {
   size?: 'sm' | 'md' | 'lg';
@@ -18,7 +19,7 @@ const Logo: React.FC<LogoProps> = ({
   };
 
   return (
-    <div className={`flex items-center space-x-2 ${className}`}>
+    <Link href="/" className={`flex items-center space-x-2 ${className} hover:opacity-80 transition-opacity duration-200`}>
       {/* Sophisticated Logo Icon */}
       <div className={`${sizeClasses[size].container} relative`}>
         {/* Main logo container - gradient background */}
@@ -83,7 +84,7 @@ const Logo: React.FC<LogoProps> = ({
           </span>
         </div>
       )}
-    </div>
+    </Link>
   );
 };
 

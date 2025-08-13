@@ -156,9 +156,16 @@ const ConnectWalletButton: React.FC<ConnectWalletButtonProps> = ({
             </div>
           </div>
 
+          {/* Dashboard Options Header */}
+          <div className="px-3 py-2 border-b border-gray-100 dark:border-gray-700/50 mb-1">
+            <p className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+              Dashboard Access
+            </p>
+          </div>
+
           {/* Dashboard Options */}
-          <DropdownMenuItem className="text-[#7F56D9] hover:text-[#6D47C7] hover:bg-[#7F56D9]/10 rounded-lg mx-1 px-3 py-2.5 transition-all duration-200 cursor-pointer flex items-center space-x-2 relative">
-            <User className="w-4 h-4" />
+          <DropdownMenuItem className="text-[#2F80ED] hover:text-[#1E6FD8] hover:bg-[#2F80ED]/10 rounded-lg mx-1 px-3 py-2.5 transition-all duration-200 cursor-pointer flex items-center space-x-2 relative">
+            <Sparkles className="w-4 h-4" />
             <span className="font-medium">Go to Startup Dashboard</span>
             <a href="/dashboard/startup" className="block w-full h-full absolute inset-0"></a>
           </DropdownMenuItem>

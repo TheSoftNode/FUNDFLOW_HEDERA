@@ -13,9 +13,9 @@ export interface CreatePaymentData {
     currency: string;
     paymentType: 'investment' | 'milestone' | 'dividend' | 'refund' | 'fee' | 'withdrawal';
     description: string;
-    campaignId?: string;
-    investmentId?: string;
-    milestoneId?: string;
+    campaignId?: string | undefined;
+    investmentId?: string | undefined;
+    milestoneId?: string | undefined;
     metadata?: Record<string, any>;
 }
 
@@ -242,7 +242,7 @@ export class PaymentService {
 
             // Simulate confirmation process
             setTimeout(async () => {
-                await this.confirmPayment(payment._id.toString());
+                await this.confirmPayment((payment._id as any).toString());
             }, 5000); // Simulate 5 second confirmation time
 
         } catch (error) {
@@ -492,9 +492,9 @@ export class PaymentService {
                 currency: payment.currency,
                 paymentType: 'refund',
                 description: `Refund: ${reason}`,
-                campaignId: payment.campaignId?.toString() || undefined,
-                investmentId: payment.investmentId?.toString() || undefined,
-                milestoneId: payment.milestoneId?.toString() || undefined,
+                campaignId: payment.campaignId?.toString(),
+                investmentId: payment.investmentId?.toString(),
+                milestoneId: payment.milestoneId?.toString(),
                 metadata: {
                     originalPaymentId: payment.paymentId,
                     refundReason: reason,

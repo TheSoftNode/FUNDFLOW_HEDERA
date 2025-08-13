@@ -19,9 +19,10 @@ import Logo from '../shared/logo/Logo';
 
 interface DashboardNavbarProps {
   sidebarCollapsed?: boolean;
+  dashboardType?: 'startup' | 'investor';
 }
 
-const DashboardNavbar = ({ sidebarCollapsed = false }: DashboardNavbarProps) => {
+const DashboardNavbar = ({ sidebarCollapsed = false, dashboardType }: DashboardNavbarProps) => {
   const [isMobileOpen, setIsMobileOpen] = useState(false);
   const { user, isConnected, disconnectWallet } = useAuth();
   const router = useRouter();
@@ -41,9 +42,8 @@ const DashboardNavbar = ({ sidebarCollapsed = false }: DashboardNavbarProps) => 
   };
 
   return (
-    <nav className={`fixed top-0 right-0 z-40 bg-white/95 dark:bg-slate-900/95 backdrop-blur-xl border-b border-white/20 dark:border-slate-700/50 shadow-lg shadow-slate-900/10 transition-all duration-300 ${
-      sidebarCollapsed ? 'left-16 lg:left-16' : 'left-64 lg:left-64'
-    }`}>
+    <nav className={`fixed top-0 right-0 z-40 bg-white/95 dark:bg-slate-900/95 backdrop-blur-xl border-b border-white/20 dark:border-slate-700/50 shadow-lg shadow-slate-900/10 transition-all duration-300 ${sidebarCollapsed ? 'left-16 lg:left-16' : 'left-64 lg:left-64'
+      }`}>
       <div className="flex justify-between items-center h-16 px-6">
         {/* Left Side - Logo (hidden on mobile) */}
         <div className="hidden lg:flex items-center">
@@ -82,7 +82,9 @@ const DashboardNavbar = ({ sidebarCollapsed = false }: DashboardNavbarProps) => 
                       {user.profile?.name || 'User'}
                     </div>
                     <div className="text-xs text-slate-500 dark:text-slate-400">
-                      {user.role === 'startup' ? 'Startup Founder' : 'Investor'}
+                      {dashboardType === 'startup' ? 'Startup Founder' :
+                        dashboardType === 'investor' ? 'Investor' :
+                          user.role === 'startup' ? 'Startup Founder' : 'Investor'}
                     </div>
                   </div>
                 </div>
@@ -133,7 +135,7 @@ const DashboardNavbar = ({ sidebarCollapsed = false }: DashboardNavbarProps) => 
                   <span className="text-lg font-semibold">Dashboard Menu</span>
                 </SheetTitle>
               </SheetHeader>
-              
+
               <div className="mt-6 space-y-4">
                 {/* User Section */}
                 {isConnected && user ? (
@@ -147,14 +149,16 @@ const DashboardNavbar = ({ sidebarCollapsed = false }: DashboardNavbarProps) => 
                           {user.profile?.name || 'User'}
                         </div>
                         <div className="text-sm text-slate-500 dark:text-slate-400">
-                          {user.role === 'startup' ? 'Startup Founder' : 'Investor'}
+                          {dashboardType === 'startup' ? 'Startup Founder' :
+                            dashboardType === 'investor' ? 'Investor' :
+                              user.role === 'startup' ? 'Startup Founder' : 'Investor'}
                         </div>
                         <div className="text-xs font-mono text-slate-400 dark:text-slate-500">
                           {user.walletAddress?.slice(0, 6)}...{user.walletAddress?.slice(-4)}
                         </div>
                       </div>
                     </div>
-                    
+
                     <Button
                       variant="ghost"
                       onClick={handleSettings}
@@ -163,7 +167,7 @@ const DashboardNavbar = ({ sidebarCollapsed = false }: DashboardNavbarProps) => 
                       <Settings className="w-4 h-4 mr-3" />
                       Settings
                     </Button>
-                    
+
                     <Button
                       variant="ghost"
                       onClick={handleDisconnect}
