@@ -120,8 +120,6 @@ const InvestorDashboard: React.FC<InvestorDashboardProps> = ({
     setSidebarCollapsed(!sidebarCollapsed);
   };
 
-
-
   const handleNavItemClick = (itemId: string) => {
     if (onNavItemClick) {
       onNavItemClick(itemId);
@@ -169,14 +167,14 @@ const InvestorDashboard: React.FC<InvestorDashboardProps> = ({
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-emerald-50/20 to-teal-50/20 dark:from-slate-900 dark:via-slate-800/30 dark:to-slate-900/30 flex">
       {/* Mobile Menu Button */}
       <button
         onClick={handleSidebarToggle}
-        className={`fixed top-4 left-4 z-50 lg:hidden bg-white dark:bg-gray-800 p-2 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 transition-opacity duration-300 ${sidebarCollapsed ? 'opacity-100' : 'opacity-0 pointer-events-none'
+        className={`fixed top-4 left-4 z-50 lg:hidden bg-white/90 dark:bg-slate-800/90 backdrop-blur-xl p-3 rounded-2xl shadow-2xl border border-white/20 dark:border-slate-700/50 transition-all duration-300 ${sidebarCollapsed ? 'opacity-100' : 'opacity-0 pointer-events-none'
           }`}
       >
-        <svg className="w-5 h-5 text-gray-600 dark:text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <svg className="w-6 h-6 text-slate-700 dark:text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
         </svg>
       </button>
@@ -192,14 +190,13 @@ const InvestorDashboard: React.FC<InvestorDashboardProps> = ({
       />
 
       {/* Main Content */}
-      <div className={`flex-1 transition-all duration-300 ${sidebarCollapsed ? 'lg:ml-16' : 'lg:ml-64'
-        }`}>
+      <div className={`flex-1 transition-all duration-500 ${sidebarCollapsed ? 'lg:ml-16' : 'lg:ml-64'}`}>
         <div className="min-h-screen">
           {/* Top Spacing for Mobile Menu */}
-          <div className="h-16 lg:h-4"></div>
+          <div className="h-16 lg:h-6"></div>
 
           {/* Dashboard Content */}
-          <div className="p-4 lg:p-8">
+          <div className="p-4 lg:p-8 space-y-8">
             {/* Dashboard Header */}
             <DashboardHeader
               userName="John"
@@ -214,38 +211,68 @@ const InvestorDashboard: React.FC<InvestorDashboardProps> = ({
             </div>
 
             {/* Main Dashboard Content */}
-            <div className="space-y-6 lg:space-y-8">
+            <div className="space-y-8">
               {/* Investments List - Full Width */}
               <div className="w-full">
-                <InvestmentsList
-                  investments={investments}
-                  onViewDetails={handleViewInvestmentDetails}
-                />
+                <div className="bg-white/80 dark:bg-slate-800/80 backdrop-blur-xl rounded-3xl p-6 lg:p-8 shadow-xl border border-white/20 dark:border-slate-700/50">
+                  <div className="flex items-center justify-between mb-6">
+                    <h2 className="text-2xl lg:text-3xl font-bold bg-gradient-to-r from-slate-900 to-slate-700 dark:from-white dark:to-slate-200 bg-clip-text text-transparent">
+                      Investment Portfolio
+                    </h2>
+                    <button className="bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white px-6 py-3 rounded-2xl font-semibold transition-all duration-300 transform hover:scale-105 hover:shadow-xl shadow-lg">
+                      Discover Opportunities
+                    </button>
+                  </div>
+                  <InvestmentsList
+                    investments={investments}
+                    onViewDetails={handleViewInvestmentDetails}
+                  />
+                </div>
               </div>
 
               {/* Row 1: Milestone Alerts and Recent Activity */}
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <div className="grid grid-cols-1 xl:grid-cols-2 gap-8">
                 {/* Milestone Alerts - Half Width */}
                 <div className="w-full">
-                  <MilestoneAlerts maxAlerts={5} />
+                  <div className="bg-white/80 dark:bg-slate-800/80 backdrop-blur-xl rounded-3xl p-6 lg:p-8 shadow-xl border border-white/20 dark:border-slate-700/50 h-full">
+                    <h3 className="text-xl lg:text-2xl font-bold text-slate-900 dark:text-white mb-6">
+                      Milestone Alerts
+                    </h3>
+                    <MilestoneAlerts maxAlerts={5} />
+                  </div>
                 </div>
 
                 {/* Recent Activity - Half Width */}
                 <div className="w-full">
-                  <RecentActivity maxItems={6} />
+                  <div className="bg-white/80 dark:bg-slate-800/80 backdrop-blur-xl rounded-3xl p-6 lg:p-8 shadow-xl border border-white/20 dark:border-slate-700/50 h-full">
+                    <h3 className="text-xl lg:text-2xl font-bold text-slate-900 dark:text-white mb-6">
+                      Recent Activity
+                    </h3>
+                    <RecentActivity maxItems={6} />
+                  </div>
                 </div>
               </div>
 
               {/* Row 2: Performance Chart and Quick Actions */}
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <div className="grid grid-cols-1 xl:grid-cols-2 gap-8">
                 {/* Performance Chart - Half Width */}
                 <div className="w-full">
-                  <PerformanceChart />
+                  <div className="bg-white/80 dark:bg-slate-800/80 backdrop-blur-xl rounded-3xl p-6 lg:p-8 shadow-xl border border-white/20 dark:border-slate-700/50 h-full">
+                    <h3 className="text-xl lg:text-2xl font-bold text-slate-900 dark:text-white mb-6">
+                      Performance Overview
+                    </h3>
+                    <PerformanceChart />
+                  </div>
                 </div>
 
                 {/* Quick Actions - Half Width */}
                 <div className="w-full">
-                  <QuickActions />
+                  <div className="bg-white/80 dark:bg-slate-800/80 backdrop-blur-xl rounded-3xl p-6 lg:p-8 shadow-xl border border-white/20 dark:border-slate-700/50 h-full">
+                    <h3 className="text-xl lg:text-2xl font-bold text-slate-900 dark:text-white mb-6">
+                      Quick Actions
+                    </h3>
+                    <QuickActions />
+                  </div>
                 </div>
               </div>
             </div>

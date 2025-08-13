@@ -36,8 +36,6 @@ const StartupDashboard: React.FC<StartupDashboardProps> = ({
     }
   };
 
-
-
   const handleNotificationClick = () => {
     setActiveNavItem('notifications');
     alert('Notifications panel would open here');
@@ -94,14 +92,14 @@ const StartupDashboard: React.FC<StartupDashboardProps> = ({
   ];
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50/20 to-indigo-50/20 dark:from-slate-900 dark:via-slate-800/30 dark:to-slate-900/30 flex">
       {/* Mobile Menu Button */}
       <button
         onClick={handleSidebarToggle}
-        className={`fixed top-4 left-4 z-50 lg:hidden bg-white dark:bg-gray-800 p-2 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 transition-opacity duration-300 ${sidebarCollapsed ? 'opacity-100' : 'opacity-0 pointer-events-none'
+        className={`fixed top-4 left-4 z-50 lg:hidden bg-white/90 dark:bg-slate-800/90 backdrop-blur-xl p-3 rounded-2xl shadow-2xl border border-white/20 dark:border-slate-700/50 transition-all duration-300 ${sidebarCollapsed ? 'opacity-100' : 'opacity-0 pointer-events-none'
           }`}
       >
-        <svg className="w-5 h-5 text-gray-600 dark:text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <svg className="w-6 h-6 text-slate-700 dark:text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
         </svg>
       </button>
@@ -117,14 +115,13 @@ const StartupDashboard: React.FC<StartupDashboardProps> = ({
       />
 
       {/* Main Content */}
-      <div className={`flex-1 transition-all duration-300 ${sidebarCollapsed ? 'lg:ml-16' : 'lg:ml-64'
-        }`}>
+      <div className={`flex-1 transition-all duration-500 ${sidebarCollapsed ? 'lg:ml-16' : 'lg:ml-64'}`}>
         <div className="min-h-screen">
           {/* Top Spacing for Mobile Menu */}
-          <div className="h-16 lg:h-4"></div>
+          <div className="h-16 lg:h-6"></div>
 
           {/* Dashboard Content */}
-          <div className="p-4 lg:p-8">
+          <div className="p-4 lg:p-8 space-y-8">
             {/* Header */}
             <StartupHeader
               onNotificationClick={handleNotificationClick}
@@ -135,34 +132,66 @@ const StartupDashboard: React.FC<StartupDashboardProps> = ({
             {activeNavItem === 'dashboard' && (
               <>
                 {/* Stats Cards */}
-                <StartupStats />
+                <div className="mb-8">
+                  <StartupStats />
+                </div>
 
                 {/* Main Dashboard Content */}
-                <div className="space-y-6 lg:space-y-8">
+                <div className="space-y-8">
                   {/* Campaigns List - Full Width */}
                   <div className="w-full">
-                    <CampaignsList campaigns={campaigns as any} />
+                    <div className="bg-white/80 dark:bg-slate-800/80 backdrop-blur-xl rounded-3xl p-6 lg:p-8 shadow-xl border border-white/20 dark:border-slate-700/50">
+                      <div className="flex items-center justify-between mb-6">
+                        <h2 className="text-2xl lg:text-3xl font-bold bg-gradient-to-r from-slate-900 to-slate-700 dark:from-white dark:to-slate-200 bg-clip-text text-transparent">
+                          Active Campaigns
+                        </h2>
+                        <button className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white px-6 py-3 rounded-2xl font-semibold transition-all duration-300 transform hover:scale-105 hover:shadow-xl shadow-lg">
+                          Create Campaign
+                        </button>
+                      </div>
+                      <CampaignsList campaigns={campaigns as any} />
+                    </div>
                   </div>
 
                   {/* Row 1: Revenue Chart and Milestone Progress */}
-                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                  <div className="grid grid-cols-1 xl:grid-cols-2 gap-8">
                     <div className="w-full">
-                      <RevenueChart />
+                      <div className="bg-white/80 dark:bg-slate-800/80 backdrop-blur-xl rounded-3xl p-6 lg:p-8 shadow-xl border border-white/20 dark:border-slate-700/50 h-full">
+                        <h3 className="text-xl lg:text-2xl font-bold text-slate-900 dark:text-white mb-6">
+                          Revenue Overview
+                        </h3>
+                        <RevenueChart />
+                      </div>
                     </div>
 
                     <div className="w-full">
-                      <MilestoneProgress />
+                      <div className="bg-white/80 dark:bg-slate-800/80 backdrop-blur-xl rounded-3xl p-6 lg:p-8 shadow-xl border border-white/20 dark:border-slate-700/50 h-full">
+                        <h3 className="text-xl lg:text-2xl font-bold text-slate-900 dark:text-white mb-6">
+                          Milestone Progress
+                        </h3>
+                        <MilestoneProgress />
+                      </div>
                     </div>
                   </div>
 
                   {/* Row 2: Investors List and Quick Actions */}
-                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                  <div className="grid grid-cols-1 xl:grid-cols-2 gap-8">
                     <div className="w-full">
-                      <InvestorsList />
+                      <div className="bg-white/80 dark:bg-slate-800/80 backdrop-blur-xl rounded-3xl p-6 lg:p-8 shadow-xl border border-white/20 dark:border-slate-700/50 h-full">
+                        <h3 className="text-xl lg:text-2xl font-bold text-slate-900 dark:text-white mb-6">
+                          Top Investors
+                        </h3>
+                        <InvestorsList />
+                      </div>
                     </div>
 
                     <div className="w-full">
-                      <StartupQuickActions />
+                      <div className="bg-white/80 dark:bg-slate-800/80 backdrop-blur-xl rounded-3xl p-6 lg:p-8 shadow-xl border border-white/20 dark:border-slate-700/50 h-full">
+                        <h3 className="text-xl lg:text-2xl font-bold text-slate-900 dark:text-white mb-6">
+                          Quick Actions
+                        </h3>
+                        <StartupQuickActions />
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -170,55 +199,72 @@ const StartupDashboard: React.FC<StartupDashboardProps> = ({
             )}
 
             {activeNavItem === 'campaigns' && (
-              <div className="space-y-6">
-                <div className="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-lg border border-gray-200/50 dark:border-gray-700/50">
-                  <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">My Campaigns</h2>
+              <div className="space-y-8">
+                <div className="bg-white/80 dark:bg-slate-800/80 backdrop-blur-xl rounded-3xl p-6 lg:p-8 shadow-xl border border-white/20 dark:border-slate-700/50">
+                  <div className="flex items-center justify-between mb-6">
+                    <h2 className="text-2xl lg:text-3xl font-bold bg-gradient-to-r from-slate-900 to-slate-700 dark:from-white dark:to-slate-200 bg-clip-text text-transparent">
+                      My Campaigns
+                    </h2>
+                    <button className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white px-6 py-3 rounded-2xl font-semibold transition-all duration-300 transform hover:scale-105 hover:shadow-xl shadow-lg">
+                      Create New Campaign
+                    </button>
+                  </div>
                   <CampaignsList campaigns={campaigns as any} />
                 </div>
               </div>
             )}
 
             {activeNavItem === 'investors' && (
-              <div className="space-y-6">
-                <div className="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-lg border border-gray-200/50 dark:border-gray-700/50">
-                  <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">Investors</h2>
+              <div className="space-y-8">
+                <div className="bg-white/80 dark:bg-slate-800/80 backdrop-blur-xl rounded-3xl p-6 lg:p-8 shadow-xl border border-white/20 dark:border-slate-700/50">
+                  <h2 className="text-2xl lg:text-3xl font-bold bg-gradient-to-r from-slate-900 to-slate-700 dark:from-white dark:to-slate-200 bg-clip-text text-transparent mb-6">
+                    Investors
+                  </h2>
                   <InvestorsList />
                 </div>
               </div>
             )}
 
             {activeNavItem === 'milestones' && (
-              <div className="space-y-6">
-                <div className="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-lg border border-gray-200/50 dark:border-gray-700/50">
-                  <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">Milestones</h2>
+              <div className="space-y-8">
+                <div className="bg-white/80 dark:bg-slate-800/80 backdrop-blur-xl rounded-3xl p-6 lg:p-8 shadow-xl border border-white/20 dark:border-slate-700/50">
+                  <h2 className="text-2xl lg:text-3xl font-bold bg-gradient-to-r from-slate-900 to-slate-700 dark:from-white dark:to-slate-200 bg-clip-text text-transparent mb-6">
+                    Milestones
+                  </h2>
                   <MilestoneProgress />
                 </div>
               </div>
             )}
 
             {activeNavItem === 'analytics' && (
-              <div className="space-y-6">
-                <div className="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-lg border border-gray-200/50 dark:border-gray-700/50">
-                  <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">Analytics</h2>
+              <div className="space-y-8">
+                <div className="bg-white/80 dark:bg-slate-800/80 backdrop-blur-xl rounded-3xl p-6 lg:p-8 shadow-xl border border-white/20 dark:border-slate-700/50">
+                  <h2 className="text-2xl lg:text-3xl font-bold bg-gradient-to-r from-slate-900 to-slate-700 dark:from-white dark:to-slate-200 bg-clip-text text-transparent mb-6">
+                    Analytics
+                  </h2>
                   <RevenueChart />
                 </div>
               </div>
             )}
 
             {activeNavItem === 'payments' && (
-              <div className="space-y-6">
-                <div className="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-lg border border-gray-200/50 dark:border-gray-700/50">
-                  <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">Payments</h2>
-                  <p className="text-gray-600 dark:text-gray-400">Payment management interface will be implemented here.</p>
+              <div className="space-y-8">
+                <div className="bg-white/80 dark:bg-slate-800/80 backdrop-blur-xl rounded-3xl p-6 lg:p-8 shadow-xl border border-white/20 dark:border-slate-700/50">
+                  <h2 className="text-2xl lg:text-3xl font-bold bg-gradient-to-r from-slate-900 to-slate-700 dark:from-white dark:to-slate-200 bg-clip-text text-transparent mb-6">
+                    Payments
+                  </h2>
+                  <p className="text-slate-600 dark:text-slate-400 text-lg">Payment management interface will be implemented here.</p>
                 </div>
               </div>
             )}
 
             {activeNavItem === 'settings' && (
-              <div className="space-y-6">
-                <div className="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-lg border border-gray-200/50 dark:border-gray-700/50">
-                  <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">Settings</h2>
-                  <p className="text-gray-600 dark:text-gray-400">Account settings and preferences will be implemented here.</p>
+              <div className="space-y-8">
+                <div className="bg-white/80 dark:bg-slate-800/80 backdrop-blur-xl rounded-3xl p-6 lg:p-8 shadow-xl border border-white/20 dark:border-slate-700/50">
+                  <h2 className="text-2xl lg:text-3xl font-bold bg-gradient-to-r from-slate-900 to-slate-700 dark:from-white dark:to-slate-200 bg-clip-text text-transparent mb-6">
+                    Settings
+                  </h2>
+                  <p className="text-slate-600 dark:text-slate-400 text-lg">Account settings and preferences will be implemented here.</p>
                 </div>
               </div>
             )}

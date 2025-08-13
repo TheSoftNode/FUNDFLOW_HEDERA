@@ -7,14 +7,13 @@ import React from 'react';
 
 const FundFlowLandingPage = () => {
   return (
-    <>
+    <div className="min-h-screen bg-white dark:bg-gray-900 transition-colors duration-300">
       <Navbar />
       <HeroSection />
       <FeaturesSection />
       <HowItWorksSection />
       <Footer />
-
-    </>
+    </div>
   );
 };
 

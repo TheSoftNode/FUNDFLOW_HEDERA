@@ -1,12 +1,6 @@
-import InvestorDashboard from '@/components/dashboard/investor/InvestorDashboard'
-import React from 'react'
+import React from 'react';
+import InvestorDashboard from '@/components/dashboard/investor/InvestorDashboard';
 
-type Props = {}
-
-const page = (props: Props) => {
-  return (
-    <InvestorDashboard />
-  )
+export default function InvestorDashboardPage() {
+  return <InvestorDashboard />;
 }
-
-export default page

@@ -32,20 +32,11 @@ const ConnectWalletButton: React.FC<ConnectWalletButtonProps> = ({
   } = useAuth();
 
   const walletOptions = [
-    {
-      name: 'HashPack',
-      id: WalletType.HASHPACK,
-      description: 'Native Hedera wallet',
-      recommended: true,
-      icon: '🔗',
-      color: 'from-purple-500 to-purple-600',
-      installUrl: 'https://hashpack.app'
-    },
+
     {
       name: 'MetaMask',
       id: WalletType.METAMASK,
       description: 'EVM compatible wallet',
-      recommended: false,
       icon: '🦊',
       color: 'from-orange-500 to-orange-600',
       installUrl: 'https://metamask.io'
