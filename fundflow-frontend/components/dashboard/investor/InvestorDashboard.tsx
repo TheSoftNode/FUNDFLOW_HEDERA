@@ -14,15 +14,16 @@ interface InvestorDashboardProps {
   sidebarCollapsed?: boolean;
   activeNavItem?: string;
   onNavItemClick?: (itemId: string) => void;
+  onSidebarToggle?: () => void;
 }
 
 const InvestorDashboard: React.FC<InvestorDashboardProps> = ({
-  sidebarCollapsed: initialSidebarCollapsed = true,
+  sidebarCollapsed = false,
   activeNavItem: initialActiveNavItem = 'dashboard',
-  onNavItemClick
+  onNavItemClick,
+  onSidebarToggle
 }) => {
   const [selectedInvestment, setSelectedInvestment] = useState<any>(null);
-  const [sidebarCollapsed, setSidebarCollapsed] = useState(initialSidebarCollapsed);
   const [activeNavItem, setActiveNavItem] = useState(initialActiveNavItem);
 
   // Mock data - replace with actual data from your API
@@ -117,7 +118,9 @@ const InvestorDashboard: React.FC<InvestorDashboardProps> = ({
   ];
 
   const handleSidebarToggle = () => {
-    setSidebarCollapsed(!sidebarCollapsed);
+    if (onSidebarToggle) {
+      onSidebarToggle();
+    }
   };
 
   const handleNavItemClick = (itemId: string) => {

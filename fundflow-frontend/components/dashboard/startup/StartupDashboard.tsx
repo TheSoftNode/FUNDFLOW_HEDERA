@@ -14,18 +14,21 @@ interface StartupDashboardProps {
   sidebarCollapsed?: boolean;
   activeNavItem?: string;
   onNavItemClick?: (itemId: string) => void;
+  onSidebarToggle?: () => void;
 }
 
 const StartupDashboard: React.FC<StartupDashboardProps> = ({
-  sidebarCollapsed: initialSidebarCollapsed = true,
+  sidebarCollapsed = false,
   activeNavItem: initialActiveNavItem = 'dashboard',
-  onNavItemClick
+  onNavItemClick,
+  onSidebarToggle
 }) => {
-  const [sidebarCollapsed, setSidebarCollapsed] = useState(initialSidebarCollapsed);
   const [activeNavItem, setActiveNavItem] = useState(initialActiveNavItem);
 
   const handleSidebarToggle = () => {
-    setSidebarCollapsed(!sidebarCollapsed);
+    if (onSidebarToggle) {
+      onSidebarToggle();
+    }
   };
 
   const handleNavItemClick = (itemId: string) => {

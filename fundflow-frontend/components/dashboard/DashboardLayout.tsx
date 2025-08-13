@@ -83,7 +83,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50/30 to-indigo-50/30 dark:from-slate-900 dark:via-slate-800/50 dark:to-slate-900/50">
-      <DashboardNavbar />
+      <DashboardNavbar sidebarCollapsed={sidebarCollapsed} />
 
       <div className="flex pt-16">
         {/* Sidebar */}
@@ -125,19 +125,21 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
         </div>
 
         {/* Main Content */}
-        <div className="flex-1 lg:ml-0">
+        <div className={`flex-1 transition-all duration-300 ${sidebarCollapsed ? 'lg:ml-16' : 'lg:ml-64'}`}>
           <div className="p-6 lg:p-8">
             {isStartup ? (
               <StartupDashboard
                 sidebarCollapsed={sidebarCollapsed}
                 activeNavItem={activeNavItem}
                 onNavItemClick={handleNavItemClick}
+                onSidebarToggle={handleSidebarToggle}
               />
             ) : isInvestor ? (
               <InvestorDashboard
                 sidebarCollapsed={sidebarCollapsed}
                 activeNavItem={activeNavItem}
                 onNavItemClick={handleNavItemClick}
+                onSidebarToggle={handleSidebarToggle}
               />
             ) : (
               <div className="text-center py-16">
