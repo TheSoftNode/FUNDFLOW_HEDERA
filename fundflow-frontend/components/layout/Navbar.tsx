@@ -182,17 +182,53 @@ const Navbar = () => {
                 </DropdownMenuContent>
               </DropdownMenu>
 
-              {/* Dashboard Link - Show current user role if connected */}
-              {isConnected && user?.role && (
-                <a
-                  href={`/dashboard/${user.role}`}
-                  className="text-gray-600 dark:text-gray-300 hover:text-[#2F80ED] dark:hover:text-[#2F80ED] font-medium px-3 py-2 transition-colors duration-200 flex items-center space-x-1"
-                >
-                  <span>My Dashboard</span>
-                  <span className="text-xs bg-[#2F80ED]/10 text-[#2F80ED] px-2 py-0.5 rounded-full font-medium capitalize">
-                    {user.role}
-                  </span>
-                </a>
+              {/* Dashboard Dropdown - Show when wallet is connected */}
+              {isConnected && (
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="ghost" className="flex items-center space-x-1 text-gray-600 dark:text-gray-300 hover:text-[#2F80ED] dark:hover:text-[#2F80ED] px-3 py-2">
+                      <span className="font-medium">Dashboards</span>
+                      <ChevronDown className="w-3 h-3" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="start" className="w-64 bg-white dark:bg-gray-800 border border-gray-200/50 dark:border-gray-700/50 shadow-xl rounded-xl p-2">
+                    <div className="px-3 py-2 border-b border-gray-100 dark:border-gray-700/50 mb-1">
+                      <p className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                        Dashboard Access
+                      </p>
+                    </div>
+                    <DropdownMenuItem className="flex items-center space-x-3 p-3 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700/50 rounded-lg mx-1 transition-all duration-200 group">
+                      <div className="w-8 h-8 bg-[#2F80ED]/10 rounded-lg flex items-center justify-center">
+                        <Zap className="w-4 h-4 text-[#2F80ED]" />
+                      </div>
+                      <div className="flex-1">
+                        <a href="/dashboard/startup" className="block">
+                          <div className="font-medium text-gray-900 dark:text-white group-hover:text-[#2F80ED] transition-colors">
+                            Go to Startup Dashboard
+                          </div>
+                          <div className="text-xs text-gray-500 dark:text-gray-400 leading-tight">
+                            Manage campaigns & milestones
+                          </div>
+                        </a>
+                      </div>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem className="flex items-center space-x-3 p-3 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700/50 rounded-lg mx-1 transition-all duration-200 group">
+                      <div className="w-8 h-8 bg-[#7F56D9]/10 rounded-lg flex items-center justify-center">
+                        <Briefcase className="w-4 h-4 text-[#7F56D9]" />
+                      </div>
+                      <div className="flex-1">
+                        <a href="/dashboard/investor" className="block">
+                          <div className="font-medium text-gray-900 dark:text-white group-hover:text-[#7F56D9] transition-colors">
+                            Go to Investor Dashboard
+                          </div>
+                          <div className="text-xs text-gray-500 dark:text-gray-400 leading-tight">
+                            Track investments & discover opportunities
+                          </div>
+                        </a>
+                      </div>
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
               )}
             </div>
 
@@ -281,18 +317,40 @@ const Navbar = () => {
                           <span className="font-medium text-sm">Create Campaign</span>
                         </a>
 
-                        {/* Dashboard Link - Show current user role if connected */}
-                        {isConnected && user?.role && (
-                          <a
-                            href={`/dashboard/${user.role}`}
-                            className="flex items-center justify-between px-3 py-2.5 rounded-lg text-gray-600 dark:text-gray-300 hover:text-[#2F80ED] dark:hover:text-[#2F80ED] hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-all duration-200"
-                            onClick={() => setIsMobileOpen(false)}
-                          >
-                            <span className="font-medium text-sm">My Dashboard</span>
-                            <span className="text-xs bg-[#2F80ED]/10 text-[#2F80ED] px-2 py-0.5 rounded-full font-medium capitalize">
-                              {user.role}
-                            </span>
-                          </a>
+                        {/* Dashboard Options - Show when wallet is connected */}
+                        {isConnected && (
+                          <>
+                            <a
+                              href="/dashboard/startup"
+                              className="flex items-center space-x-3 px-3 py-2.5 rounded-lg text-gray-600 dark:text-gray-300 hover:text-[#2F80ED] dark:hover:text-[#2F80ED] hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-all duration-200 group"
+                              onClick={() => setIsMobileOpen(false)}
+                            >
+                              <div className="w-6 h-6 bg-[#2F80ED]/10 rounded-md flex items-center justify-center group-hover:bg-[#2F80ED]/20 transition-colors">
+                                <Zap className="w-3.5 h-3.5 text-[#2F80ED]" />
+                              </div>
+                              <div className="flex-1 min-w-0">
+                                <div className="font-medium text-sm">Go to Startup Dashboard</div>
+                                <div className="text-xs text-gray-500 dark:text-gray-400 group-hover:text-[#2F80ED]/70 dark:group-hover:text-[#2F80ED]/70 leading-tight truncate">
+                                  Manage campaigns & milestones
+                                </div>
+                              </div>
+                            </a>
+                            <a
+                              href="/dashboard/investor"
+                              className="flex items-center space-x-3 px-3 py-2.5 rounded-lg text-gray-600 dark:text-gray-300 hover:text-[#7F56D9] dark:hover:text-[#7F56D9] hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-all duration-200 group"
+                              onClick={() => setIsMobileOpen(false)}
+                            >
+                              <div className="w-6 h-6 bg-[#7F56D9]/10 rounded-md flex items-center justify-center group-hover:bg-[#7F56D9]/20 transition-colors">
+                                <Briefcase className="w-3.5 h-3.5 text-[#7F56D9]" />
+                              </div>
+                              <div className="flex-1 min-w-0">
+                                <div className="font-medium text-sm">Go to Investor Dashboard</div>
+                                <div className="text-xs text-gray-500 dark:text-gray-400 group-hover:text-[#7F56D9]/70 dark:group-hover:text-[#7F56D9]/70 leading-tight truncate">
+                                  Track investments & discover opportunities
+                                </div>
+                              </div>
+                            </a>
+                          </>
                         )}
                       </div>
                     </div>
